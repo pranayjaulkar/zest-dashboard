@@ -1,23 +1,24 @@
-import { useState } from "react";
+import Navbar from "@/components/Navbar/Navbar";
+import {
+  SignedInAuthObject,
+  SignedOutAuthObject,
+  auth,
+} from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-import { auth } from "@clerk/nextjs";
-import prismadb from "@/lib/prismadb";
-
 type Props = {
   children: React.ReactNode;
   params: { storeId: string };
 };
 
-export default async function DashboardLayout({ children, params }: Props) {
-  const { userId } = auth();
+export default async function DashboardLayout({ children }: Props) {
+  const { userId }: SignedInAuthObject | SignedOutAuthObject = auth();
   if (!userId) {
     redirect("/sign-in");
   }
-  const store = await prismadb.store.findFirst({
-    where: {
-      id: params.storeId,
-      userId,
-    },
-  });
-  return <div></div>;
+  return (
+    <div>
+      <Navbar />
+      {children}
+    </div>
+  );
 }

@@ -2,6 +2,13 @@ import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs";
 import prismadb from "@/lib/prismadb";
 import { SignedInAuthObject, SignedOutAuthObject } from "@clerk/nextjs/server";
+type store = {
+  id: string;
+  name: string;
+  userId: string;
+  createdAt: Date;
+  updateAt: Date;
+} | null;
 
 export async function POST(req: Request) {
   try {
@@ -18,7 +25,23 @@ export async function POST(req: Request) {
     });
     return NextResponse.json(store);
   } catch (error) {
-    console.log("[STORES_POST]", error);
+    console.log("api/stores/route.ts", error);
+    return new NextResponse("Internal Error", { status: 500 });
+  }
+}
+export async function GET(req: Request) {
+  try {
+    const { storeId }: { storeId: string } = await req.json();
+    console.log("storeId: ", storeId);
+    if (!storeId) {
+      return new NextResponse("Unauthorized", { status: 401 });
+    }
+    const store = await prismadb.store.findFirst({
+      where: { id: storeId },
+    });
+    return NextResponse.json(store);
+  } catch (error) {
+    console.log("api/stores/route.ts", error);
     return new NextResponse("Internal Error", { status: 500 });
   }
 }

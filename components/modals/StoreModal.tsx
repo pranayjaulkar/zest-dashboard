@@ -17,11 +17,12 @@ import { Input } from "@/components/ui/input";
 import { Button } from "../ui/button";
 import { useState } from "react";
 import toast from "react-hot-toast";
-
+import { useRouter } from "next/navigation";
 const formSchema = z.object({ name: z.string().min(1) });
 
 export default function StoreModal() {
   const storeModal = useStoreModal();
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -33,10 +34,11 @@ export default function StoreModal() {
       setLoading(true);
       const res = await axios.post("/api/stores", values);
       toast.success("created store successfully");
-    } catch (error) {
-      toast.error("Something went wrong");
-    } finally {
+      router.push(`/${res.data.id}`);
       setLoading(false);
+    } catch (err) {
+      console.log(err);
+      toast.error("Something went wrong");
     }
   };
 
