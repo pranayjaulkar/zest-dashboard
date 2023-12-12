@@ -10,7 +10,7 @@ type Props = { storeId: string };
 export default async function DashboardPage({ storeId }: Props) {
   let store: store | null;
   store = await findUserStore(storeId);
-  console.log("store: ", store);
+  console.trace("store: ", store);
   return (
     <div>
       <Content store={store} />
