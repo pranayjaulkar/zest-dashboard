@@ -27,6 +27,8 @@ model Billboard {
   store     Store    @relation("StoreToBillboard", fields: [storeId], references: [id])
   label     String
   imageUrl  String
+  public_id String
+  signature String
   createdAt DateTime @default(now())
   updateAt  DateTime @updatedAt
 

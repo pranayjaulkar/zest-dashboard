@@ -1,6 +1,28 @@
 import prismadb from "@/lib/prismadb";
 import { auth } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
+import { v2 as cloudinary } from "cloudinary";
+import { Billboard } from "@prisma/client";
+import { string } from "zod";
+import { error } from "console";
+
+export async function GET(
+  req: Request,
+  { params }: { params: { billboardId: string } }
+) {
+  try {
+    if (!params.billboardId) {
+      return new NextResponse("Billboard id is required", { status: 400 });
+    }
+    const billboard = await prismadb.billboard.findUnique({
+      where: { id: params.billboardId },
+    });
+    return NextResponse.json(billboard);
+  } catch (error) {
+    console.log("[Bilboard_DELETE]", error);
+    return new NextResponse("Internal error", { status: 500 });
+  }
+}
 
 export async function PATCH(
   req: Request,
@@ -60,31 +82,24 @@ export async function DELETE(
     const storeByUserId = await prismadb.store.findFirst({
       where: { id: params.storeId, userId },
     });
+    const billboard: Billboard | null = await prismadb.billboard.findUnique({
+      where: { id: params.billboardId },
+    });
 
     if (!storeByUserId) {
       return new NextResponse("Unauthorized", { status: 403 });
     }
-    const deletedBillboard = await prismadb.billboard.delete({
-      where: { id: params.billboardId },
-    });
-    return NextResponse.json(deletedBillboard);
-  } catch (error) {
-    console.log("[Bilboard_DELETE]", error);
-    return new NextResponse("Internal error", { status: 500 });
-  }
-}
-export async function GET(
-  req: Request,
-  { params }: { params: { billboardId: string } }
-) {
-  try {
-    if (!params.billboardId) {
-      return new NextResponse("Billboard id is required", { status: 400 });
+    let deleteResponse;
+    if (billboard && billboard.public_id) {
+      deleteResponse = await cloudinary.uploader.destroy(billboard.public_id);
     }
-    const billboard = await prismadb.billboard.findUnique({
-      where: { id: params.billboardId },
-    });
-    return NextResponse.json(billboard);
+    let deletedBillboard;
+    if (deleteResponse.result === "ok") {
+      deletedBillboard = await prismadb.billboard.delete({
+        where: { id: params.billboardId },
+      });
+    } else throw error;
+    return NextResponse.json(deletedBillboard);
   } catch (error) {
     console.log("[Bilboard_DELETE]", error);
     return new NextResponse("Internal error", { status: 500 });

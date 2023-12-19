@@ -51,7 +51,10 @@ const BillboardForm: React.FC<BillboardFormProps> = ({ initialData }) => {
   const action = initialData ? "Save changes" : "Create billboard";
   const onSubmit = async (data: BillboardFormValue) => {
     try {
-      setLoading(true);
+      setLoading(true
+      
+      
+      );
       if (initialData) {
         await axios.patch(
           `/api/stores/${params.storeId}/billboards/${params.billboardId}`,
@@ -80,7 +83,7 @@ const BillboardForm: React.FC<BillboardFormProps> = ({ initialData }) => {
       );
       router.refresh();
       router.push("/");
-      toast.success("Bililboard deleted");
+      toast.success("Billboard deleted");
     } catch (error) {
       toast.error(
         "Make sure you removed all categories first using this billboard"
