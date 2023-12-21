@@ -9,16 +9,17 @@ export async function POST(
   try {
     const { userId } = auth();
     const body = await req.json();
-    const { label, imageUrl } = body;
+    const { label, image } = body;
 
     if (!userId) {
       return new NextResponse("Unauthorized", { status: 404 });
     }
+
     if (!label) {
       return new NextResponse("Label is required", { status: 400 });
     }
-    if (!imageUrl) {
-      return new NextResponse("Image Url is required", { status: 400 });
+    if (!image.secure_url || !image.public_id || !image.signature) {
+      return new NextResponse("Imagesfgh is required", { status: 400 });
     }
     if (!params.storeId) {
       return new NextResponse("Store id is required", { status: 400 });
@@ -31,7 +32,13 @@ export async function POST(
       return new NextResponse("Unauthorized", { status: 403 });
     }
     const billboard = await prismadb.billboard.create({
-      data: { label, imageUrl, storeId: params.storeId },
+      data: {
+        label,
+        imageUrl: image.secure_url,
+        imagePublicId: image.public_id,
+        imageSignature: image.signature,
+        storeId: params.storeId,
+      },
     });
     return NextResponse.json(billboard);
   } catch (error) {

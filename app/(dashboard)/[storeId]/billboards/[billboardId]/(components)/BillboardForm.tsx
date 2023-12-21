@@ -25,13 +25,26 @@ import { useOrigin } from "@/hooks/useOrigin";
 import ImageUpload from "@/components/ui/image-upload";
 
 interface BillboardFormProps {
-  initialData: Billboard | null;
+  initialData: {
+    id: string | undefined;
+    storeId: string | undefined;
+    label: string | undefined;
+    image: {
+      secure_url: string | undefined;
+      public_id: string | undefined;
+      signature: string | undefined;
+    };
+  };
 }
 const formSchema = z.object({
   label: z.string().min(1),
-  imageUrl: z.string().min(1),
+  image: z.object({
+    secure_url: z.string(),
+    public_id: z.string(),
+    signature: z.string(),
+  }),
 });
-type BillboardFormValue = z.infer<typeof formSchema>;
+export type BillboardFormValue = z.infer<typeof formSchema>;
 
 const BillboardForm: React.FC<BillboardFormProps> = ({ initialData }) => {
   const params = useParams();
@@ -41,21 +54,25 @@ const BillboardForm: React.FC<BillboardFormProps> = ({ initialData }) => {
   const [loading, setLoading] = useState(false);
   const form = useForm<BillboardFormValue>({
     resolver: zodResolver(formSchema),
-    defaultValues: initialData || { label: "", imageUrl: "" },
+    defaultValues: initialData || {
+      label: "",
+      image: { secure_url: "", public_id: "", signature: "" },
+    },
   });
-  const title = initialData ? "Edit billboard" : "Create billboard";
-  const description = initialData ? "Edit a billboard" : "Add a new Billboard";
-  const toastMessage = initialData
-    ? "Billboard updated."
-    : "Billboard created.";
-  const action = initialData ? "Save changes" : "Create billboard";
+
+  const title =
+    initialData && initialData.id ? "Edit billboard" : "Create billboard";
+  const description =
+    initialData && initialData.id ? "Edit a billboard" : "Add a new Billboard";
+  const toastMessage =
+    initialData && initialData.id ? "Billboard updated" : "Billboard created";
+  const action =
+    initialData && initialData.id ? "Save changes" : "Create billboard";
   const onSubmit = async (data: BillboardFormValue) => {
     try {
-      setLoading(true
-      
-      
-      );
-      if (initialData) {
+      console.log("data: ", data);
+      setLoading(true);
+      if (initialData?.id) {
         await axios.patch(
           `/api/stores/${params.storeId}/billboards/${params.billboardId}`,
           data
@@ -123,15 +140,19 @@ const BillboardForm: React.FC<BillboardFormProps> = ({ initialData }) => {
         >
           <FormField
             control={form.control}
-            name="imageUrl"
+            name="image"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Background Image</FormLabel>
                 <FormControl>
                   <ImageUpload
-                    value={field.value ? [field.value] : []}
+                    value={
+                      field.value
+                        ? field.value
+                        : { secure_url: "", public_id: "", signature: "" }
+                    }
                     disabled={loading}
-                    onChange={(url) => field.onChange(url)}
+                    onChange={(result) => field.onChange(result)}
                     onRemove={() => field.onChange("")}
                   />
                 </FormControl>

@@ -5,12 +5,13 @@ import { useEffect, useState } from "react";
 import { Button } from "./button";
 import Image from "next/image";
 import { CldUploadWidget } from "next-cloudinary";
+import { BillboardFormValue } from "@/app/(dashboard)/[storeId]/billboards/[billboardId]/(components)/BillboardForm";
 
 interface ImageUploadProps {
   disabled: boolean;
-  onChange: (value: string) => void;
+  onChange: (value: BillboardFormValue["image"]) => void;
   onRemove: (value: string) => void;
-  value: string[];
+  value: BillboardFormValue["image"];
 }
 
 const ImageUpload: React.FC<ImageUploadProps> = ({
@@ -21,7 +22,12 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
 }) => {
   const [isMounted, setIsMounted] = useState(false);
   const onUpload = (result: any) => {
-    onChange(result.info.secure_url);
+    const filteredResult = {
+      secure_url: result.info.secure_url as string,
+      public_id: result.info.public_id as string,
+      signature: result.info.signature as string,
+    };
+    onChange(filteredResult);
   };
   useEffect(() => {
     setIsMounted(true);
@@ -32,24 +38,29 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
   return (
     <div>
       <div className="mb-4 flex items-center gap-4">
-        {value.map((url) => (
+        {value && value.secure_url && (
           <div
-            key={url}
+            key={value.secure_url}
             className="relative rounded-md overflow-hidden w-[200px] h-[200px]"
           >
             <div className="z-10 absolute top-2 right-2">
               <Button
                 type="button"
-                onClick={() => onRemove(url)}
+                onClick={() => onRemove(value.secure_url)}
                 variant="destructive"
                 size="icon"
               >
                 <TrashIcon className="h-4 w-4" />
               </Button>
             </div>
-            <Image fill className="object-cover" alt="Image" src={url} />
+            <Image
+              fill
+              className="object-cover"
+              alt="Image"
+              src={value.secure_url}
+            />
           </div>
-        ))}
+        )}
       </div>
       <CldUploadWidget onUpload={onUpload} uploadPreset="x4jdqunx">
         {({ open }) => {

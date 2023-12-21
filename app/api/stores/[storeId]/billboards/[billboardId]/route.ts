@@ -1,10 +1,8 @@
 import prismadb from "@/lib/prismadb";
 import { auth } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
-import { v2 as cloudinary } from "cloudinary";
 import { Billboard } from "@prisma/client";
-import { string } from "zod";
-import { error } from "console";
+import cloudinary from "@/cloudinary";
 
 export async function GET(
   req: Request,
@@ -89,16 +87,23 @@ export async function DELETE(
     if (!storeByUserId) {
       return new NextResponse("Unauthorized", { status: 403 });
     }
-    let deleteResponse;
-    if (billboard && billboard.public_id) {
-      deleteResponse = await cloudinary.uploader.destroy(billboard.public_id);
+    let imageDeleteResponse;
+    try {
+      if (billboard && billboard.imagePublicId) {
+        imageDeleteResponse = await cloudinary.uploader.destroy(
+          billboard.imagePublicId,
+        );
+      }
+    } catch (error) {
+      console.log("error", error);
     }
-    let deletedBillboard;
-    if (deleteResponse.result === "ok") {
-      deletedBillboard = await prismadb.billboard.delete({
-        where: { id: params.billboardId },
-      });
-    } else throw error;
+
+    if (imageDeleteResponse?.result !== "ok") {
+      return new NextResponse("Something went wrong", { status: 500 });
+    }
+    const deletedBillboard = await prismadb.billboard.delete({
+      where: { id: params.billboardId },
+    });
     return NextResponse.json(deletedBillboard);
   } catch (error) {
     console.log("[Bilboard_DELETE]", error);
