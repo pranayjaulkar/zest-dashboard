@@ -104,7 +104,7 @@ export async function DELETE(
     const deletedBillboard = await prismadb.billboard.delete({
       where: { id: params.billboardId },
     });
-    return NextResponse.json(deletedBillboard);
+    return NextResponse.json({res:"adfhgh"});
   } catch (error) {
     console.log("[Bilboard_DELETE]", error);
     return new NextResponse("Internal error", { status: 500 });

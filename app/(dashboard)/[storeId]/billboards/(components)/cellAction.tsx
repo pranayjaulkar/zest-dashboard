@@ -6,7 +6,12 @@ import {
   DropdownMenuTrigger,
 } from "@radix-ui/react-dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { Copy as CopyIcon, Edit as EditIcon, MoreHorizontal as MoreHorizontalIcon, Trash as TrashIcon} from "lucide-react";
+import {
+  Copy as CopyIcon,
+  Edit as EditIcon,
+  MoreHorizontal as MoreHorizontalIcon,
+  Trash as TrashIcon,
+} from "lucide-react";
 import toast from "react-hot-toast";
 import { useRouter, useParams } from "next/navigation";
 import { useState } from "react";
@@ -31,31 +36,21 @@ export const CellAction: React.FC<CellActionProps> = ({ data, setData }) => {
   const onDelete = async () => {
     try {
       setLoading(true);
-
       await axios.delete(`/api/stores/${params.storeId}/billboards/${data.id}`);
+      setLoading(false);
+      setOpen(false);
       setData((previousData) =>
         previousData.filter((element) => element.id !== data.id)
       );
       toast.success("Billboard deleted");
     } catch (error) {
       console.log("error: ", error);
-      toast.error(
-        "Make sure you removed all categories first using this billboard"
-      );
-    } finally {
-      setLoading(false);
-      setOpen(false);
+      toast.error("Something Went Wrong");
     }
   };
 
   return (
     <>
-      {/* <AlertModal
-        isOpen={open}
-        onClose={() => setOpen(false)}
-        onConfirm={onDelete}
-        loading={loading}
-      /> */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="h-8 w-8 p-0">
@@ -88,7 +83,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data, setData }) => {
           </DropdownMenuItem>
           <DropdownMenuItem
             className="flex justify-start border-0 rounded-md  py-1 px-2 m-1 min-w-[128px] hover:bg-gray-100 cursor-pointer"
-            onClick={onDelete}
+            onClick={() => onDelete()}
           >
             <TrashIcon className="mr-2 h-4 w-4" />
             Delete

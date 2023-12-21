@@ -12,7 +12,7 @@ interface ModalProps {
   title: string;
   description: string;
   isOpen: boolean;
-  onClose: () => void;
+  setOpen: React.Dispatch<React.SetStateAction<boolean>>;
   children?: React.ReactNode;
 }
 
@@ -20,16 +20,12 @@ export const Modal: React.FC<ModalProps> = ({
   title,
   description,
   isOpen,
-  onClose,
+  setOpen,
   children,
 }) => {
-  const onChange = (open: boolean) => {
-    if (!open) {
-      onClose();
-    }
-  };
+  console.log('Modals - isOpen: ', isOpen);
   return (
-    <Dialog open={isOpen} onOpenChange={onChange}>
+    <Dialog open={isOpen} onOpenChange={setOpen}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>

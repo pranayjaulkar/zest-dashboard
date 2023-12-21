@@ -11,7 +11,7 @@ interface ImageUploadProps {
   disabled: boolean;
   onChange: (value: BillboardFormValue["image"]) => void;
   onRemove: (value: string) => void;
-  value: BillboardFormValue["image"];
+  value: BillboardFormValue["image"] | null;
 }
 
 const ImageUpload: React.FC<ImageUploadProps> = ({
@@ -63,14 +63,15 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
         )}
       </div>
       <CldUploadWidget onUpload={onUpload} uploadPreset="x4jdqunx">
-        {({ open }) => {
+        {({ open, isLoading }) => {
           const onClick = () => {
-            open();
+            if (!isLoading) open();
           };
+
           return (
             <Button
               type="button"
-              disabled={disabled}
+              disabled={isLoading}
               variant="secondary"
               onClick={onClick}
             >

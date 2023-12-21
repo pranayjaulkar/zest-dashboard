@@ -56,7 +56,7 @@ const BillboardForm: React.FC<BillboardFormProps> = ({ initialData }) => {
     resolver: zodResolver(formSchema),
     defaultValues: initialData || {
       label: "",
-      image: { secure_url: "", public_id: "", signature: "" },
+      image: {},
     },
   });
 
@@ -70,7 +70,6 @@ const BillboardForm: React.FC<BillboardFormProps> = ({ initialData }) => {
     initialData && initialData.id ? "Save changes" : "Create billboard";
   const onSubmit = async (data: BillboardFormValue) => {
     try {
-      console.log("data: ", data);
       setLoading(true);
       if (initialData?.id) {
         await axios.patch(
@@ -94,14 +93,12 @@ const BillboardForm: React.FC<BillboardFormProps> = ({ initialData }) => {
   const onDelete = async () => {
     try {
       setLoading(true);
-
       await axios.delete(
-        `/api/${params.storeId}/billboards/${params.billboardId}`
+        `/api/stores/${params.storeId}/billboards/${params.billboardId}`
       );
-      router.refresh();
-      router.push("/");
       toast.success("Billboard deleted");
     } catch (error) {
+      console.log("error: ", error);
       toast.error(
         "Make sure you removed all categories first using this billboard"
       );
@@ -115,14 +112,14 @@ const BillboardForm: React.FC<BillboardFormProps> = ({ initialData }) => {
     <>
       <AlertModal
         isOpen={open}
-        onClose={() => setOpen(false)}
+        setOpen={setOpen}
         onConfirm={onDelete}
         loading={loading}
       />
       <div className="flex items-center justify-between">
         <Heading title={title} description={description} />
 
-        {initialData && (
+        {initialData?.id && (
           <Button
             variant="destructive"
             size="icon"
@@ -146,11 +143,7 @@ const BillboardForm: React.FC<BillboardFormProps> = ({ initialData }) => {
                 <FormLabel>Background Image</FormLabel>
                 <FormControl>
                   <ImageUpload
-                    value={
-                      field.value
-                        ? field.value
-                        : { secure_url: "", public_id: "", signature: "" }
-                    }
+                    value={field.value ? field.value : null}
                     disabled={loading}
                     onChange={(result) => field.onChange(result)}
                     onRemove={() => field.onChange("")}
@@ -170,7 +163,8 @@ const BillboardForm: React.FC<BillboardFormProps> = ({ initialData }) => {
                     <Input
                       disabled={loading}
                       placeholder="Billboard Label"
-                      {...field}
+                      onChange={(event) => field.onChange(event.target.value)}
+                      value={field.value || ""}
                     />
                   </FormControl>
                 </FormItem>

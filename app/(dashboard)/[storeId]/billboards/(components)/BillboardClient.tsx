@@ -4,7 +4,7 @@ import Heading from "@/components/ui/heading";
 import { Separator } from "@/components/ui/separator";
 import { Plus as PlusIcon } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
-import { DataTable } from "@/components/ui/dataTable";
+import { DataTable } from "@/components/ui/data-table";
 import { ColumnDef } from "@tanstack/react-table";
 import { CellAction } from "./cellAction";
 import { Billboard } from "@prisma/client";
