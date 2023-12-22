@@ -1,9 +1,9 @@
 "use client";
 import { useStoreModal } from "@/hooks/useStoreModalStore";
 import { useEffect } from "react";
-import { store } from "@/types";
+import { Store } from "@prisma/client";
 type Props = {
-  store: store | null;
+  store: Store | null;
 };
 export default function Content({ store }: Props) {
   const storeState = useStoreModal();

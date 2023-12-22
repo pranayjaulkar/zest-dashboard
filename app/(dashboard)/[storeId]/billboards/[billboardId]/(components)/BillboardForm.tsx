@@ -48,7 +48,6 @@ export type BillboardFormValue = z.infer<typeof formSchema>;
 
 const BillboardForm: React.FC<BillboardFormProps> = ({ initialData }) => {
   const params = useParams();
-  const origin = useOrigin();
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -61,13 +60,13 @@ const BillboardForm: React.FC<BillboardFormProps> = ({ initialData }) => {
   });
 
   const title =
-    initialData && initialData.id ? "Edit billboard" : "Create billboard";
+    initialData?.id ? "Edit billboard" : "Create billboard";
   const description =
-    initialData && initialData.id ? "Edit a billboard" : "Add a new Billboard";
+    initialData?.id ? "Edit a billboard" : "Add a new Billboard";
   const toastMessage =
-    initialData && initialData.id ? "Billboard updated" : "Billboard created";
+    initialData?.id ? "Billboard updated" : "Billboard created";
   const action =
-    initialData && initialData.id ? "Save changes" : "Create billboard";
+    initialData?.id ? "Save changes" : "Create billboard";
   const onSubmit = async (data: BillboardFormValue) => {
     try {
       setLoading(true);

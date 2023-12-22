@@ -6,7 +6,7 @@ import { Plus as PlusIcon } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { DataTable } from "@/components/ui/dataTable";
 import { ColumnDef } from "@tanstack/react-table";
-import { CellAction } from "./cellAction";
+import { CellAction } from "./CellAction";
 import { Billboard } from "@prisma/client";
 import { useState } from "react";
 import { format } from "date-fns";

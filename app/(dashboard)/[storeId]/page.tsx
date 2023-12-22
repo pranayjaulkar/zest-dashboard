@@ -1,15 +1,15 @@
-import Navbar from "@/components/Navbar/Navbar";
 import Content from "./Content";
-import { findUserStore } from "@/lib/findUserStore";
-import { store } from "@/types";
+import prismadb from "@/lib/prismadb";
+import { Store } from "@prisma/client";
 export const metadata = {
   title: "Dashboard",
 };
 type Props = { storeId: string };
 
 export default async function DashboardPage({ storeId }: Props) {
-  let store: store | null;
-  store = await findUserStore(storeId);
+  const store: Store | null = await prismadb.store.findFirst({
+    where: { id: storeId },
+  });
   return (
     <div>
       <Content store={store} />

@@ -24,7 +24,7 @@ import {
 import { useOrigin } from "@/hooks/useOrigin";
 
 interface SettingsFormProps {
-  initialData: Store;
+  initialData: Store | null;
 }
 const formSchema = z.object({
   name: z.string().min(1),
@@ -39,7 +39,7 @@ const SettingsForm: React.FC<SettingsFormProps> = ({ initialData }) => {
   const [loading, setLoading] = useState(false);
   const form = useForm<SettingsFormValue>({
     resolver: zodResolver(formSchema),
-    defaultValues: initialData,
+    defaultValues: initialData ? initialData : { name: "" },
   });
   const onSubmit = async (data: SettingsFormValue) => {
     try {
@@ -74,7 +74,7 @@ const SettingsForm: React.FC<SettingsFormProps> = ({ initialData }) => {
     <>
       <AlertModal
         isOpen={open}
-        onClose={() => setOpen(false)}
+        setOpen={setOpen}
         onConfirm={onDelete}
         loading={loading}
       />
@@ -101,6 +101,7 @@ const SettingsForm: React.FC<SettingsFormProps> = ({ initialData }) => {
                     <Input
                       disabled={loading}
                       placeholder="Store name"
+                      // value={field.value}
                       {...field}
                     />
                   </FormControl>
