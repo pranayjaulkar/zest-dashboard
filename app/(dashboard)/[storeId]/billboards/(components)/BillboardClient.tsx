@@ -4,12 +4,13 @@ import Heading from "@/components/ui/heading";
 import { Separator } from "@/components/ui/separator";
 import { Plus as PlusIcon } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
-import { DataTable } from "@/components/ui/data-table";
+import { DataTable } from "@/components/ui/dataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import { CellAction } from "./cellAction";
 import { Billboard } from "@prisma/client";
 import { useState } from "react";
 import { format } from "date-fns";
+import ApiList from "@/components/ui/apiList";
 
 export type BillboardColumn = {
   id: string;
@@ -65,6 +66,9 @@ export const BillboardClient: React.FC<BillboardClientProps> = ({
       </div>
       <Separator />
       <DataTable columns={columns} data={data} searchKey="label" />
+      <Heading title="API" description="API calls for billboards" />
+      <Separator />
+      <ApiList entityName="billboards" entityIdName="billboardId" />
     </>
   );
 };

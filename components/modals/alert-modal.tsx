@@ -17,7 +17,6 @@ export const AlertModal: React.FC<AlertModalProps> = ({
   loading,
 }) => {
   const [isMounted, setIsMounted] = useState(false);
-  console.log("isOpen: ", isOpen);
 
   useEffect(() => {
     setIsMounted(true);

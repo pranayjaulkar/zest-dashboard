@@ -13,7 +13,7 @@ import axios from "axios";
 import { useParams, useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { AlertModal } from "@/components/modals/alert-modal";
-import { ApiAlert } from "@/components/ui/api-alert";
+import { ApiAlert } from "@/components/ui/apiAlert";
 import {
   Form,
   FormControl,
@@ -22,7 +22,7 @@ import {
   FormLabel,
 } from "@/components/ui/form";
 import { useOrigin } from "@/hooks/useOrigin";
-import ImageUpload from "@/components/ui/image-upload";
+import ImageUpload from "@/components/ui/imageUpload";
 
 interface BillboardFormProps {
   initialData: {
@@ -96,6 +96,9 @@ const BillboardForm: React.FC<BillboardFormProps> = ({ initialData }) => {
       await axios.delete(
         `/api/stores/${params.storeId}/billboards/${params.billboardId}`
       );
+      router.push(`/${params.storeId}/billboards/`)
+      router.refresh();
+
       toast.success("Billboard deleted");
     } catch (error) {
       console.log("error: ", error);
@@ -176,12 +179,7 @@ const BillboardForm: React.FC<BillboardFormProps> = ({ initialData }) => {
           </Button>
         </form>
       </Form>
-      <Separator />
-      <ApiAlert
-        title="NEXT_PUBLIC_API_URL"
-        description={`${origin}/api/${params.storeId}`}
-        variant="public"
-      />
+     
     </>
   );
 };

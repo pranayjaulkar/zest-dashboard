@@ -23,7 +23,6 @@ export const Modal: React.FC<ModalProps> = ({
   setOpen,
   children,
 }) => {
-  console.log('Modals - isOpen: ', isOpen);
   return (
     <Dialog open={isOpen} onOpenChange={setOpen}>
       <DialogContent>
