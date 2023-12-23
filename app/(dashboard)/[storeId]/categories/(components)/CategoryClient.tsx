@@ -1,3 +1,4 @@
+"use client";
 import ApiList from "@/components/ui/apiList";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/dataTable";
@@ -8,7 +9,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { PlusIcon } from "lucide-react";
 import { useParams } from "next/navigation";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { CellAction } from "./CellAction";
 
@@ -72,7 +73,7 @@ export const CategoryClient: React.FC<CategoriesClientProps> = ({
         </Button>
       </div>
       <Separator />
-      <DataTable columns={columns} data={data} searchKey="label" />
+      <DataTable columns={columns} data={data} searchKey="name" />
       <Heading title="API" description="API calls for categories" />
       <Separator />
       <ApiList entityName="categories" entityIdName="categoryId" />

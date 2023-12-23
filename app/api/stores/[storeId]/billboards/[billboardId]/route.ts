@@ -88,14 +88,10 @@ export async function DELETE(
       return new NextResponse("Unauthorized", { status: 403 });
     }
     let imageDeleteResponse;
-    try {
-      if (billboard && billboard.imagePublicId) {
-        imageDeleteResponse = await cloudinary.uploader.destroy(
-          billboard.imagePublicId,
-        );
-      }
-    } catch (error) {
-      console.log("error", error);
+    if (billboard && billboard.imagePublicId) {
+      imageDeleteResponse = await cloudinary.uploader.destroy(
+        billboard.imagePublicId
+      );
     }
 
     if (imageDeleteResponse?.result !== "ok") {
@@ -104,7 +100,7 @@ export async function DELETE(
     const deletedBillboard = await prismadb.billboard.delete({
       where: { id: params.billboardId },
     });
-    return NextResponse.json({res:"adfhgh"});
+    return NextResponse.json(deletedBillboard);
   } catch (error) {
     console.log("[Bilboard_DELETE]", error);
     return new NextResponse("Internal error", { status: 500 });

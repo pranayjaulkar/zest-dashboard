@@ -32,7 +32,7 @@ model Billboard {
   imageSignature String
   createdAt      DateTime   @default(now())
   updatedAt      DateTime   @updatedAt
-  Category       Category[]
+  Categories       Category[]
 
   @@index([storeId])
 }
