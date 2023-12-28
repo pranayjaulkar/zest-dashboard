@@ -7,38 +7,42 @@ import { useParams, useRouter } from "next/navigation";
 import { DataTable } from "@/components/ui/dataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import { CellAction } from "./CellAction";
-import { Billboard } from "@prisma/client";
+import { Size } from "@prisma/client";
 import { useState } from "react";
 import { format } from "date-fns";
 import ApiList from "@/components/ui/apiList";
 
-export type BillboardColumn = {
+export type SizeColumn = {
   id: string;
-  label: string;
+  name: string;
+  value: string;
   createdAt: string;
 };
 
-interface BillboardClientProps {
-  billboards: Billboard[];
+interface SizeClientProps {
+  sizes: Size[];
 }
 
-export const BillboardClient: React.FC<BillboardClientProps> = ({
-  billboards,
-}) => {
+export const SizeClient: React.FC<SizeClientProps> = ({ sizes }) => {
   const router = useRouter();
   const params = useParams();
-  const [data, setData] = useState<BillboardColumn[]>(
-    billboards.map((item) => ({
+  const [data, setData] = useState<SizeColumn[]>(
+    sizes.map((item) => ({
       id: item.id,
-      label: item.label,
+      name: item.name,
+      value: item.value,
       createdAt: format(item.createdAt, "dd-MM-yyy"),
     }))
   );
 
-  const columns: ColumnDef<BillboardColumn>[] = [
+  const columns: ColumnDef<SizeColumn>[] = [
     {
-      accessorKey: "label",
-      header: "Label",
+      accessorKey: "name",
+      header: "Name",
+    },
+    {
+      accessorKey: "value",
+      header: "Value",
     },
     {
       accessorKey: "createdAt",
@@ -54,23 +58,21 @@ export const BillboardClient: React.FC<BillboardClientProps> = ({
     <>
       <div className="flex items-center justify-between">
         <Heading
-          title={`Billboards (${data.length})`}
-          description="Manage billboards for your store"
+          title={`Sizes (${data.length})`}
+          description="Manage sizes for your store"
         />
-        <Button
-          onClick={() => router.push(`/${params.storeId}/billboards/new`)}
-        >
+        <Button onClick={() => router.push(`/${params.storeId}/sizes/new`)}>
           <PlusIcon className="mr-2 h-4 w-4" />
           Add New
         </Button>
       </div>
       <Separator />
-      <DataTable columns={columns} data={data} searchKey="label" />
-      <Heading title="API" description="API calls for billboards" />
+      <DataTable columns={columns} data={data} searchKey="name" />
+      <Heading title="API" description="API calls for sizes" />
       <Separator />
-      <ApiList entityName="billboards" entityIdName="billboardId" />
+      <ApiList entityName="sizes" entityIdName="sizeId" />
     </>
   );
 };
 
-export default BillboardClient;
+export default SizeClient;

@@ -17,11 +17,11 @@ import { useRouter, useParams } from "next/navigation";
 import { useState } from "react";
 import axios from "axios";
 import { AlertModal } from "@/components/modals/alert-modal";
-import { BillboardColumn } from "./Client";
+import { SizeColumn } from "./Client";
 
 interface CellActionProps {
-  data: BillboardColumn;
-  setData: React.Dispatch<React.SetStateAction<BillboardColumn[]>>;
+  data: SizeColumn;
+  setData: React.Dispatch<React.SetStateAction<SizeColumn[]>>;
 }
 
 export const CellAction: React.FC<CellActionProps> = ({ data, setData }) => {
@@ -31,18 +31,18 @@ export const CellAction: React.FC<CellActionProps> = ({ data, setData }) => {
   const [open, setOpen] = useState(false);
   const onCopy = (id: string) => {
     navigator.clipboard.writeText(id);
-    toast.success("Billboard ID copied to the clipboard");
+    toast.success("Size ID copied to the clipboard");
   };
   const onDelete = async () => {
     try {
       setLoading(true);
-      await axios.delete(`/api/stores/${params.storeId}/billboards/${data.id}`);
+      await axios.delete(`/api/stores/${params.storeId}/sizes/${data.id}`);
       setLoading(false);
       setOpen(false);
       setData((previousData) =>
         previousData.filter((element) => element.id !== data.id)
       );
-      toast.success("Billboard deleted");
+      toast.success("Size deleted");
     } catch (error) {
       console.log("error: ", error);
       toast.error("Something Went Wrong");
@@ -75,7 +75,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data, setData }) => {
           <DropdownMenuItem
             className="flex justify-start border-0  rounded-md py-1 px-2 m-1 min-w-[128px] hover:bg-gray-100 cursor-pointer"
             onClick={() => {
-              router.push(`/${params.storeId}/billboards/${data.id}`);
+              router.push(`/${params.storeId}/sizes/${data.id}`);
             }}
           >
             <EditIcon className="mr-2 h-4 w-4" />

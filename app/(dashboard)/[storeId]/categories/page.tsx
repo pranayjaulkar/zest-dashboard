@@ -1,5 +1,5 @@
 import { Billboard, Category, Prisma } from "@prisma/client";
-import CategoryClient from "./(components)/CategoryClient";
+import CategoryClient from "./(components)/Client";
 import prismadb, { CategoryWithBillboards } from "@/lib/prismadb";
 
 export default async function CategoriesPage({

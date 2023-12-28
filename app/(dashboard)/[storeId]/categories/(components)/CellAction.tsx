@@ -16,7 +16,7 @@ import {
   import { useRouter, useParams } from "next/navigation";
   import { useState } from "react";
   import axios from "axios";
-  import { CategoryColumn } from "./CategoryClient";
+  import { CategoryColumn } from "./Client";
   
   interface CellActionProps {
     data: CategoryColumn;

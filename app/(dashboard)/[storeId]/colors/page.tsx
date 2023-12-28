@@ -1,20 +1,20 @@
-import { Billboard } from "@prisma/client";
-import BillboardClient from "./(components)/Client";
+import { Size } from "@prisma/client";
+import SizeClient from "./(components)/Client";
 import prismadb from "@/lib/prismadb";
 
-export default async function BillboardsPage({
+export default async function SizesPage({
   params,
 }: {
   params: { storeId: string };
 }) {
-  const billboards: Billboard[] = await prismadb.billboard.findMany({
+  const sizes: Size[] = await prismadb.size.findMany({
     where: { storeId: params.storeId },
     orderBy: { createdAt: "desc" },
   });
   return (
     <div className="flex-col">
       <div className="flex-1 space-y-4 p-8 pt-6">
-      <BillboardClient billboards={billboards} />
+        <SizeClient sizes={sizes} />
       </div>
     </div>
   );
