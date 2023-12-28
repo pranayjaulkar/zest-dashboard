@@ -7,27 +7,27 @@ import { useParams, useRouter } from "next/navigation";
 import { DataTable } from "@/components/ui/dataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import { CellAction } from "./CellAction";
-import { Size } from "@prisma/client";
+import { Color } from "@prisma/client";
 import { useState } from "react";
 import { format } from "date-fns";
 import ApiList from "@/components/ui/apiList";
 
-export type SizeColumn = {
+export type ColorColumn = {
   id: string;
   name: string;
   value: string;
   createdAt: string;
 };
 
-interface SizeClientProps {
-  sizes: Size[];
+interface ColorClientProps {
+  colors: Color[];
 }
 
-export const SizeClient: React.FC<SizeClientProps> = ({ sizes }) => {
+export const ColorClient: React.FC<ColorClientProps> = ({ colors }) => {
   const router = useRouter();
   const params = useParams();
-  const [data, setData] = useState<SizeColumn[]>(
-    sizes.map((item) => ({
+  const [data, setData] = useState<ColorColumn[]>(
+    colors.map((item) => ({
       id: item.id,
       name: item.name,
       value: item.value,
@@ -35,7 +35,7 @@ export const SizeClient: React.FC<SizeClientProps> = ({ sizes }) => {
     }))
   );
 
-  const columns: ColumnDef<SizeColumn>[] = [
+  const columns: ColumnDef<ColorColumn>[] = [
     {
       accessorKey: "name",
       header: "Name",
@@ -58,21 +58,21 @@ export const SizeClient: React.FC<SizeClientProps> = ({ sizes }) => {
     <>
       <div className="flex items-center justify-between">
         <Heading
-          title={`Sizes (${data.length})`}
-          description="Manage sizes for your store"
+          title={`Colors (${data.length})`}
+          description="Manage colors for your store"
         />
-        <Button onClick={() => router.push(`/${params.storeId}/sizes/new`)}>
+        <Button onClick={() => router.push(`/${params.storeId}/colors/new`)}>
           <PlusIcon className="mr-2 h-4 w-4" />
           Add New
         </Button>
       </div>
       <Separator />
       <DataTable columns={columns} data={data} searchKey="name" />
-      <Heading title="API" description="API calls for sizes" />
+      <Heading title="API" description="API calls for colors" />
       <Separator />
-      <ApiList entityName="sizes" entityIdName="sizeId" />
+      <ApiList entityName="colors" entityIdName="colorId" />
     </>
   );
 };
 
-export default SizeClient;
+export default ColorClient;

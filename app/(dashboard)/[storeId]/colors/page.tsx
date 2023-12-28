@@ -1,20 +1,20 @@
-import { Size } from "@prisma/client";
-import SizeClient from "./(components)/Client";
+import { Color } from "@prisma/client";
+import ColorClient from "./(components)/Client";
 import prismadb from "@/lib/prismadb";
 
-export default async function SizesPage({
+export default async function ColorsPage({
   params,
 }: {
   params: { storeId: string };
 }) {
-  const sizes: Size[] = await prismadb.size.findMany({
+  const colors: Color[] = await prismadb.color.findMany({
     where: { storeId: params.storeId },
     orderBy: { createdAt: "desc" },
   });
   return (
     <div className="flex-col">
       <div className="flex-1 space-y-4 p-8 pt-6">
-        <SizeClient sizes={sizes} />
+        <ColorClient colors={colors} />
       </div>
     </div>
   );
