@@ -43,6 +43,15 @@ export const ColorClient: React.FC<ColorClientProps> = ({ colors }) => {
     {
       accessorKey: "value",
       header: "Value",
+      cell: ({ row }) => (
+        <div className="flex items-center gap-x-2">
+          <div className="w-16">{row.original.value}</div>
+          <div
+            className="h-6 w-6 rounded-full border"
+            style={{ backgroundColor: row.original.value }}
+          ></div>
+        </div>
+      ),
     },
     {
       accessorKey: "createdAt",

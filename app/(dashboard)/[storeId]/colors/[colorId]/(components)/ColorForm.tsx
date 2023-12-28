@@ -29,7 +29,10 @@ interface ColorFormProps {
 }
 const formSchema = z.object({
   name: z.string().min(1),
-  value: z.string().min(1),
+  value: z
+    .string()
+    .min(4)
+    .regex(/^#/, { message: "String must be a valid hex code. e.g #55bef2" }),
 });
 export type ColorFormValue = z.infer<typeof formSchema>;
 
@@ -83,7 +86,9 @@ const ColorForm: React.FC<ColorFormProps> = ({ initialData }) => {
       toast.success("Color deleted");
     } catch (error) {
       console.log("error: ", error);
-      toast.error("Make sure you removed all categories first using this color");
+      toast.error(
+        "Make sure you removed all categories first using this color"
+      );
     } finally {
       setLoading(false);
       setOpen(false);
@@ -142,12 +147,18 @@ const ColorForm: React.FC<ColorFormProps> = ({ initialData }) => {
                 <FormItem>
                   <FormLabel>Value</FormLabel>
                   <FormControl>
-                    <Input
-                      disabled={loading}
-                      placeholder="Color Value"
-                      onChange={(event) => field.onChange(event.target.value)}
-                      value={field.value || ""}
-                    />
+                    <div className="flex items-center gap-x-4">
+                      <Input
+                        disabled={loading}
+                        placeholder="Enter Hex Code"
+                        onChange={(event) => field.onChange(event.target.value)}
+                        value={field.value || ""}
+                      />{" "}
+                      <div
+                        className="border p-4 rounded-full"
+                        style={{ backgroundColor: field.value }}
+                      />
+                    </div>
                   </FormControl>
                 </FormItem>
               )}
