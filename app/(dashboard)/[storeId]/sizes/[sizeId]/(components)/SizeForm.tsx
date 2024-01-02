@@ -83,7 +83,7 @@ const SizeForm: React.FC<SizeFormProps> = ({ initialData }) => {
       toast.success("Size deleted");
     } catch (error) {
       console.log("error: ", error);
-      toast.error("Make sure you removed all categories first using this size");
+      toast.error("Something went wrong");
     } finally {
       setLoading(false);
       setOpen(false);

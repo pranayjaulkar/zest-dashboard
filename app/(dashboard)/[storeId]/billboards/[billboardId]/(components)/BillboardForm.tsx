@@ -59,14 +59,14 @@ const BillboardForm: React.FC<BillboardFormProps> = ({ initialData }) => {
     },
   });
 
-  const title =
-    initialData?.id ? "Edit billboard" : "Create billboard";
-  const description =
-    initialData?.id ? "Edit a billboard" : "Add a new Billboard";
-  const toastMessage =
-    initialData?.id ? "Billboard updated" : "Billboard created";
-  const action =
-    initialData?.id ? "Save changes" : "Create billboard";
+  const title = initialData?.id ? "Edit billboard" : "Create billboard";
+  const description = initialData?.id
+    ? "Edit a billboard"
+    : "Add a new Billboard";
+  const toastMessage = initialData?.id
+    ? "Billboard updated"
+    : "Billboard created";
+  const action = initialData?.id ? "Save changes" : "Create billboard";
   const onSubmit = async (data: BillboardFormValue) => {
     try {
       setLoading(true);
@@ -95,15 +95,13 @@ const BillboardForm: React.FC<BillboardFormProps> = ({ initialData }) => {
       await axios.delete(
         `/api/stores/${params.storeId}/billboards/${params.billboardId}`
       );
-      router.push(`/${params.storeId}/billboards/`)
+      router.push(`/${params.storeId}/billboards/`);
       router.refresh();
 
       toast.success("Billboard deleted");
     } catch (error) {
       console.log("error: ", error);
-      toast.error(
-        "Make sure you removed all categories first using this billboard"
-      );
+      toast.error("Something went wrong");
     } finally {
       setLoading(false);
       setOpen(false);
@@ -178,7 +176,6 @@ const BillboardForm: React.FC<BillboardFormProps> = ({ initialData }) => {
           </Button>
         </form>
       </Form>
-     
     </>
   );
 };

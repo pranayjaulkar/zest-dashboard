@@ -55,12 +55,8 @@ const CategoryForm: React.FC<CategoryFormProps> = ({
   });
 
   const title = initialData ? "Edit category" : "Create category";
-  const description = initialData
-    ? "Edit a category"
-    : "Add a new Category";
-  const toastMessage = initialData
-    ? "Category updated"
-    : "Category created";
+  const description = initialData ? "Edit a category" : "Add a new Category";
+  const toastMessage = initialData ? "Category updated" : "Category created";
   const action = initialData ? "Save changes" : "Create category";
   const onSubmit = async (data: CategoryFormValue) => {
     try {
@@ -95,9 +91,7 @@ const CategoryForm: React.FC<CategoryFormProps> = ({
       toast.success("Category deleted");
     } catch (error) {
       console.log("error: ", error);
-      toast.error(
-        "Make sure you removed all categories first using this category"
-      );
+      toast.error("Something went wrong");
     } finally {
       setLoading(false);
       setOpen(false);

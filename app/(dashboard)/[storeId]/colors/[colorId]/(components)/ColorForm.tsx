@@ -86,9 +86,7 @@ const ColorForm: React.FC<ColorFormProps> = ({ initialData }) => {
       toast.success("Color deleted");
     } catch (error) {
       console.log("error: ", error);
-      toast.error(
-        "Make sure you removed all categories first using this color"
-      );
+      toast.error("Something went wrong");
     } finally {
       setLoading(false);
       setOpen(false);
