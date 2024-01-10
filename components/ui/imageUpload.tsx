@@ -7,11 +7,15 @@ import Image from "next/image";
 import { CldUploadWidget } from "next-cloudinary";
 import { BillboardFormValue } from "@/app/(dashboard)/[storeId]/billboards/[billboardId]/(components)/BillboardForm";
 
+type ImageType = {
+  secureUrl: string;
+  publicId: string;
+};
 interface ImageUploadProps {
   disabled: boolean;
-  onChange: (value: BillboardFormValue["image"]) => void;
+  onChange: (value: ImageType[]) => void;
   onRemove: (value: string) => void;
-  value: BillboardFormValue["image"] | null;
+  value: ImageType[];
 }
 
 const ImageUpload: React.FC<ImageUploadProps> = ({
@@ -23,11 +27,14 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
   const [isMounted, setIsMounted] = useState(false);
   const onUpload = (result: any) => {
     const filteredResult = {
-      secure_url: result.info.secure_url as string,
-      public_id: result.info.public_id as string,
-      signature: result.info.signature as string,
+      secureUrl: result.info.secure_url as string,
+      publicId: result.info.public_id as string,
     };
-    onChange(filteredResult);
+    if (value?.length) {
+      onChange([...value, filteredResult]);
+    } else {
+      onChange([filteredResult]);
+    }
   };
   useEffect(() => {
     setIsMounted(true);
@@ -38,15 +45,15 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
   return (
     <div>
       <div className="mb-4 flex items-center gap-4">
-        {value && value.secure_url && (
+        {value &&value.map((image, i) => (
           <div
-            key={value.secure_url}
+            key={i}
             className="relative rounded-md overflow-hidden w-[200px] h-[200px]"
           >
             <div className="z-10 absolute top-2 right-2">
               <Button
                 type="button"
-                onClick={() => onRemove(value.secure_url)}
+                onClick={() => onRemove(image.secureUrl)}
                 variant="destructive"
                 size="icon"
               >
@@ -57,10 +64,10 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
               fill
               className="object-cover"
               alt="Image"
-              src={value.secure_url}
+              src={image.secureUrl || ""}
             />
           </div>
-        )}
+        ))}
       </div>
       <CldUploadWidget onUpload={onUpload} uploadPreset="x4jdqunx">
         {({ open, isLoading }) => {

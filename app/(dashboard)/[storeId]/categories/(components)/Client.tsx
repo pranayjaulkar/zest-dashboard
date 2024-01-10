@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/dataTable";
 import Heading from "@/components/ui/heading";
 import { Separator } from "@/components/ui/separator";
-import { Category } from "@prisma/client";
+import { Billboard, Category } from "@prisma/client";
 import { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { PlusIcon } from "lucide-react";
@@ -21,7 +21,7 @@ export type CategoryColumn = {
 };
 
 interface CategoriesClientProps {
-  categories: any[];
+  categories: (Category & { billboard: Billboard })[];
 }
 
 export const CategoryClient: React.FC<CategoriesClientProps> = ({

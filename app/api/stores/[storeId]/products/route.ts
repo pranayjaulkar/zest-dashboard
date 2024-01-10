@@ -1,5 +1,6 @@
 import prismadb from "@/lib/prismadb";
 import { auth } from "@clerk/nextjs";
+import { Product, Image } from "@prisma/client";
 import { NextResponse } from "next/server";
 
 export async function POST(
@@ -9,17 +10,29 @@ export async function POST(
   try {
     const { userId } = auth();
     const body = await req.json();
-    const { label, image } = body;
+    const productData = body;
 
     if (!userId) {
       return new NextResponse("Unauthorized", { status: 404 });
     }
 
-    if (!label) {
-      return new NextResponse("Label is required", { status: 400 });
+    if (!productData.name) {
+      return new NextResponse("Name is required", { status: 400 });
     }
-    if (!image.secureUrl || !image.publicId) {
-      return new NextResponse("Image is required", { status: 400 });
+    if (!productData.price) {
+      return new NextResponse("Price is required", { status: 400 });
+    }
+    if (!productData.categoryId) {
+      return new NextResponse("Category is required", { status: 400 });
+    }
+    if (!productData.colorId) {
+      return new NextResponse("Color is required", { status: 400 });
+    }
+    if (!productData.sizeId) {
+      return new NextResponse("Size is required", { status: 400 });
+    }
+    if (!productData.images || !productData.images.length) {
+      return new NextResponse("Images are required", { status: 400 });
     }
     if (!params.storeId) {
       return new NextResponse("Store id is required", { status: 400 });
@@ -31,17 +44,15 @@ export async function POST(
     if (!storeByUserId) {
       return new NextResponse("Unauthorized", { status: 403 });
     }
-    const billboard = await prismadb.billboard.create({
+    const product: Product = await prismadb.product.create({
       data: {
-        label,
-        imageUrl: image.secureUrl,
-        imagePublicId: image.publicId,
+        ...productData,
         storeId: params.storeId,
       },
     });
-    return NextResponse.json(billboard);
+    return NextResponse.json(product);
   } catch (error) {
-    console.log("[Bilboard_POST]", error);
+    console.log("[product_POST]", error);
     return new NextResponse("Internal error", { status: 500 });
   }
 }
@@ -55,12 +66,12 @@ export async function GET(
       return new NextResponse("Store id is required", { status: 400 });
     }
 
-    const billboards = await prismadb.billboard.findMany({
+    const products = await prismadb.product.findMany({
       where: { storeId: params.storeId },
     });
-    return NextResponse.json(billboards);
+    return NextResponse.json(products);
   } catch (error) {
-    console.log("[Bilboard_GET]", error);
+    console.log("[product_GET]", error);
     return new NextResponse("Internal error", { status: 500 });
   }
 }

@@ -26,16 +26,15 @@ model Store {
 }
 
 model Billboard {
-  id             String     @id @default(uuid())
-  storeId        String
-  store          Store      @relation("StoreToBillboard", fields: [storeId], references: [id])
-  label          String
-  imageUrl       String
-  imagePublicId  String
-  imageSignature String
-  createdAt      DateTime   @default(now())
-  updatedAt      DateTime   @updatedAt
-  categories     Category[]
+  id            String     @id @default(uuid())
+  storeId       String
+  store         Store      @relation("StoreToBillboard", fields: [storeId], references: [id])
+  label         String
+  imageUrl      String
+  imagePublicId String
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  categories    Category[] @relation("BillboardToCategory")
 
   @@index([storeId])
 }
@@ -45,7 +44,7 @@ model Category {
   storeId     String
   store       Store     @relation("StoreToCategory", fields: [storeId], references: [id])
   billboardId String
-  billboard   Billboard @relation(fields: [billboardId], references: [id])
+  billboard   Billboard @relation("BillboardToCategory", fields: [billboardId], references: [id])
   name        String
   products    Product[] @relation("CategoryToProduct")
   createdAt   DateTime  @default(now())
@@ -90,14 +89,14 @@ model Product {
   name       String
   price      Decimal
   isFeatured Boolean  @default(false)
-  idArchived Boolean  @default(false)
+  isArchived Boolean  @default(false)
   sizeId     String
   size       Size     @relation(fields: [sizeId], references: [id])
   colorId    String
   color      Color    @relation(fields: [colorId], references: [id])
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
-  Image      Image[]  @relation("ProductToImage")
+  images     Image[]  @relation("ProductToImage")
 
   @@index([storeId])
   @@index([sizeId])
@@ -108,9 +107,8 @@ model Product {
 model Image {
   id        String   @id @default(uuid())
   productId String
-  url       String
+  secureUrl String
   publicId  String
-  signature String
   products  Product  @relation("ProductToImage", fields: [productId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

@@ -52,8 +52,6 @@ const ColorForm: React.FC<ColorFormProps> = ({ initialData }) => {
   const action = initialData?.id ? "Save changes" : "Create color";
   const onSubmit = async (data: ColorFormValue) => {
     try {
-      console.log("initialData: ", initialData);
-      console.log("data: ", data);
       setLoading(true);
       if (initialData?.id) {
         await axios.patch(

@@ -5,7 +5,6 @@ import { Separator } from "@/components/ui/separator";
 import { Trash as TrashIcon } from "lucide-react";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Billboard } from "@prisma/client";
 import { useForm } from "react-hook-form";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
@@ -13,7 +12,6 @@ import axios from "axios";
 import { useParams, useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { AlertModal } from "@/components/modals/alert-modal";
-import { ApiAlert } from "@/components/ui/apiAlert";
 import {
   Form,
   FormControl,
@@ -21,7 +19,6 @@ import {
   FormItem,
   FormLabel,
 } from "@/components/ui/form";
-import { useOrigin } from "@/hooks/useOrigin";
 import ImageUpload from "@/components/ui/imageUpload";
 
 interface BillboardFormProps {
@@ -30,18 +27,16 @@ interface BillboardFormProps {
     storeId: string | undefined;
     label: string | undefined;
     image: {
-      secure_url: string | undefined;
-      public_id: string | undefined;
-      signature: string | undefined;
+      secureUrl: string | undefined;
+      publicId: string | undefined;
     };
   };
 }
 const formSchema = z.object({
   label: z.string().min(1),
   image: z.object({
-    secure_url: z.string(),
-    public_id: z.string(),
-    signature: z.string(),
+    secureUrl: z.string(),
+    publicId: z.string(),
   }),
 });
 export type BillboardFormValue = z.infer<typeof formSchema>;
@@ -143,10 +138,10 @@ const BillboardForm: React.FC<BillboardFormProps> = ({ initialData }) => {
                 <FormLabel>Background Image</FormLabel>
                 <FormControl>
                   <ImageUpload
-                    value={field.value ? field.value : null}
+                    value={field.value.secureUrl ? [field.value] : []}
                     disabled={loading}
-                    onChange={(result) => field.onChange(result)}
-                    onRemove={() => field.onChange("")}
+                    onChange={(result) => field.onChange(...result)}
+                    onRemove={() => field.onChange([])}
                   />
                 </FormControl>
               </FormItem>

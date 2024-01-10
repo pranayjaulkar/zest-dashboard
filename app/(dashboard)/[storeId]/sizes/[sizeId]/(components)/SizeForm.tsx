@@ -49,8 +49,6 @@ const SizeForm: React.FC<SizeFormProps> = ({ initialData }) => {
   const action = initialData?.id ? "Save changes" : "Create size";
   const onSubmit = async (data: SizeFormValue) => {
     try {
-      console.log("initialData: ", initialData);
-      console.log("data: ", data);
       setLoading(true);
       if (initialData?.id) {
         await axios.patch(

@@ -93,14 +93,17 @@ export async function DELETE(
         billboard.imagePublicId
       );
     }
-
-    if (imageDeleteResponse?.result !== "ok") {
+    if (
+      imageDeleteResponse?.result === "ok" ||
+      imageDeleteResponse?.result === "not found"
+    ) {
+      const deletedBillboard = await prismadb.billboard.delete({
+        where: { id: params.billboardId },
+      });
+      return NextResponse.json(deletedBillboard);
+    } else {
       return new NextResponse("Something went wrong", { status: 500 });
     }
-    const deletedBillboard = await prismadb.billboard.delete({
-      where: { id: params.billboardId },
-    });
-    return NextResponse.json(deletedBillboard);
   } catch (error) {
     console.log("[Bilboard_DELETE]", error);
     return new NextResponse("Internal error", { status: 500 });
