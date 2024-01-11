@@ -30,6 +30,7 @@ export async function PATCH(
     const { userId } = auth();
     const body = await req.json();
     const productData = body;
+    console.log('productData: ', productData);
 
     if (!userId) {
       return new NextResponse("Unauthorized", { status: 404 });
@@ -107,7 +108,7 @@ export async function DELETE(
       return new NextResponse("Unauthorized", { status: 403 });
     }
     const imagesPublicIdArray: string[] | undefined = product?.images.map(
-      (image) => image.publicId
+      (image) => image.cloudinaryPublicId
     );
     let imageDeleteResponse;
     if (product && product?.images.length) {
@@ -115,14 +116,14 @@ export async function DELETE(
         imagesPublicIdArray || []
       );
     }
-    if (
-      imageDeleteResponse?.result === "ok" ||
-      imageDeleteResponse?.result === "not found"
-    ) {
-      const deletedProduct = await prismadb.product.delete({
-        where: { id: params.productId },
-      });
-      return NextResponse.json(deletedProduct);
+    if (imageDeleteResponse?.deleted) {
+    const deletedImages = await prismadb.image.deleteMany({
+      where: { productId: params.productId },
+    });
+    const deletedProduct = await prismadb.product.delete({
+      where: { id: params.productId },
+    });
+    return NextResponse.json(deletedProduct);
     } else {
       return new NextResponse("Something went wrong", { status: 500 });
     }

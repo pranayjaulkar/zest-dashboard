@@ -5,12 +5,8 @@ import { useEffect, useState } from "react";
 import { Button } from "./button";
 import Image from "next/image";
 import { CldUploadWidget } from "next-cloudinary";
-import { BillboardFormValue } from "@/app/(dashboard)/[storeId]/billboards/[billboardId]/(components)/BillboardForm";
 
-type ImageType = {
-  secureUrl: string;
-  publicId: string;
-};
+type ImageType = { url: string; cloudinaryPublicId: string };
 interface ImageUploadProps {
   disabled: boolean;
   onChange: (value: ImageType[]) => void;
@@ -27,8 +23,8 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
   const [isMounted, setIsMounted] = useState(false);
   const onUpload = (result: any) => {
     const filteredResult = {
-      secureUrl: result.info.secure_url as string,
-      publicId: result.info.public_id as string,
+      url: result.info.secure_url as string,
+      cloudinaryPublicId: result.info.public_id as string,
     };
     if (value?.length) {
       onChange([...value, filteredResult]);
@@ -45,29 +41,30 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
   return (
     <div>
       <div className="mb-4 flex items-center gap-4">
-        {value &&value.map((image, i) => (
-          <div
-            key={i}
-            className="relative rounded-md overflow-hidden w-[200px] h-[200px]"
-          >
-            <div className="z-10 absolute top-2 right-2">
-              <Button
-                type="button"
-                onClick={() => onRemove(image.secureUrl)}
-                variant="destructive"
-                size="icon"
-              >
-                <TrashIcon className="h-4 w-4" />
-              </Button>
+        {value &&
+          value.map((image, i) => (
+            <div
+              key={i}
+              className="relative rounded-md overflow-hidden w-[200px] h-[200px]"
+            >
+              <div className="z-10 absolute top-2 right-2">
+                <Button
+                  type="button"
+                  onClick={() => onRemove(image.url)}
+                  variant="destructive"
+                  size="icon"
+                >
+                  <TrashIcon className="h-4 w-4" />
+                </Button>
+              </div>
+              <Image
+                fill
+                className="object-cover"
+                alt="Image"
+                src={image.url || ""}
+              />
             </div>
-            <Image
-              fill
-              className="object-cover"
-              alt="Image"
-              src={image.secureUrl || ""}
-            />
-          </div>
-        ))}
+          ))}
       </div>
       <CldUploadWidget onUpload={onUpload} uploadPreset="x4jdqunx">
         {({ open, isLoading }) => {

@@ -10,7 +10,7 @@ export async function POST(
   try {
     const { userId } = auth();
     const body = await req.json();
-    const productData = body;
+    let productData = body;
 
     if (!userId) {
       return new NextResponse("Unauthorized", { status: 404 });
@@ -44,10 +44,23 @@ export async function POST(
     if (!storeByUserId) {
       return new NextResponse("Unauthorized", { status: 403 });
     }
+
     const product: Product = await prismadb.product.create({
       data: {
         ...productData,
         storeId: params.storeId,
+        images: {
+          createMany: {
+            data: [
+              ...productData.images.map(
+                (img: { url: string; cloudinaryPublicId: string }) => ({
+                  url: img.url,
+                  cloudinaryPublicId: img.cloudinaryPublicId,
+                })
+              ),
+            ],
+          },
+        },
       },
     });
     return NextResponse.json(product);

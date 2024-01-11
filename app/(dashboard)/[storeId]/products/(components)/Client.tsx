@@ -12,7 +12,7 @@ import { useState } from "react";
 import { format } from "date-fns";
 import ApiList from "@/components/ui/apiList";
 import { formatter } from "@/lib/utils";
-import { ProductWithCategorySizeColor } from "@/lib/prismadb";
+import { Decimal } from "@prisma/client/runtime/library";
 
 export type ProductColumn = {
   id: string;
@@ -27,27 +27,13 @@ export type ProductColumn = {
 };
 
 interface ProductClientProps {
-  products: (Product & { size: Size } & { color: Color } & {
-    category: Category;
-  })[];
+  products: ProductColumn[];
 }
 
 export const ProductClient: React.FC<ProductClientProps> = ({ products }) => {
   const router = useRouter();
   const params = useParams();
-  const [data, setData] = useState<ProductColumn[]>(
-    products.map((item) => ({
-      id: item.id,
-      name: item.name,
-      isFeatured: item.isFeatured,
-      isArchived: item.isArchived,
-      price: formatter.format(item.price.toNumber()),
-      category: item.category.name,
-      size: item.size.value,
-      color: item.color.value,
-      createdAt: format(item.createdAt, "dd-MM-yyy"),
-    }))
-  );
+  const [data, setData] = useState<ProductColumn[]>(products);
 
   const columns: ColumnDef<ProductColumn>[] = [
     {

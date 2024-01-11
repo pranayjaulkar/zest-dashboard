@@ -40,7 +40,7 @@ interface ProductFormProps {
 const formSchema = z.object({
   name: z.string().min(1),
   images: z
-    .object({ secureUrl: z.string().min(1), publicId: z.string() })
+    .object({ url: z.string().min(1), cloudinaryPublicId: z.string() })
     .array(),
   categoryId: z.string().min(1),
   sizeId: z.string().min(1),
@@ -164,7 +164,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
                     onChange={(updatedImages) => field.onChange(updatedImages)}
                     onRemove={(url) =>
                       field.onChange(
-                        field.value.filter((image) => image.secureUrl !== url)
+                        field.value.filter((image) => image.url !== url)
                       )
                     }
                   />
