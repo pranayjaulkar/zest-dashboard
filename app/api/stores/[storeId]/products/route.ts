@@ -51,21 +51,14 @@ export async function POST(
         storeId: params.storeId,
         images: {
           createMany: {
-            data: [
-              ...productData.images.map(
-                (img: { url: string; cloudinaryPublicId: string }) => ({
-                  url: img.url,
-                  cloudinaryPublicId: img.cloudinaryPublicId,
-                })
-              ),
-            ],
+            data: productData.images,
           },
         },
       },
     });
     return NextResponse.json(product);
   } catch (error) {
-    console.log("[product_POST]", error);
+    console.trace("[product_POST]", error);
     return new NextResponse("Internal error", { status: 500 });
   }
 }
@@ -84,7 +77,7 @@ export async function GET(
     });
     return NextResponse.json(products);
   } catch (error) {
-    console.log("[product_GET]", error);
+    console.trace("[product_GET]", error);
     return new NextResponse("Internal error", { status: 500 });
   }
 }

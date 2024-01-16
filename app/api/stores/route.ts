@@ -25,7 +25,7 @@ export async function POST(req: Request) {
     });
     return NextResponse.json(store);
   } catch (error) {
-    console.log("api/stores/route.ts", error);
+    console.trace("api/stores/route.ts", error);
     return new NextResponse("Internal Error", { status: 500 });
   }
 }
@@ -40,7 +40,7 @@ export async function GET(req: Request) {
     });
     return NextResponse.json(store);
   } catch (error) {
-    console.log("api/stores/route.ts", error);
+    console.trace("api/stores/route.ts", error);
     return new NextResponse("Internal Error", { status: 500 });
   }
 }

@@ -17,7 +17,7 @@ export async function GET(
     });
     return NextResponse.json(size);
   } catch (error) {
-    console.log("[Size_GET]", error);
+    console.trace("[Size_GET]", error);
     return new NextResponse("Internal error", { status: 500 });
   }
 }
@@ -57,7 +57,7 @@ export async function PATCH(
     });
     return NextResponse.json(updatedSize);
   } catch (error) {
-    console.log("[Size_PATCH]", error);
+    console.trace("[Size_PATCH]", error);
     return new NextResponse("Internal error", { status: 500 });
   }
 }
@@ -89,7 +89,7 @@ export async function DELETE(
     });
     return NextResponse.json(deletedSize);
   } catch (error) {
-    console.log("[Size_DELETE]", error);
+    console.trace("[Size_DELETE]", error);
     return new NextResponse("Internal error", { status: 500 });
   }
 }

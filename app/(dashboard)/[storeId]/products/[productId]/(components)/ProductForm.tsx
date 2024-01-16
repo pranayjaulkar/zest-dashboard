@@ -31,8 +31,10 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 
+type ProductWithPriceNumber = Omit<Product, "price"> & { price: number };
+
 interface ProductFormProps {
-  initialData: (Product & { images: Image[] }) | null;
+  initialData: (ProductWithPriceNumber & { images: Image[] }) | null;
   categories: Category[];
   sizes: Size[];
   colors: Color[];
@@ -40,7 +42,10 @@ interface ProductFormProps {
 const formSchema = z.object({
   name: z.string().min(1),
   images: z
-    .object({ url: z.string().min(1), cloudinaryPublicId: z.string() })
+    .object({
+      url: z.string().min(1),
+      cloudinaryPublicId: z.string(),
+    })
     .array(),
   categoryId: z.string().min(1),
   sizeId: z.string().min(1),
@@ -116,7 +121,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
 
       toast.success("Product deleted");
     } catch (error) {
-      console.log("error: ", error);
+      console.trace("error: ", error);
       toast.error("Something went wrong");
     } finally {
       setLoading(false);

@@ -37,7 +37,7 @@ export default function StoreModal() {
       router.push(`/${res.data.id}`);
       setLoading(false);
     } catch (err) {
-      console.log(err);
+      console.trace(err);
       toast.error("Something went wrong");
     }
   };

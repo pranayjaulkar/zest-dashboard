@@ -43,7 +43,7 @@ import {
         );
         toast.success("Category deleted");
       } catch (error) {
-        console.log("error: ", error);
+        console.trace("error: ", error);
         toast.error("Something Went Wrong");
       }
     };

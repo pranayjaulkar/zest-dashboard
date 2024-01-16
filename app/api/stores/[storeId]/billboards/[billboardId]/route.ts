@@ -17,7 +17,7 @@ export async function GET(
     });
     return NextResponse.json(billboard);
   } catch (error) {
-    console.log("[Bilboard_DELETE]", error);
+    console.trace("[Bilboard_DELETE]", error);
     return new NextResponse("Internal error", { status: 500 });
   }
 }
@@ -57,7 +57,7 @@ export async function PATCH(
     });
     return NextResponse.json(updatedBillboard);
   } catch (error) {
-    console.log("[Bilboard_PATCH]", error);
+    console.trace("[Bilboard_PATCH]", error);
     return new NextResponse("Internal error", { status: 500 });
   }
 }
@@ -105,7 +105,7 @@ export async function DELETE(
       return new NextResponse("Something went wrong", { status: 500 });
     }
   } catch (error) {
-    console.log("[Bilboard_DELETE]", error);
+    console.trace("[Bilboard_DELETE]", error);
     return new NextResponse("Internal error", { status: 500 });
   }
 }

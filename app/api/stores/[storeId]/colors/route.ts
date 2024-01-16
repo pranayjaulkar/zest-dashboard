@@ -40,7 +40,7 @@ export async function POST(
     });
     return NextResponse.json(color);
   } catch (error) {
-    console.log("[color_POST]", error);
+    console.trace("[color_POST]", error);
     return new NextResponse("Internal error", { status: 500 });
   }
 }
@@ -59,7 +59,7 @@ export async function GET(
     });
     return NextResponse.json(categories);
   } catch (error) {
-    console.log("[color_GET]", error);
+    console.trace("[color_GET]", error);
     return new NextResponse("Internal error", { status: 500 });
   }
 }

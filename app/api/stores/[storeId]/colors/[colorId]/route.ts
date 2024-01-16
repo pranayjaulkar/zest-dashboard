@@ -17,7 +17,7 @@ export async function GET(
     });
     return NextResponse.json(color);
   } catch (error) {
-    console.log("[Color_GET]", error);
+    console.trace("[Color_GET]", error);
     return new NextResponse("Internal error", { status: 500 });
   }
 }
@@ -57,7 +57,7 @@ export async function PATCH(
     });
     return NextResponse.json(updatedColor);
   } catch (error) {
-    console.log("[Color_PATCH]", error);
+    console.trace("[Color_PATCH]", error);
     return new NextResponse("Internal error", { status: 500 });
   }
 }
@@ -89,7 +89,7 @@ export async function DELETE(
     });
     return NextResponse.json(deletedColor);
   } catch (error) {
-    console.log("[Color_DELETE]", error);
+    console.trace("[Color_DELETE]", error);
     return new NextResponse("Internal error", { status: 500 });
   }
 }

@@ -44,7 +44,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data, setData }) => {
       );
       toast.success("Billboard deleted");
     } catch (error) {
-      console.log("error: ", error);
+      console.trace("error: ", error);
       toast.error("Something Went Wrong");
     }
   };

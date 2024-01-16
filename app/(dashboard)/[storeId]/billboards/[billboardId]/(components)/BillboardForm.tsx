@@ -27,16 +27,16 @@ interface BillboardFormProps {
     storeId: string | undefined;
     label: string | undefined;
     image: {
-      secureUrl: string | undefined;
-      publicId: string | undefined;
+      url: string | undefined;
+      cloudinaryPublicId: string | undefined;
     };
   };
 }
 const formSchema = z.object({
   label: z.string().min(1),
   image: z.object({
-    secureUrl: z.string(),
-    publicId: z.string(),
+    url: z.string(),
+    cloudinaryPublicId: z.string(),
   }),
 });
 export type BillboardFormValue = z.infer<typeof formSchema>;
@@ -95,7 +95,7 @@ const BillboardForm: React.FC<BillboardFormProps> = ({ initialData }) => {
 
       toast.success("Billboard deleted");
     } catch (error) {
-      console.log("error: ", error);
+      console.trace("error: ", error);
       toast.error("Something went wrong");
     } finally {
       setLoading(false);
@@ -138,7 +138,7 @@ const BillboardForm: React.FC<BillboardFormProps> = ({ initialData }) => {
                 <FormLabel>Background Image</FormLabel>
                 <FormControl>
                   <ImageUpload
-                    value={field.value.secureUrl ? [field.value] : []}
+                    value={field.value?.url ? [field.value] : []}
                     disabled={loading}
                     onChange={(result) => field.onChange(...result)}
                     onRemove={() => field.onChange([])}

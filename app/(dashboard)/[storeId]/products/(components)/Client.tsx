@@ -7,12 +7,8 @@ import { useParams, useRouter } from "next/navigation";
 import { DataTable } from "@/components/ui/dataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import { CellAction } from "./CellAction";
-import { Category, Color, Product, Size } from "@prisma/client";
 import { useState } from "react";
-import { format } from "date-fns";
 import ApiList from "@/components/ui/apiList";
-import { formatter } from "@/lib/utils";
-import { Decimal } from "@prisma/client/runtime/library";
 
 export type ProductColumn = {
   id: string;

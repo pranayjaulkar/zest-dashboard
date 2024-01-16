@@ -83,7 +83,7 @@ const ColorForm: React.FC<ColorFormProps> = ({ initialData }) => {
 
       toast.success("Color deleted");
     } catch (error) {
-      console.log("error: ", error);
+      console.trace("error: ", error);
       toast.error("Something went wrong");
     } finally {
       setLoading(false);

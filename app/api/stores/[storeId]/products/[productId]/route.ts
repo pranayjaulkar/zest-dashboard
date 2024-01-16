@@ -14,10 +14,16 @@ export async function GET(
     }
     const product = await prismadb.product.findUnique({
       where: { id: params.productId },
+      include: {
+        category: true,
+        color: true,
+        size: true,
+        images: true,
+      },
     });
     return NextResponse.json(product);
   } catch (error) {
-    console.log("[product_DELETE]", error);
+    console.trace("[product_DELETE]", error);
     return new NextResponse("Internal error", { status: 500 });
   }
 }
@@ -29,9 +35,7 @@ export async function PATCH(
   try {
     const { userId } = auth();
     const body = await req.json();
-    const productData = body;
-    console.log('productData: ', productData);
-
+    const productData: Product & { images: Image[] } = body;
     if (!userId) {
       return new NextResponse("Unauthorized", { status: 404 });
     }
@@ -69,11 +73,19 @@ export async function PATCH(
     }
     const updatedProduct = await prismadb.product.update({
       where: { id: params.productId },
-      data: { ...productData },
+      data: {
+        ...productData,
+        images: {
+          deleteMany: {},
+          createMany: {
+            data: productData.images,
+          },
+        },
+      },
     });
     return NextResponse.json(updatedProduct);
   } catch (error) {
-    console.log("[product_PATCH]", error);
+    console.trace("[product_PATCH]", error);
     return new NextResponse("Internal error", { status: 500 });
   }
 }
@@ -117,18 +129,18 @@ export async function DELETE(
       );
     }
     if (imageDeleteResponse?.deleted) {
-    const deletedImages = await prismadb.image.deleteMany({
-      where: { productId: params.productId },
-    });
-    const deletedProduct = await prismadb.product.delete({
-      where: { id: params.productId },
-    });
-    return NextResponse.json(deletedProduct);
+      const deletedImages = await prismadb.image.deleteMany({
+        where: { productId: params.productId },
+      });
+      const deletedProduct = await prismadb.product.delete({
+        where: { id: params.productId },
+      });
+      return NextResponse.json(deletedProduct);
     } else {
       return new NextResponse("Something went wrong", { status: 500 });
     }
   } catch (error) {
-    console.log("[product_DELETE]", error);
+    console.trace("[product_DELETE]", error);
     return new NextResponse("Internal error", { status: 500 });
   }
 }

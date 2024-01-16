@@ -1,5 +1,6 @@
 import prismadb from "@/lib/prismadb";
 import ProductForm from "./(components)/ProductForm";
+import { formatter } from "@/lib/utils";
 
 export default async function ProductPage({
   params,
@@ -24,12 +25,20 @@ export default async function ProductPage({
   const colors = await prismadb.color.findMany({
     where: { storeId: params.storeId },
   });
-
+  let productWithPriceNumber;
+  if (product) {
+    productWithPriceNumber = {
+      ...product,
+      price: product.price.toNumber(),
+    };
+  } else {
+    productWithPriceNumber = product;
+  }
   return (
     <div className="flex-col">
       <div className="flex-1 space-y-4 p-8 pt-6">
         <ProductForm
-          initialData={product}
+          initialData={productWithPriceNumber}
           categories={categories}
           colors={colors}
           sizes={sizes}

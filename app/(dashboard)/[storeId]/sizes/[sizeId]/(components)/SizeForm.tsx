@@ -80,7 +80,7 @@ const SizeForm: React.FC<SizeFormProps> = ({ initialData }) => {
 
       toast.success("Size deleted");
     } catch (error) {
-      console.log("error: ", error);
+      console.trace("error: ", error);
       toast.error("Something went wrong");
     } finally {
       setLoading(false);
