@@ -23,7 +23,7 @@ export async function GET(
     });
     return NextResponse.json(product);
   } catch (error) {
-    console.trace("[product_DELETE]", error);
+    console.trace("[PRODUCT_GET]", error);
     return new NextResponse("Internal error", { status: 500 });
   }
 }
@@ -85,7 +85,7 @@ export async function PATCH(
     });
     return NextResponse.json(updatedProduct);
   } catch (error) {
-    console.trace("[product_PATCH]", error);
+    console.trace("[PRODUCT_PATCH]", error);
     return new NextResponse("Internal error", { status: 500 });
   }
 }
@@ -140,7 +140,7 @@ export async function DELETE(
       return new NextResponse("Something went wrong", { status: 500 });
     }
   } catch (error) {
-    console.trace("[product_DELETE]", error);
+    console.trace("[PRODUCT_DELETE]", error);
     return new NextResponse("Internal error", { status: 500 });
   }
 }

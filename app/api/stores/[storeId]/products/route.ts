@@ -58,7 +58,7 @@ export async function POST(
     });
     return NextResponse.json(product);
   } catch (error) {
-    console.trace("[product_POST]", error);
+    console.trace("[PRODUCT_POST]", error);
     return new NextResponse("Internal error", { status: 500 });
   }
 }
@@ -68,16 +68,30 @@ export async function GET(
   { params }: { params: { storeId: string } }
 ) {
   try {
+    const searchParams = new URLSearchParams(req.url);
+    const categoryId = searchParams.get("categoryId") || undefined;
+    const sizeId = searchParams.get("sizeId") || undefined;
+    const colorId = searchParams.get("colorId") || undefined;
+    const isFeatured = searchParams.get("isFeatured") || undefined;
     if (!params.storeId) {
       return new NextResponse("Store id is required", { status: 400 });
     }
 
     const products = await prismadb.product.findMany({
-      where: { storeId: params.storeId },
+      where: {
+        storeId: params.storeId,
+        categoryId,
+        sizeId,
+        colorId,
+        isFeatured: isFeatured ? true : undefined,
+        isArchived: false,
+      },
+      include: { images: true, category: true, color: true, size: true },
+      orderBy: { createdAt: "desc" },
     });
     return NextResponse.json(products);
   } catch (error) {
-    console.trace("[product_GET]", error);
+    console.trace("[PRODUCT_GET]", error);
     return new NextResponse("Internal error", { status: 500 });
   }
 }
