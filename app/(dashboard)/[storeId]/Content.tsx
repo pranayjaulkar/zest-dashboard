@@ -7,14 +7,13 @@ type Props = {
 };
 export default function Content({ store }: Props) {
   const storeState = useStoreModal();
- 
+
   useEffect(() => {
     storeState.onClose();
   }, []);
   return (
     <div>
-      <p>{store?.name}</p>
-      <p>{store?.userId}</p>
+      <p>Active Store: {store?.name}</p>
     </div>
   );
 }

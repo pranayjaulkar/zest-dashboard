@@ -16,11 +16,12 @@ import toast from "react-hot-toast";
 import { useRouter, useParams } from "next/navigation";
 import { useState } from "react";
 import axios from "axios";
-import { CategoryColumn } from "./Client";
+import { AlertModal } from "@/components/modals/alert-modal";
+import { ProductColumn } from "./Client";
 
 interface CellActionProps {
-  data: CategoryColumn;
-  setData: React.Dispatch<React.SetStateAction<CategoryColumn[]>>;
+  data: ProductColumn;
+  setData: React.Dispatch<React.SetStateAction<ProductColumn[]>>;
 }
 
 export const CellAction: React.FC<CellActionProps> = ({ data, setData }) => {
@@ -30,27 +31,21 @@ export const CellAction: React.FC<CellActionProps> = ({ data, setData }) => {
   const [open, setOpen] = useState(false);
   const onCopy = (id: string) => {
     navigator.clipboard.writeText(id);
-    toast.success("Category ID copied to the clipboard");
+    toast.success("Product ID copied to the clipboard");
   };
   const onDelete = async () => {
     try {
       setLoading(true);
-      await axios.delete(`/api/stores/${params.storeId}/categories/${data.id}`);
+      await axios.delete(`/api/stores/${params.storeId}/products/${data.id}`);
       setLoading(false);
       setOpen(false);
       setData((previousData) =>
         previousData.filter((element) => element.id !== data.id)
       );
-      toast.success("Category deleted");
-    } catch (error: any) {
-      console.log("error: ", error);
-      if (error?.response?.data === "P2014") {
-        toast.error(
-          "Make sure you removed all products of this category first"
-        );
-      } else {
-        toast.error("Something Went Wrong");
-      }
+      toast.success("Product deleted");
+    } catch (error) {
+      console.trace("error: ", error);
+      toast.error("Something Went Wrong");
     }
   };
 
@@ -80,7 +75,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data, setData }) => {
           <DropdownMenuItem
             className="flex justify-start border-0  rounded-md py-1 px-2 m-1 min-w-[128px] hover:bg-gray-100 cursor-pointer"
             onClick={() => {
-              router.push(`/${params.storeId}/categories/${data.id}`);
+              router.push(`/${params.storeId}/products/${data.id}`);
             }}
           >
             <EditIcon className="mr-2 h-4 w-4" />
