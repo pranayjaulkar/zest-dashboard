@@ -68,7 +68,8 @@ export async function GET(
   { params }: { params: { storeId: string } }
 ) {
   try {
-    const searchParams = new URLSearchParams(req.url);
+    const url = new URL(req.url);
+    const searchParams = new URLSearchParams(url.search);
     const categoryId = searchParams.get("categoryId") || undefined;
     const sizeId = searchParams.get("sizeId") || undefined;
     const colorId = searchParams.get("colorId") || undefined;

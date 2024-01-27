@@ -57,7 +57,6 @@ export async function GET(
     const categories = await prismadb.category.findMany({
       where: { storeId: params.storeId },
     });
-    console.log("categories: ", categories);
     return NextResponse.json(categories);
   } catch (error) {
     console.trace("[Category_GET]", error);

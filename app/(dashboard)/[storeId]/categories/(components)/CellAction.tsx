@@ -43,7 +43,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data, setData }) => {
       );
       toast.success("Category deleted");
     } catch (error: any) {
-      console.log("error: ", error);
+      console.trace("error: ", error);
       if (error?.response?.data === "P2014") {
         toast.error(
           "Make sure you removed all products of this category first"
