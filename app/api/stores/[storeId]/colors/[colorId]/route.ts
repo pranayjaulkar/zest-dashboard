@@ -88,7 +88,10 @@ export async function DELETE(
       where: { id: params.colorId },
     });
     return NextResponse.json(deletedColor);
-  } catch (error) {
+  } catch (error:any) {
+    if (error?.code === "P2014") {
+      return new NextResponse(error.code, { status: 400 });
+    }
     console.trace("[Color_DELETE]", error);
     return new NextResponse("Internal error", { status: 500 });
   }

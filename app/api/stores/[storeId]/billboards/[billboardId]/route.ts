@@ -17,7 +17,7 @@ export async function GET(
     });
     return NextResponse.json(billboard);
   } catch (error) {
-    console.trace("[Bilboard_DELETE]", error);
+    console.trace("[Bilboard_GET]", error);
     return new NextResponse("Internal error", { status: 500 });
   }
 }
@@ -29,7 +29,7 @@ export async function PATCH(
   try {
     const { userId } = auth();
     const body = await req.json();
-    const { label, imageUrl } = body;
+    const { label, image } = body;
 
     if (!userId) {
       return new NextResponse("Unauthorized", { status: 404 });
@@ -37,7 +37,7 @@ export async function PATCH(
     if (!label) {
       return new NextResponse("Label is required", { status: 400 });
     }
-    if (!imageUrl) {
+    if (!image.url || !image.cloudinaryPublicId) {
       return new NextResponse("Image Url is required", { status: 400 });
     }
     if (!params.billboardId) {
@@ -53,7 +53,11 @@ export async function PATCH(
     }
     const updatedBillboard = await prismadb.billboard.updateMany({
       where: { id: params.billboardId },
-      data: { label, imageUrl },
+      data: {
+        label,
+        imageUrl: image.url,
+        imagePublicId: image.cloudinaryPublicId,
+      },
     });
     return NextResponse.json(updatedBillboard);
   } catch (error) {
@@ -104,8 +108,11 @@ export async function DELETE(
     } else {
       return new NextResponse("Something went wrong", { status: 500 });
     }
-  } catch (error) {
+  } catch (error: any) {
     console.trace("[Bilboard_DELETE]", error);
+    if (error?.code === "P2014") {
+      return new NextResponse(error.code, { status: 400 });
+    }
     return new NextResponse("Internal error", { status: 500 });
   }
 }

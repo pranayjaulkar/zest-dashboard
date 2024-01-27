@@ -1,8 +1,6 @@
 import prismadb from "@/lib/prismadb";
 import { auth } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
-import { Category } from "@prisma/client";
-import cloudinary from "@/cloudinary";
 
 export async function GET(
   req: Request,

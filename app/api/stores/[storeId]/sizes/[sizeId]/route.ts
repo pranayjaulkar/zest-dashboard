@@ -88,8 +88,11 @@ export async function DELETE(
       where: { id: params.sizeId },
     });
     return NextResponse.json(deletedSize);
-  } catch (error) {
+  } catch (error:any) {
     console.trace("[Size_DELETE]", error);
+    if (error?.code === "P2014") {
+      return new NextResponse(error.code, { status: 400 });
+    }
     return new NextResponse("Internal error", { status: 500 });
   }
 }

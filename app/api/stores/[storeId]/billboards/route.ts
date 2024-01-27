@@ -18,7 +18,7 @@ export async function POST(
     if (!label) {
       return new NextResponse("Label is required", { status: 400 });
     }
-    if (!image.secureUrl || !image.publicId) {
+    if (!image.url || !image.cloudinaryPublicId) {
       return new NextResponse("Image is required", { status: 400 });
     }
     if (!params.storeId) {
@@ -34,8 +34,8 @@ export async function POST(
     const billboard = await prismadb.billboard.create({
       data: {
         label,
-        imageUrl: image.secureUrl,
-        imagePublicId: image.publicId,
+        imageUrl: image.url,
+        imagePublicId: image.cloudinaryPublicId,
         storeId: params.storeId,
       },
     });

@@ -43,9 +43,11 @@ export const CellAction: React.FC<CellActionProps> = ({ data, setData }) => {
         previousData.filter((element) => element.id !== data.id)
       );
       toast.success("Billboard deleted");
-    } catch (error) {
+    } catch (error: any) {
       console.trace("error: ", error);
-      toast.error("Something Went Wrong");
+      if (error.response.data === "P2014")
+        toast.error("This Billboard is in use with a category");
+      else toast.error("Something Went Wrong");
     }
   };
 

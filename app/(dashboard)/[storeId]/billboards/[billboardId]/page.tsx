@@ -17,8 +17,8 @@ export default async function BillboardPage({
     storeId: billboard?.storeId,
     label: billboard?.label,
     image: {
-      secureUrl: billboard?.imageUrl,
-      publicId: billboard?.imagePublicId,
+      url: billboard?.imageUrl,
+      cloudinaryPublicId: billboard?.imagePublicId,
     },
   };
   return (

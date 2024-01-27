@@ -6,7 +6,18 @@ import { Button } from "./button";
 import Image from "next/image";
 import { CldUploadWidget } from "next-cloudinary";
 
-type ImageType = { url: string; cloudinaryPublicId: string };
+// type ImageType = {
+//   type: "product" | "billboard";
+//   url?: string;
+//   cloudinaryPublicId?: string;
+//   imageUrl?: string;
+//   publicId?: string;
+// };
+
+type ImageType = {
+  url: string;
+  cloudinaryPublicId: string;
+};
 interface ImageUploadProps {
   disabled: boolean;
   onChange: (value: ImageType[]) => void;
@@ -26,11 +37,9 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
       url: result.info.secure_url as string,
       cloudinaryPublicId: result.info.public_id as string,
     };
-    if (value?.length) {
-      onChange([...value, filteredResult]);
-    } else {
-      onChange([filteredResult]);
-    }
+    console.log("filteredResult: ", filteredResult);
+    console.log("value: ", value);
+    onChange([...value, filteredResult]);
   };
   useEffect(() => {
     setIsMounted(true);
@@ -50,7 +59,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
               <div className="z-10 absolute top-2 right-2">
                 <Button
                   type="button"
-                  onClick={() => onRemove(image.url)}
+                  onClick={() => onRemove(image.url || "")}
                   variant="destructive"
                   size="icon"
                 >

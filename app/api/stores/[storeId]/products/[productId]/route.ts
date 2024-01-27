@@ -139,8 +139,11 @@ export async function DELETE(
     } else {
       return new NextResponse("Something went wrong", { status: 500 });
     }
-  } catch (error) {
+  } catch (error:any) {
     console.trace("[PRODUCT_DELETE]", error);
+    if (error?.code === "P2014") {
+      return new NextResponse(error.code, { status: 400 });
+    }
     return new NextResponse("Internal error", { status: 500 });
   }
 }
