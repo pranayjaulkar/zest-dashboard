@@ -149,7 +149,7 @@ const ColorForm: React.FC<ColorFormProps> = ({ initialData }) => {
                         placeholder="Enter Hex Code"
                         onChange={(event) => field.onChange(event.target.value)}
                         value={field.value || ""}
-                      />{" "}
+                      />
                       <div
                         className="border p-4 rounded-full"
                         style={{ backgroundColor: field.value }}

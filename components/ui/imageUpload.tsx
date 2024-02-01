@@ -37,8 +37,6 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
       url: result.info.secure_url as string,
       cloudinaryPublicId: result.info.public_id as string,
     };
-    console.log("filteredResult: ", filteredResult);
-    console.log("value: ", value);
     onChange([...value, filteredResult]);
   };
   useEffect(() => {

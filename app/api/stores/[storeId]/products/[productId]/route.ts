@@ -71,6 +71,22 @@ export async function PATCH(
     if (!storeByUserId) {
       return new NextResponse("Unauthorized", { status: 403 });
     }
+    const product = await prismadb.product.findUnique({
+      where: { id: params.productId },
+      include: { images: true },
+    });
+
+    if (product && product?.images.length) {
+      const imagesPublicIdArray: string[] | undefined = product?.images.map(
+        (image) => image.cloudinaryPublicId
+      );
+      const imageDeleteResponse = await cloudinary.api.delete_resources(
+        imagesPublicIdArray || []
+      );
+      if (!imageDeleteResponse?.deleted)
+        console.trace("[PRODUCT_PATCH]: Unsuccesfull Image Deletion");
+    }
+
     const updatedProduct = await prismadb.product.update({
       where: { id: params.productId },
       data: {
@@ -129,7 +145,7 @@ export async function DELETE(
       );
     }
     if (imageDeleteResponse?.deleted) {
-      const deletedImages = await prismadb.image.deleteMany({
+      await prismadb.image.deleteMany({
         where: { productId: params.productId },
       });
       const deletedProduct = await prismadb.product.delete({
@@ -139,7 +155,7 @@ export async function DELETE(
     } else {
       return new NextResponse("Something went wrong", { status: 500 });
     }
-  } catch (error:any) {
+  } catch (error: any) {
     console.trace("[PRODUCT_DELETE]", error);
     if (error?.code === "P2014") {
       return new NextResponse(error.code, { status: 400 });
