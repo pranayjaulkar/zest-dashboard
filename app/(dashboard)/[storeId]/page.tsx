@@ -1,4 +1,4 @@
-import Content from "./Content";
+import Content from "./(components)/Content";
 import prismadb from "@/lib/prismadb";
 import { Store } from "@prisma/client";
 export const metadata = {
