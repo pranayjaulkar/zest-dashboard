@@ -313,7 +313,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
                   <div className="space-y-l leading-none">
                     <FormLabel>Featured</FormLabel>
                     <FormDescription>
-                      This product will not appear on the homepage.
+                      This product will appear on the homepage.
                     </FormDescription>
                   </div>
                 </FormItem>

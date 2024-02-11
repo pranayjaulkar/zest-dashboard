@@ -3,6 +3,8 @@ import StoreSwitcher from "@/components/Navbar/components/StoreSwitcher";
 import MainNav from "@/components/Navbar/components/MainNav";
 import prismadb from "@/lib/prismadb";
 import { redirect } from "next/navigation";
+import { ThemeToggle } from "@/components/ui/themeToggle";
+
 export default async function Navbar() {
   const { userId } = auth();
 
@@ -21,6 +23,7 @@ export default async function Navbar() {
         <StoreSwitcher items={stores} />
         <MainNav className="mx-6" />
         <div className="ml-auto flex items-center space-x-4">
+          <ThemeToggle />
           <UserButton />
         </div>
       </div>

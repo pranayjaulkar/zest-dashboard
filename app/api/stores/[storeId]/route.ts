@@ -2,6 +2,24 @@ import prismadb from "@/lib/prismadb";
 import { auth } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
 
+export async function GET(
+  req: Request,
+  { params }: { params: { storeId: string } }
+) {
+  try {
+    if (!params.storeId) {
+      return new NextResponse("Store id is required", { status: 400 });
+    }
+    const store = await prismadb.store.findUnique({
+      where: { id: params.storeId },
+    });
+    return NextResponse.json(store);
+  } catch (err) {
+    console.trace("[STORE_GET]", err);
+    return new NextResponse("Internal error", { status: 500 });
+  }
+}
+
 export async function PATCH(
   req: Request,
   { params }: { params: { storeId: string } }
