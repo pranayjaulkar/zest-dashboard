@@ -22,7 +22,7 @@ interface BillboardClientProps {
   billboards: Billboard[];
 }
 
-export const BillboardClient: React.FC<BillboardClientProps> = ({
+const BillboardClient: React.FC<BillboardClientProps> = ({
   billboards,
 }) => {
   const router = useRouter();

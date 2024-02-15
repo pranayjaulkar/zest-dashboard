@@ -23,7 +23,7 @@ interface ColorClientProps {
   colors: Color[];
 }
 
-export const ColorClient: React.FC<ColorClientProps> = ({ colors }) => {
+const ColorClient: React.FC<ColorClientProps> = ({ colors }) => {
   const router = useRouter();
   const params = useParams();
   const [data, setData] = useState<ColorColumn[]>(

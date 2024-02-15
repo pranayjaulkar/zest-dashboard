@@ -17,11 +17,11 @@ import { useRouter, useParams } from "next/navigation";
 import { useState } from "react";
 import axios from "axios";
 import { AlertModal } from "@/components/modals/alert-modal";
-import { ProductColumn } from "./Client";
+import { OrderColumn } from "./Client";
 
 interface CellActionProps {
-  data: ProductColumn;
-  setData: React.Dispatch<React.SetStateAction<ProductColumn[]>>;
+  data: OrderColumn;
+  setData: React.Dispatch<React.SetStateAction<OrderColumn[]>>;
 }
 
 export const CellAction: React.FC<CellActionProps> = ({ data, setData }) => {

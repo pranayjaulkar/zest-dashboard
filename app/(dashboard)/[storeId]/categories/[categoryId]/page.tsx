@@ -4,7 +4,7 @@ interface CategoryPageProps {
   params: { categoryId: string; storeId: string };
 }
 
-export const CategoryPage: React.FC<CategoryPageProps> = async ({ params }) => {
+const CategoryPage: React.FC<CategoryPageProps> = async ({ params }) => {
   const category = await prismadb.category.findUnique({
     where: {
       id: params.categoryId,

@@ -1,14 +1,8 @@
 "use client";
-import { Button } from "@/components/ui/button";
 import Heading from "@/components/ui/heading";
 import { Separator } from "@/components/ui/separator";
-import { Plus as PlusIcon } from "lucide-react";
-import { useParams, useRouter } from "next/navigation";
 import { DataTable } from "@/components/ui/dataTable";
 import { ColumnDef } from "@tanstack/react-table";
-import { CellAction } from "./CellAction";
-import { useState } from "react";
-import ApiList from "@/components/ui/apiList";
 
 export type OrderColumn = {
   id: string;
@@ -24,8 +18,7 @@ interface OrderClientProps {
   orders: OrderColumn[];
 }
 
-export const OrderClient: React.FC<OrderClientProps> = ({ orders }) => {
-
+const OrderClient: React.FC<OrderClientProps> = ({ orders }) => {
   const columns: ColumnDef<OrderColumn>[] = [
     {
       accessorKey: "products",

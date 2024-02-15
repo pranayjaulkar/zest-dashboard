@@ -46,7 +46,7 @@ export default function StoreModal() {
     <Modal
       title="Create Store"
       isOpen={storeModal.isOpen}
-      onClose={storeModal.onClose}
+      setOpen={storeModal.onClose}
       description="Add a new store to manage products and categories"
     >
       <div>

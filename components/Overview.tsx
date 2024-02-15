@@ -6,7 +6,7 @@ interface OverviewProps {
   data: any[];
 }
 
-export const Overview: React.FC<OverviewProps> = ({ data }) => {
+const Overview: React.FC<OverviewProps> = ({ data }) => {
   return (
     <ResponsiveContainer width="100%" height={350}>
       <BarChart data={data}>

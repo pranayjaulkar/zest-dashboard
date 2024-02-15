@@ -23,7 +23,7 @@ interface SizeClientProps {
   sizes: Size[];
 }
 
-export const SizeClient: React.FC<SizeClientProps> = ({ sizes }) => {
+const SizeClient: React.FC<SizeClientProps> = ({ sizes }) => {
   const router = useRouter();
   const params = useParams();
   const [data, setData] = useState<SizeColumn[]>(

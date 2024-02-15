@@ -9,7 +9,7 @@ interface ApiListProps {
   entityIdName: string;
 }
 
-export const ApiList: React.FC<ApiListProps> = ({
+const ApiList: React.FC<ApiListProps> = ({
   entityName,
   entityIdName,
 }) => {

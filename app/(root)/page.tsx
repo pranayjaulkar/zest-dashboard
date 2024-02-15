@@ -11,7 +11,7 @@ export default function Home() {
   const isOpen = useStoreModal((state) => state.isOpen);
   useEffect(() => {
     onOpen();
-  }, []);
+  }, [onOpen]);
 
   return null;
 }

@@ -1,6 +1,4 @@
 import Heading from "@/components/ui/heading";
-import prismadb from "@/lib/prismadb";
-import { Store } from "@prisma/client";
 import { Separator } from "@/components/ui/separator";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CreditCard, DollarSign, Package } from "lucide-react";
@@ -13,13 +11,13 @@ import { getGraphRevenue } from "@/actions/getGraphRevenue";
 export const metadata = {
   title: "Dashboard",
 };
-type Props = { storeId: string };
+interface DashboardPageProps {
+  params: { storeId: string };
+}
 
-export default async function DashboardPage({ storeId }: Props) {
-  const store: Store | null = await prismadb.store.findFirst({
-    where: { id: storeId },
-  });
-
+export default async function DashboardPage({
+  params: { storeId },
+}: DashboardPageProps) {
   const totalRevenue = await getTotalRevenue(storeId);
   const salesCount = await getSalesCount(storeId);
   const stockCount = await getStockCount(storeId);

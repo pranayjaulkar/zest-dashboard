@@ -24,9 +24,7 @@ interface CategoriesClientProps {
   categories: (Category & { billboard: Billboard })[];
 }
 
-export const CategoryClient: React.FC<CategoriesClientProps> = ({
-  categories,
-}) => {
+const CategoryClient: React.FC<CategoriesClientProps> = ({ categories }) => {
   const router = useRouter();
   const params = useParams();
   const [data, setData] = useState<CategoryColumn[]>(
