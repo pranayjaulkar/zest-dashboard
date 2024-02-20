@@ -16,8 +16,7 @@ import toast from "react-hot-toast";
 import { useRouter, useParams } from "next/navigation";
 import { useState } from "react";
 import axios from "axios";
-import { AlertModal } from "@/components/modals/alert-modal";
-import { SizeColumn } from "./SizeClient";
+import { SizeColumn } from "./Client";
 
 interface CellActionProps {
   data: SizeColumn;

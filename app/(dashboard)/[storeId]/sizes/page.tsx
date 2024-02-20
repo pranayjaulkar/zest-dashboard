@@ -1,5 +1,5 @@
 import { Size } from "@prisma/client";
-import SizeClient from "./(components)/SizeClient";
+import SizeClient from "./(components)/Client";
 import prismadb from "@/lib/prismadb";
 
 export default async function SizesPage({
