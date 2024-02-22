@@ -4,7 +4,7 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
-} from "@radix-ui/react-dropdown-menu";
+} from "@/components/ui/dropdownMenu";
 import { Button } from "@/components/ui/button";
 import {
   Copy as CopyIcon,

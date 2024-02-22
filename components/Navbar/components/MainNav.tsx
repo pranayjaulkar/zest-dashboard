@@ -1,7 +1,6 @@
 "use client";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-import { Params } from "next/dist/shared/lib/router/utils/route-matcher";
 import { useParams, usePathname } from "next/navigation";
 
 export default function MainNav({
@@ -9,7 +8,7 @@ export default function MainNav({
   ...props
 }: React.HTMLAttributes<HTMLElement>) {
   const pathname: string = usePathname();
-  const params: Params = useParams();
+  const params = useParams();
   const routes = [
     {
       href: `/${params.storeId}`,

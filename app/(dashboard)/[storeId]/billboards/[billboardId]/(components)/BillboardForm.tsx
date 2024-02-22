@@ -1,16 +1,17 @@
 "use client";
-import { Button } from "@/components/ui/button";
+import axios from "axios";
 import Heading from "@/components/ui/heading";
+import toast from "react-hot-toast";
+import ImageUpload from "@/components/ui/imageUpload";
+import * as z from "zod";
+import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Trash as TrashIcon } from "lucide-react";
-import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
-import axios from "axios";
 import { useParams, useRouter } from "next/navigation";
-import toast from "react-hot-toast";
 import { AlertModal } from "@/components/modals/alert-modal";
 import {
   Form,
@@ -19,7 +20,6 @@ import {
   FormItem,
   FormLabel,
 } from "@/components/ui/form";
-import ImageUpload from "@/components/ui/imageUpload";
 
 interface BillboardFormProps {
   initialData: {
@@ -73,8 +73,8 @@ const BillboardForm: React.FC<BillboardFormProps> = ({ initialData }) => {
       } else {
         await axios.post(`/api/stores/${params.storeId}/billboards`, data);
       }
-      router.refresh();
       router.push(`/${params.storeId}/billboards`);
+      router.refresh();
       toast.success(toastMessage);
     } catch (error) {
       console.trace("error", error);
