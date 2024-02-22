@@ -25,6 +25,7 @@ import {
   CommandList,
   CommandSeparator,
 } from "../../ui/command";
+import { useLoadingBarStore } from "@/hooks/useLoadingBarStore";
 type PopoverTriggerProps = React.ComponentPropsWithoutRef<
   typeof PopoverTrigger
 >;
@@ -38,6 +39,7 @@ export default function StoreSwitcher({
   items = [],
 }: StoreSwitcherProps) {
   const storeModal = useStoreModal();
+  const loadingBar = useLoadingBarStore()
   const params = useParams();
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -50,6 +52,7 @@ export default function StoreSwitcher({
   );
   const onStoreSelect = (store: { value: string; label: string }) => {
     setOpen(false);
+    loadingBar.start()
     router.push(`/${store.value}`);
   };
   return (

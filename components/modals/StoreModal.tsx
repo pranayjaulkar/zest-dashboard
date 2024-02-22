@@ -18,10 +18,12 @@ import { Button } from "../ui/button";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
+import { useLoadingBarStore } from "@/hooks/useLoadingBarStore";
 const formSchema = z.object({ name: z.string().min(1) });
 
 export default function StoreModal() {
   const storeModal = useStoreModal();
+  const loadingBar = useLoadingBarStore();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const form = useForm<z.infer<typeof formSchema>>({
@@ -32,6 +34,7 @@ export default function StoreModal() {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       setLoading(true);
+      loadingBar.start();
       const res = await axios.post("/api/stores", values);
       toast.success("created store successfully");
       router.push(`/${res.data.id}`);

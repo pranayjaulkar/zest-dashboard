@@ -22,6 +22,7 @@ import {
   FormLabel,
 } from "@/components/ui/form";
 import { useOrigin } from "@/hooks/useOrigin";
+import { useLoadingBarStore } from "@/hooks/useLoadingBarStore";
 
 interface SettingsFormProps {
   initialData: Store | null;
@@ -35,6 +36,8 @@ const SettingsForm: React.FC<SettingsFormProps> = ({ initialData }) => {
   const params = useParams();
   const origin = useOrigin();
   const router = useRouter();
+  const loadingBar = useLoadingBarStore();
+
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const form = useForm<SettingsFormValue>({
@@ -44,6 +47,8 @@ const SettingsForm: React.FC<SettingsFormProps> = ({ initialData }) => {
   const onSubmit = async (data: SettingsFormValue) => {
     try {
       setLoading(true);
+      loadingBar.start();
+
       await axios.patch(`/api/stores/${params.storeId}`, data);
       router.refresh();
       toast.success("Store updated");
@@ -57,7 +62,8 @@ const SettingsForm: React.FC<SettingsFormProps> = ({ initialData }) => {
   const onDelete = async () => {
     try {
       setLoading(true);
-      const res = await axios.delete(`/api/stores/${params.storeId}`);
+      loadingBar.start();
+      await axios.delete(`/api/stores/${params.storeId}`);
       router.refresh();
       router.push("/");
       toast.success("Store deleted");

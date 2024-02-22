@@ -11,6 +11,8 @@ import { Billboard } from "@prisma/client";
 import { useState } from "react";
 import { format } from "date-fns";
 import ApiList from "@/components/ui/apiList";
+import { useLoadingBarStore } from "@/hooks/useLoadingBarStore";
+import Link from "next/link";
 
 export type BillboardColumn = {
   id: string;
@@ -22,11 +24,9 @@ interface BillboardClientProps {
   billboards: Billboard[];
 }
 
-const BillboardClient: React.FC<BillboardClientProps> = ({
-  billboards,
-}) => {
-  const router = useRouter();
+const BillboardClient: React.FC<BillboardClientProps> = ({ billboards }) => {
   const params = useParams();
+  const loadingBar = useLoadingBarStore();
   const [data, setData] = useState<BillboardColumn[]>(
     billboards.map((item) => ({
       id: item.id,
@@ -57,12 +57,15 @@ const BillboardClient: React.FC<BillboardClientProps> = ({
           title={`Billboards (${data.length})`}
           description="Manage billboards for your store"
         />
-        <Button
-          onClick={() => router.push(`/${params.storeId}/billboards/new`)}
+        <Link
+          href={`/${params.storeId}/billboards/new`}
+          onClick={() => loadingBar.start()}
         >
-          <PlusIcon className="mr-2 h-4 w-4" />
-          Add New
-        </Button>
+          <Button>
+            <PlusIcon className="mr-2 h-4 w-4" />
+            Add New
+          </Button>
+        </Link>
       </div>
       <Separator />
       <DataTable columns={columns} data={data} searchKey="label" />

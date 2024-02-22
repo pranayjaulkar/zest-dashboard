@@ -30,6 +30,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useLoadingBarStore } from "@/hooks/useLoadingBarStore";
 
 type ProductWithPriceNumber = Omit<Product, "price"> & { price: number };
 
@@ -66,6 +67,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const loadingBar = useLoadingBarStore();
   const form = useForm<ProductFormValue>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -91,6 +93,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
   const onSubmit = async (data: ProductFormValue) => {
     try {
       setLoading(true);
+      loadingBar.start();
       if (initialData?.id) {
         await axios.patch(
           `/api/stores/${params.storeId}/products/${params.productId}`,
@@ -113,6 +116,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
   const onDelete = async () => {
     try {
       setLoading(true);
+      loadingBar.start();
       await axios.delete(
         `/api/stores/${params.storeId}/products/${params.productId}`
       );

@@ -9,6 +9,8 @@ import { ColumnDef } from "@tanstack/react-table";
 import { CellAction } from "./CellAction";
 import { useState } from "react";
 import ApiList from "@/components/ui/apiList";
+import { useLoadingBarStore } from "@/hooks/useLoadingBarStore";
+import Link from "next/link";
 
 export type ProductColumn = {
   id: string;
@@ -27,9 +29,9 @@ interface ProductClientProps {
 }
 
 const ProductClient: React.FC<ProductClientProps> = ({ products }) => {
-  const router = useRouter();
   const params = useParams();
   const [data, setData] = useState<ProductColumn[]>(products);
+  const loadingBar = useLoadingBarStore();
 
   const columns: ColumnDef<ProductColumn>[] = [
     {
@@ -86,10 +88,15 @@ const ProductClient: React.FC<ProductClientProps> = ({ products }) => {
           title={`Products (${data.length})`}
           description="Manage products for your store"
         />
-        <Button onClick={() => router.push(`/${params.storeId}/products/new`)}>
-          <PlusIcon className="mr-2 h-4 w-4" />
-          Add New
-        </Button>
+        <Link
+          href={`/${params.storeId}/products/new`}
+          onClick={() => loadingBar.start()}
+        >
+          <Button>
+            <PlusIcon className="mr-2 h-4 w-4" />
+            Add New
+          </Button>
+        </Link>
       </div>
       <Separator />
       <DataTable columns={columns} data={data} searchKey="name" />

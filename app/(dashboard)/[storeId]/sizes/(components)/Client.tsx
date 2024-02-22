@@ -11,6 +11,8 @@ import { Size } from "@prisma/client";
 import { useState } from "react";
 import { format } from "date-fns";
 import ApiList from "@/components/ui/apiList";
+import { useLoadingBarStore } from "@/hooks/useLoadingBarStore";
+import Link from "next/link";
 
 export type SizeColumn = {
   id: string;
@@ -24,8 +26,8 @@ interface SizeClientProps {
 }
 
 const SizeClient: React.FC<SizeClientProps> = ({ sizes }) => {
-  const router = useRouter();
   const params = useParams();
+  const loadingBar = useLoadingBarStore();
   const [data, setData] = useState<SizeColumn[]>(
     sizes.map((item) => ({
       id: item.id,
@@ -61,10 +63,15 @@ const SizeClient: React.FC<SizeClientProps> = ({ sizes }) => {
           title={`Sizes (${data.length})`}
           description="Manage sizes for your store"
         />
-        <Button onClick={() => router.push(`/${params.storeId}/sizes/new`)}>
-          <PlusIcon className="mr-2 h-4 w-4" />
-          Add New
-        </Button>
+        <Link
+          href={`/${params.storeId}/sizes/new`}
+          onClick={() => loadingBar.start()}
+        >
+          <Button>
+            <PlusIcon className="mr-2 h-4 w-4" />
+            Add New
+          </Button>
+        </Link>
       </div>
       <Separator />
       <DataTable columns={columns} data={data} searchKey="name" />

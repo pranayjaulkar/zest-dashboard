@@ -12,6 +12,8 @@ import { useParams } from "next/navigation";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { CellAction } from "./CellAction";
+import { useLoadingBarStore } from "@/hooks/useLoadingBarStore";
+import Link from "next/link";
 
 export type CategoryColumn = {
   id: string;
@@ -25,7 +27,7 @@ interface CategoriesClientProps {
 }
 
 const CategoryClient: React.FC<CategoriesClientProps> = ({ categories }) => {
-  const router = useRouter();
+  const loadingBar = useLoadingBarStore();
   const params = useParams();
   const [data, setData] = useState<CategoryColumn[]>(
     categories.map((item) => ({
@@ -63,12 +65,15 @@ const CategoryClient: React.FC<CategoriesClientProps> = ({ categories }) => {
           title={`Categories (${data.length})`}
           description="Manage categories for your store"
         />
-        <Button
-          onClick={() => router.push(`/${params.storeId}/categories/new`)}
+        <Link
+          href={`/${params.storeId}/categories/new`}
+          onClick={() => loadingBar.start()}
         >
-          <PlusIcon className="mr-2 h-4 w-4" />
-          Add New
-        </Button>
+          <Button>
+            <PlusIcon className="mr-2 h-4 w-4" />
+            Add New
+          </Button>
+        </Link>
       </div>
       <Separator />
       <DataTable columns={columns} data={data} searchKey="name" />

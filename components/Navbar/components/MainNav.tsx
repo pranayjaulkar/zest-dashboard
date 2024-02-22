@@ -2,6 +2,7 @@
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
+import { useLoadingBarStore } from "@/hooks/useLoadingBarStore";
 
 export default function MainNav({
   className,
@@ -9,6 +10,7 @@ export default function MainNav({
 }: React.HTMLAttributes<HTMLElement>) {
   const pathname: string = usePathname();
   const params = useParams();
+  const loadingBar = useLoadingBarStore();
   const routes = [
     {
       href: `/${params.storeId}`,
@@ -58,6 +60,9 @@ export default function MainNav({
         <Link
           key={route.href}
           href={route.href}
+          onClick={() => {
+            loadingBar.start();
+          }}
           className={cn(
             "text-sm font-medium transition-colors hover:text-primary",
             route.active

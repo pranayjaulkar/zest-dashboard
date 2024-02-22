@@ -11,6 +11,8 @@ import { Color } from "@prisma/client";
 import { useState } from "react";
 import { format } from "date-fns";
 import ApiList from "@/components/ui/apiList";
+import Link from "next/link";
+import { useLoadingBarStore } from "@/hooks/useLoadingBarStore";
 
 export type ColorColumn = {
   id: string;
@@ -24,8 +26,8 @@ interface ColorClientProps {
 }
 
 const ColorClient: React.FC<ColorClientProps> = ({ colors }) => {
-  const router = useRouter();
   const params = useParams();
+  const loadingBar = useLoadingBarStore()
   const [data, setData] = useState<ColorColumn[]>(
     colors.map((item) => ({
       id: item.id,
@@ -70,10 +72,15 @@ const ColorClient: React.FC<ColorClientProps> = ({ colors }) => {
           title={`Colors (${data.length})`}
           description="Manage colors for your store"
         />
-        <Button onClick={() => router.push(`/${params.storeId}/colors/new`)}>
-          <PlusIcon className="mr-2 h-4 w-4" />
-          Add New
-        </Button>
+        <Link
+          href={`/${params.storeId}/colors/new`}
+          onClick={() => loadingBar.start()}
+        >
+          <Button>
+            <PlusIcon className="mr-2 h-4 w-4" />
+            Add New
+          </Button>
+        </Link>
       </div>
       <Separator />
       <DataTable columns={columns} data={data} searchKey="name" />

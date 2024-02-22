@@ -20,6 +20,7 @@ import {
   FormItem,
   FormLabel,
 } from "@/components/ui/form";
+import { useLoadingBarStore } from "@/hooks/useLoadingBarStore";
 
 interface BillboardFormProps {
   initialData: {
@@ -62,9 +63,11 @@ const BillboardForm: React.FC<BillboardFormProps> = ({ initialData }) => {
     ? "Billboard updated"
     : "Billboard created";
   const action = initialData?.id ? "Save changes" : "Create billboard";
+  const loadingBar = useLoadingBarStore();
   const onSubmit = async (data: BillboardFormValue) => {
     try {
       setLoading(true);
+      loadingBar.start();
       if (initialData?.id) {
         await axios.patch(
           `/api/stores/${params.storeId}/billboards/${params.billboardId}`,
@@ -75,18 +78,18 @@ const BillboardForm: React.FC<BillboardFormProps> = ({ initialData }) => {
       }
       router.push(`/${params.storeId}/billboards`);
       router.refresh();
+      setLoading(false);
       toast.success(toastMessage);
     } catch (error) {
       console.trace("error", error);
       toast.error("Something Went Wrong");
-    } finally {
-      setLoading(false);
     }
   };
 
   const onDelete = async () => {
     try {
       setLoading(true);
+      loadingBar.start();
       await axios.delete(
         `/api/stores/${params.storeId}/billboards/${params.billboardId}`
       );

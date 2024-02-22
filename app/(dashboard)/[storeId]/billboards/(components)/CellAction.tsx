@@ -18,6 +18,7 @@ import { useState } from "react";
 import axios from "axios";
 import { BillboardColumn } from "./Client";
 import Link from "next/link";
+import { useLoadingBarStore } from "@/hooks/useLoadingBarStore";
 
 interface CellActionProps {
   data: BillboardColumn;
@@ -28,6 +29,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data, setData }) => {
   const params = useParams();
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
+  const loadingBar = useLoadingBarStore();
   const onCopy = (id: string) => {
     navigator.clipboard.writeText(id);
     toast.success("Billboard ID copied to the clipboard");
@@ -74,7 +76,12 @@ export const CellAction: React.FC<CellActionProps> = ({ data, setData }) => {
             Copy ID
           </DropdownMenuItem>
 
-          <Link href={`/${params.storeId}/billboards/${data.id}`}>
+          <Link
+            href={`/${params.storeId}/billboards/${data.id}`}
+            onClick={() => {
+              loadingBar.start();
+            }}
+          >
             <DropdownMenuItem className="flex justify-start border-0  rounded-md py-1 px-2 m-1 min-w-[128px] hover:bg-gray-100 cursor-pointer">
               <EditIcon className="mr-2 h-4 w-4" />
               Update

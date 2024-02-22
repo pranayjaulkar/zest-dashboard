@@ -19,6 +19,7 @@ import {
   FormItem,
   FormLabel,
 } from "@/components/ui/form";
+import { useLoadingBarStore } from "@/hooks/useLoadingBarStore";
 
 interface ColorFormProps {
   initialData: {
@@ -38,6 +39,7 @@ export type ColorFormValue = z.infer<typeof formSchema>;
 
 const ColorForm: React.FC<ColorFormProps> = ({ initialData }) => {
   const params = useParams();
+  const loadingBar = useLoadingBarStore();
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -53,6 +55,7 @@ const ColorForm: React.FC<ColorFormProps> = ({ initialData }) => {
   const onSubmit = async (data: ColorFormValue) => {
     try {
       setLoading(true);
+      loadingBar.start();
       if (initialData?.id) {
         await axios.patch(
           `/api/stores/${params.storeId}/colors/${params.colorId}`,
@@ -75,6 +78,7 @@ const ColorForm: React.FC<ColorFormProps> = ({ initialData }) => {
   const onDelete = async () => {
     try {
       setLoading(true);
+      loadingBar.start();
       await axios.delete(
         `/api/stores/${params.storeId}/colors/${params.colorId}`
       );

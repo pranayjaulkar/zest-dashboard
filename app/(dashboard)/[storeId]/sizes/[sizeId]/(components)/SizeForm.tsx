@@ -19,6 +19,7 @@ import {
   FormItem,
   FormLabel,
 } from "@/components/ui/form";
+import { useLoadingBarStore } from "@/hooks/useLoadingBarStore";
 
 interface SizeFormProps {
   initialData: {
@@ -35,6 +36,7 @@ export type SizeFormValue = z.infer<typeof formSchema>;
 
 const SizeForm: React.FC<SizeFormProps> = ({ initialData }) => {
   const params = useParams();
+  const loadingBar = useLoadingBarStore();
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -50,6 +52,7 @@ const SizeForm: React.FC<SizeFormProps> = ({ initialData }) => {
   const onSubmit = async (data: SizeFormValue) => {
     try {
       setLoading(true);
+      loadingBar.start();
       if (initialData?.id) {
         await axios.patch(
           `/api/stores/${params.storeId}/sizes/${params.sizeId}`,
@@ -72,6 +75,7 @@ const SizeForm: React.FC<SizeFormProps> = ({ initialData }) => {
   const onDelete = async () => {
     try {
       setLoading(true);
+      loadingBar.start();
       await axios.delete(
         `/api/stores/${params.storeId}/sizes/${params.sizeId}`
       );

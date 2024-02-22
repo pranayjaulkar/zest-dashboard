@@ -17,6 +17,8 @@ import { useRouter, useParams } from "next/navigation";
 import { useState } from "react";
 import axios from "axios";
 import { SizeColumn } from "./Client";
+import { useLoadingBarStore } from "@/hooks/useLoadingBarStore";
+import Link from "next/link";
 
 interface CellActionProps {
   data: SizeColumn;
@@ -24,8 +26,8 @@ interface CellActionProps {
 }
 
 export const CellAction: React.FC<CellActionProps> = ({ data, setData }) => {
-  const router = useRouter();
   const params = useParams();
+  const loadingBar = useLoadingBarStore();
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const onCopy = (id: string) => {
@@ -71,15 +73,15 @@ export const CellAction: React.FC<CellActionProps> = ({ data, setData }) => {
             <CopyIcon className="mr-2 h-4 w-4" />
             Copy ID
           </DropdownMenuItem>
-          <DropdownMenuItem
-            className="flex justify-start border-0  rounded-md py-1 px-2 m-1 min-w-[128px] hover:bg-gray-100 cursor-pointer"
-            onClick={() => {
-              router.push(`/${params.storeId}/sizes/${data.id}`);
-            }}
+          <Link
+            href={`/${params.storeId}/sizes/${data.id}`}
+            onClick={() => loadingBar.start()}
           >
-            <EditIcon className="mr-2 h-4 w-4" />
-            Update
-          </DropdownMenuItem>
+            <DropdownMenuItem className="flex justify-start border-0  rounded-md py-1 px-2 m-1 min-w-[128px] hover:bg-gray-100 cursor-pointer">
+              <EditIcon className="mr-2 h-4 w-4" />
+              Update
+            </DropdownMenuItem>
+          </Link>
           <DropdownMenuItem
             className="flex justify-start border-0 rounded-md  py-1 px-2 m-1 min-w-[128px] hover:bg-gray-100 cursor-pointer"
             onClick={() => onDelete()}

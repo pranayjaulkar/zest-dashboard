@@ -27,6 +27,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useLoadingBarStore } from "@/hooks/useLoadingBarStore";
 
 interface CategoryFormProps {
   initialData: Category | null;
@@ -45,6 +46,7 @@ const CategoryForm: React.FC<CategoryFormProps> = ({
   const params = useParams();
   const router = useRouter();
   const [open, setOpen] = useState(false);
+  const loadingBar = useLoadingBarStore();
   const [loading, setLoading] = useState(false);
   const form = useForm<CategoryFormValue>({
     resolver: zodResolver(formSchema),
@@ -61,6 +63,7 @@ const CategoryForm: React.FC<CategoryFormProps> = ({
   const onSubmit = async (data: CategoryFormValue) => {
     try {
       setLoading(true);
+      loadingBar.start();
       if (initialData) {
         await axios.patch(
           `/api/stores/${params.storeId}/categories/${params.categoryId}`,
@@ -83,6 +86,7 @@ const CategoryForm: React.FC<CategoryFormProps> = ({
   const onDelete = async () => {
     try {
       setLoading(true);
+      loadingBar.start();
       await axios.delete(
         `/api/stores/${params.storeId}/categories/${params.categoryId}`
       );
