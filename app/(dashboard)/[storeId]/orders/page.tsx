@@ -28,8 +28,8 @@ export default async function OrdersPage({
         <Client
           data={formattedOrders}
           columns={columns}
-          entityName="Product"
-          entityNamePlural="Order"
+          entityName="Order"
+          entityNamePlural="orders"
           searchKey="orders"
         />
       </div>

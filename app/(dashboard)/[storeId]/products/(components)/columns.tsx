@@ -21,11 +21,11 @@ const columns = [
     header: "Price",
   },
   {
-    accessorKey: "category",
+    accessorKey: "category.name",
     header: "Category",
   },
   {
-    accessorKey: "size",
+    accessorKey: "size.value",
     header: "Size",
   },
   {
@@ -33,10 +33,10 @@ const columns = [
     header: "Color",
     cell: ({ row }: { row: any }) => (
       <div className="flex items-center gap-x-2">
-        <div className="w-16">{row.original.color}</div>
+        <div className="w-16">{row.original.color.value}</div>
         <div
           className="h-6 w-6 rounded-full border"
-          style={{ backgroundColor: row.original.color }}
+          style={{ backgroundColor: row.original.color.value }}
         ></div>
       </div>
     ),
