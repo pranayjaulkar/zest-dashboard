@@ -1,3 +1,4 @@
+import { getRandomNumber } from "@/lib/utils";
 import { create } from "zustand";
 
 interface useLoadingBarStoreProps {
@@ -6,16 +7,8 @@ interface useLoadingBarStoreProps {
   start: () => void;
   done: () => void;
 }
-
-function getRandomNumber(min: number, max: number) {
-  const minCeiled = Math.ceil(min);
-  const maxFloored = Math.floor(max);
-  return Math.floor(Math.random() * (maxFloored - minCeiled) + minCeiled);
-}
-
 function setIntervalIncrement(prevState: useLoadingBarStoreProps) {
-  let randomNumber = getRandomNumber(5, 20);
-  console.log("randomNumber: ", randomNumber);
+  let randomNumber = getRandomNumber(5, 15);
   if (prevState.progress < 80)
     return { progress: prevState.progress + randomNumber };
   else return { progress: prevState.progress };
@@ -29,7 +22,7 @@ export const useLoadingBarStore = create<useLoadingBarStoreProps>((set) => ({
     set({ progress: 20 });
     intervalId = setInterval(() => {
       set((prevState) => setIntervalIncrement(prevState));
-    }, 3000);
+    }, 400);
   },
   done: () => {
     clearInterval(intervalId);

@@ -1,8 +1,7 @@
-import { Product } from "@prisma/client";
-import ProductClient from "./(components)/Client";
-import prismadb, { ProductWithCategorySizeColor } from "@/lib/prismadb";
+import prismadb from "@/lib/prismadb";
 import { formatter } from "@/lib/utils";
-import { format } from "date-fns";
+import Client from "@/components/Client";
+import columns from "./(components)/columns";
 
 export default async function ProductsPage({
   params,
@@ -15,21 +14,20 @@ export default async function ProductsPage({
     orderBy: { createdAt: "desc" },
   });
   const formattedProducts = products.map((item) => ({
-    id: item.id,
-    name: item.name,
-    isFeatured: item.isFeatured,
-    isArchived: item.isArchived,
+    ...item,
     price: formatter.format(item.price.toNumber()),
-    category: item.category.name,
-    size: item.size.value,
-    color: item.color.value,
-    createdAt: format(item.createdAt, "dd-MM-yyy"),
   }));
 
   return (
     <div className="flex-col">
       <div className="flex-1 space-y-4 p-8 pt-6">
-        <ProductClient products={formattedProducts} />
+        <Client
+          data={formattedProducts}
+          columns={columns}
+          entityName="Product"
+          entityNamePlural="products"
+          searchKey="name"
+        />
       </div>
     </div>
   );

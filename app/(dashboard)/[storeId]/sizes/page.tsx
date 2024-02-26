@@ -1,6 +1,7 @@
 import { Size } from "@prisma/client";
-import SizeClient from "./(components)/Client";
 import prismadb from "@/lib/prismadb";
+import Client from "@/components/Client";
+import columns from "./(components)/columns";
 
 export default async function SizesPage({
   params,
@@ -14,7 +15,13 @@ export default async function SizesPage({
   return (
     <div className="flex-col">
       <div className="flex-1 space-y-4 p-8 pt-6">
-        <SizeClient sizes={sizes} />
+        <Client
+          data={sizes}
+          columns={columns}
+          entityName="Size"
+          entityNamePlural="sizes"
+          searchKey="name"
+        />
       </div>
     </div>
   );
