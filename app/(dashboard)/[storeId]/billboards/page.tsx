@@ -1,6 +1,7 @@
 import { Billboard } from "@prisma/client";
-import BillboardClient from "./(components)/Client";
 import prismadb from "@/lib/prismadb";
+import Client from "@/components/Client";
+import columns from "./(components)/columns";
 
 export default async function BillboardsPage({
   params,
@@ -11,10 +12,17 @@ export default async function BillboardsPage({
     where: { storeId: params.storeId },
     orderBy: { createdAt: "desc" },
   });
+
   return (
     <div className="flex-col">
       <div className="flex-1 space-y-4 p-8 pt-6">
-      <BillboardClient billboards={billboards} />
+        <Client
+          data={billboards}
+          entityName="Billboard"
+          entityNamePlural="billboards"
+          columns={columns}
+          searchKey="label"
+        />
       </div>
     </div>
   );

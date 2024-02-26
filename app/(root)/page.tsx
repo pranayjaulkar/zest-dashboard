@@ -1,5 +1,5 @@
 "use client";
-import { useStoreModal } from "@/hooks/useStoreModalStore";
+import { useStoreModal } from "@/hooks/useCreateModalStore";
 import { useEffect } from "react";
 
 const findUser = () => {

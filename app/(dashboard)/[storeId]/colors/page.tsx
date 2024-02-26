@@ -1,6 +1,7 @@
 import { Color } from "@prisma/client";
-import ColorClient from "./(components)/Client";
 import prismadb from "@/lib/prismadb";
+import Client from "@/components/Client";
+import columns from "./(components)/columns";
 
 export default async function ColorsPage({
   params,
@@ -14,7 +15,13 @@ export default async function ColorsPage({
   return (
     <div className="flex-col">
       <div className="flex-1 space-y-4 p-8 pt-6">
-        <ColorClient colors={colors} />
+        <Client
+          data={colors}
+          columns={columns}
+          entityName="Color"
+          entityNamePlural="colors"
+          searchKey="name"
+        />
       </div>
     </div>
   );

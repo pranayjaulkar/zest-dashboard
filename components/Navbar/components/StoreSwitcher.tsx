@@ -4,7 +4,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { useStoreModal } from "@/hooks/useStoreModalStore";
+import { useStoreModal } from "@/hooks/useCreateModalStore";
 import { Store } from "@prisma/client";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
@@ -39,7 +39,7 @@ export default function StoreSwitcher({
   items = [],
 }: StoreSwitcherProps) {
   const storeModal = useStoreModal();
-  const loadingBar = useLoadingBarStore()
+  const loadingBar = useLoadingBarStore();
   const params = useParams();
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -52,7 +52,7 @@ export default function StoreSwitcher({
   );
   const onStoreSelect = (store: { value: string; label: string }) => {
     setOpen(false);
-    loadingBar.start()
+    loadingBar.start();
     router.push(`/${store.value}`);
   };
   return (
