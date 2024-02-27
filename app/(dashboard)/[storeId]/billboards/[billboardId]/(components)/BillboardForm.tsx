@@ -12,7 +12,7 @@ import { useForm } from "react-hook-form";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { useParams, useRouter } from "next/navigation";
-import { AlertModal } from "@/components/modals/alert-modal";
+import { AlertModal } from "@/components/modals/AlertModal";
 import {
   Form,
   FormControl,
@@ -95,14 +95,12 @@ const BillboardForm: React.FC<BillboardFormProps> = ({ initialData }) => {
       );
       router.push(`/${params.storeId}/billboards/`);
       router.refresh();
-
       toast.success("Billboard deleted");
+      setLoading(false);
+      setOpen(false);
     } catch (error) {
       console.trace("error: ", error);
       toast.error("Something went wrong");
-    } finally {
-      setLoading(false);
-      setOpen(false);
     }
   };
 

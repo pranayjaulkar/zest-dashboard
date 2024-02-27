@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import axios from "axios";
 import { useParams, useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import { AlertModal } from "@/components/modals/alert-modal";
+import { AlertModal } from "@/components/modals/AlertModal";
 import {
   Form,
   FormControl,

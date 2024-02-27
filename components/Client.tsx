@@ -12,6 +12,9 @@ import ApiList from "@/components/ui/apiList";
 import { useLoadingBarStore } from "@/hooks/useLoadingBarStore";
 import Link from "next/link";
 import CellActions from "./CellActions";
+import { AlertModal } from "./modals/AlertModal";
+import axios from "axios";
+import toast from "react-hot-toast";
 
 interface ClientProps<TData> {
   data: TData[];
@@ -33,6 +36,14 @@ export default function Client<
   const params = useParams();
   const loadingBar = useLoadingBarStore();
   const [rows, setRows] = useState(data);
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [rowId, setRowId] = useState("");
+
+  const onDelete = async (id: string) => {
+    setOpen(true);
+    setRowId(id);
+  };
 
   const columnDefs: ColumnDef<TData>[] = [
     ...columns.map((column) => {
@@ -51,14 +62,40 @@ export default function Client<
           entityName={entityName}
           entityNamePlural={entityNamePlural}
           row={row.original}
-          setRows={setRows}
+          onDelete={onDelete}
         />
       ),
     },
   ];
 
+  const onConfirm = async () => {
+    try {
+      setLoading(true);
+      loadingBar.start();
+      await axios.delete(
+        `/api/stores/${params.storeId}/${entityNamePlural}/${rowId}`
+      );
+      setRows((previousData) =>
+        previousData.filter((element) => element.id !== rowId)
+      );
+      setLoading(false);
+      setOpen(false);
+      loadingBar.done();
+      toast.success(`${entityName} deleted`);
+    } catch (error) {
+      console.trace("error: ", error);
+      toast.error("Something Went Wrong");
+    }
+  };
+
   return (
     <>
+      <AlertModal
+        isOpen={open}
+        setOpen={setOpen}
+        onConfirm={onConfirm}
+        loading={loading}
+      />
       <div className="flex items-center justify-between">
         <Heading
           title={`${entityName} (${data.length})`}
