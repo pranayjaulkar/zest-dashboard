@@ -67,12 +67,13 @@ const SettingsForm: React.FC<SettingsFormProps> = ({ initialData }) => {
       router.refresh();
       router.push("/");
       toast.success("Store deleted");
+      setLoading(false);
+      setOpen(false);
     } catch (error) {
       setLoading(false);
       setOpen(false);
-    } finally {
-      setLoading(false);
-      setOpen(false);
+      loadingBar.done();
+      toast.error("Something Went Wrong");
     }
   };
 
