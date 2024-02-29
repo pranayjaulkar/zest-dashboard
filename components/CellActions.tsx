@@ -13,9 +13,7 @@ import {
   Trash as TrashIcon,
 } from "lucide-react";
 import toast from "react-hot-toast";
-import { useParams } from "next/navigation";
-import { useState } from "react";
-import axios from "axios";
+import { useParams, usePathname } from "next/navigation";
 import { useLoadingBarStore } from "@/hooks/useLoadingBarStore";
 import Link from "next/link";
 
@@ -30,6 +28,8 @@ export default function CellActions<
   TData extends { id: string; label?: string; name?: string }
 >({ row, entityNamePlural, entityName, onDelete }: CellActionsProps<TData>) {
   const params = useParams();
+  const pathname = usePathname();
+
   const loadingBar = useLoadingBarStore();
   const onCopy = (id: string) => {
     navigator.clipboard.writeText(id);
@@ -61,7 +61,10 @@ export default function CellActions<
           </DropdownMenuItem>
           <Link
             href={`/${params.storeId}/${entityNamePlural}/${row.id}`}
-            onClick={() => loadingBar.start()}
+            onClick={() => {
+              if (pathname !== `/${params.storeId}/${entityNamePlural}/${row.id}`)
+                loadingBar.start();
+            }}
           >
             <DropdownMenuItem className="flex justify-start border-0  rounded-md py-1 px-2 m-1 min-w-[128px] hover:bg-gray-100 cursor-pointer">
               <EditIcon className="mr-2 h-4 w-4" />

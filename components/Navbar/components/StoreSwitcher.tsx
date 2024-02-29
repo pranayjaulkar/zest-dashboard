@@ -6,7 +6,7 @@ import {
 } from "@/components/ui/popover";
 import { useStoreModal } from "@/hooks/useCreateModalStore";
 import { Store } from "@prisma/client";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "../../ui/button";
 import { cn } from "@/lib/utils";
@@ -40,6 +40,7 @@ export default function StoreSwitcher({
 }: StoreSwitcherProps) {
   const storeModal = useStoreModal();
   const loadingBar = useLoadingBarStore();
+  const pathname = usePathname();
   const params = useParams();
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -52,8 +53,10 @@ export default function StoreSwitcher({
   );
   const onStoreSelect = (store: { value: string; label: string }) => {
     setOpen(false);
-    loadingBar.start();
-    router.push(`/${store.value}`);
+    if (pathname !== `/${store.value}`) {
+      loadingBar.start();
+      router.push(`/${store.value}`);
+    }
   };
   return (
     <Popover open={open} onOpenChange={setOpen}>

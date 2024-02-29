@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import Heading from "@/components/ui/heading";
 import { Separator } from "@/components/ui/separator";
 import { Plus as PlusIcon } from "lucide-react";
-import { useParams } from "next/navigation";
+import { useParams, usePathname } from "next/navigation";
 import { DataTable } from "@/components/ui/dataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import { useState } from "react";
@@ -39,6 +39,7 @@ export default function Client<
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [rowId, setRowId] = useState("");
+  const pathname = usePathname();
 
   const onDelete = async (id: string) => {
     setOpen(true);
@@ -103,7 +104,10 @@ export default function Client<
         />
         <Link
           href={`/${params.storeId}/${entityNamePlural}/new`}
-          onClick={() => loadingBar.start()}
+          onClick={() => {
+            if (pathname !== `/${params.storeId}/${entityNamePlural}/new`)
+              loadingBar.start();
+          }}
         >
           <Button>
             <PlusIcon className="mr-2 h-4 w-4" />

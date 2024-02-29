@@ -8,7 +8,7 @@ export default function MainNav({
   className,
   ...props
 }: React.HTMLAttributes<HTMLElement>) {
-  const pathname: string = usePathname();
+  const pathname = usePathname();
   const params = useParams();
   const loadingBar = useLoadingBarStore();
   const routes = [
@@ -61,7 +61,7 @@ export default function MainNav({
           key={route.href}
           href={route.href}
           onClick={() => {
-            loadingBar.start();
+            if (pathname !== route.href) loadingBar.start();
           }}
           className={cn(
             "text-sm font-medium transition-colors hover:text-primary",
