@@ -20,7 +20,7 @@ export default async function CategoriesPage({
         <Client
           data={categories}
           entityName="Category"
-          entityNamePlural="Categories"
+          entityNamePlural="categories"
           columns={columns}
           searchKey="name"
         />
