@@ -19,7 +19,13 @@ export const useLoadingBarStore = create<useLoadingBarStoreProps>((set) => ({
   progress: 0,
   setProgress: (n) => set({ progress: n }),
   start: () => {
-    set({ progress: 20 });
+    set((prevProgress) => {
+      if (prevProgress.progress === 0) return { progress: 20 };
+      else {
+        clearInterval(intervalId);
+        return { progress: 20 };
+      }
+    });
     intervalId = setInterval(() => {
       set((prevState) => setIntervalIncrement(prevState));
     }, 400);
