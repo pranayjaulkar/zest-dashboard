@@ -15,6 +15,7 @@ import CellActions from "./CellActions";
 import { AlertModal } from "./modals/AlertModal";
 import axios from "axios";
 import toast from "react-hot-toast";
+import { isOrder } from "@/types";
 
 interface ClientProps<TData> {
   data: TData[];
@@ -97,23 +98,29 @@ export default function Client<
         onConfirm={onConfirm}
         loading={loading}
       />
-      <div className="flex items-center justify-between">
+      <div
+        className={`flex items-center ${
+          isOrder(data[0]) ? "justify-start" : "justify-between"
+        }`}
+      >
         <Heading
           title={`${entityName} (${data.length})`}
           description={`Manage ${entityNamePlural} for your store`}
         />
-        <Link
-          href={`/${params.storeId}/${entityNamePlural}/new`}
-          onClick={() => {
-            if (pathname !== `/${params.storeId}/${entityNamePlural}/new`)
-              loadingBar.start();
-          }}
-        >
-          <Button>
-            <PlusIcon className="mr-2 h-4 w-4" />
-            Add New
-          </Button>
-        </Link>
+        {!isOrder(data[0]) && (
+          <Link
+            href={`/${params.storeId}/${entityNamePlural}/new`}
+            onClick={() => {
+              if (pathname !== `/${params.storeId}/${entityNamePlural}/new`)
+                loadingBar.start();
+            }}
+          >
+            <Button>
+              <PlusIcon className="mr-2 h-4 w-4" />
+              Add New
+            </Button>
+          </Link>
+        )}
       </div>
       <Separator />
       <DataTable columns={columnDefs} data={rows} searchKey={searchKey} />

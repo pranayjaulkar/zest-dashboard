@@ -48,7 +48,6 @@ const SettingsForm: React.FC<SettingsFormProps> = ({ initialData }) => {
     try {
       setLoading(true);
       loadingBar.start();
-
       await axios.patch(`/api/stores/${params.storeId}`, data);
       router.refresh();
       toast.success("Store updated");
@@ -78,14 +77,14 @@ const SettingsForm: React.FC<SettingsFormProps> = ({ initialData }) => {
   };
 
   return (
-    <>
+    <div className="flex-1 space-y-4 p-8 pt-6">
       <AlertModal
         isOpen={open}
         setOpen={setOpen}
         onConfirm={onDelete}
         loading={loading}
       />
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between ">
         <Heading title="Settings" description="Manage store preferences" />
         <Button variant="destructive" size="icon" onClick={() => setOpen(true)}>
           <TrashIcon className="h-4 w-4" />
@@ -127,7 +126,7 @@ const SettingsForm: React.FC<SettingsFormProps> = ({ initialData }) => {
         description={`${origin}/api/stores/${params.storeId}`}
         variant="public"
       />
-    </>
+    </div>
   );
 };
 

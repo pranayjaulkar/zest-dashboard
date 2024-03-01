@@ -11,7 +11,7 @@ export default async function SettingsPage({
     where: { id: params.storeId },
   });
   return (
-    <div className="mx-4">
+    <div className="flex-col max-w-screen-xl mx-auto ">
       <SettingsForm initialData={store} />
     </div>
   );

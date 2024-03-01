@@ -1,6 +1,5 @@
 import prismadb from "@/lib/prismadb";
 import ProductForm from "./(components)/ProductForm";
-import { formatter } from "@/lib/utils";
 
 export default async function ProductPage({
   params,
@@ -35,7 +34,7 @@ export default async function ProductPage({
     productWithPriceNumber = product;
   }
   return (
-    <div className="flex-col">
+    <div className="flex-col max-w-screen-xl mx-auto">
       <div className="flex-1 space-y-4 p-8 pt-6">
         <ProductForm
           initialData={productWithPriceNumber}

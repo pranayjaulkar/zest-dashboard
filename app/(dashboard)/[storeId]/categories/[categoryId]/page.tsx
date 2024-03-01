@@ -17,7 +17,7 @@ const CategoryPage: React.FC<CategoryPageProps> = async ({ params }) => {
     },
   });
   return (
-    <div className="flex-col">
+    <div className="flex-col max-w-screen-xl mx-auto">
       <div className="flex-1 space-y-4 p-8 pt-6">
         <CategoryForm initialData={category} billboards={billboards} />
       </div>

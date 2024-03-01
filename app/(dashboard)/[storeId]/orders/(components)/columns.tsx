@@ -1,5 +1,5 @@
 "use client";
-import { OrderItem, Product } from "@prisma/client";
+import { Product } from "@prisma/client";
 
 const columns = [
   {
@@ -7,10 +7,7 @@ const columns = [
     header: "Products",
     cell: ({ row }: { row: any }) =>
       row.original.orderItems
-        .map(
-          (orderItem: OrderItem & { product: Product }) =>
-            orderItem.product.name
-        )
+        .map((orderItem: Product) => orderItem.name)
         .join(", "),
   },
   {

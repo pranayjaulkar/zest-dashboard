@@ -20,17 +20,21 @@ export default async function OrdersPage({
         return total + Number(item.product.price);
       }, 0)
     ),
+    orderItems: item.orderItems.map((orderItem) => ({
+      ...orderItem.product,
+      price: formatter.format(Number(orderItem.product.price)),
+    })),
   }));
 
   return (
-    <div className="flex-col">
+   <div className="flex-col max-w-screen-xl mx-auto">
       <div className="flex-1 space-y-4 p-8 pt-6">
         <Client
           data={formattedOrders}
           columns={columns}
           entityName="Order"
           entityNamePlural="orders"
-          searchKey="orders"
+          searchKey="products"
         />
       </div>
     </div>

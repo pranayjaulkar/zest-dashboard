@@ -18,7 +18,7 @@ export default async function SizePage({
     name: size?.name,
   };
   return (
-    <div className="flex-col">
+    <div className="flex-col max-w-screen-xl mx-auto">
       <div className="flex-1 space-y-4 p-8 pt-6">
         <SizeForm initialData={newSize} />
       </div>
