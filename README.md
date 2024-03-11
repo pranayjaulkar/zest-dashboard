@@ -43,31 +43,3 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/deploym
 
 
 
-import java.applet.*;
-import java.awt.*;
-public class Shape extends Applet
-{ 
-public void paint(Graphics g)
-{
-g.drawLine(10,10,15,15);
-g.drawRect(10,60,40,30);
-g.fillRect(60,10,30,80);
-g.drawLine(100,10,230,140);
-g.drawLine(100,140,230,10);
-g.drawOval(10,10,50,50);
-g.drawOval(10,120,155,95);
-}
-}
-Shape.html
-<HTML>
-<!WELCOME WORLD>
-<HEAD>
-<TITLE>
-</TITLE>
-</HEAD>
-<BODY>
-<APPLET CODE=Shape.class
-WIDTH =400 HEIGHT=200>
-</APPLET>
-</BODY>
-</HTML>
