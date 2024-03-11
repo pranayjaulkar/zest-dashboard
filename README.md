@@ -36,136 +36,95 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/deploym
 =======
 # ecommerce-website
 >>>>>>> f95df343b2aa7ca9ddd3fd68edc0d26ca8ede6ce
-P13
-class MyException extends Exception
+
+
+
+
+
+
+
+import java.lang.Thread;
+
+class A implements Runnable
 
 {
 
-MyException(String message)
-
-{
-
- super(message);
-
-}
-
-}
-
-class TestMyException
-
-{
-
-public static void main(String args[])
-
-{
-
- int x=5 , y=1000;
-
- try
-
- {
-
- float z=(float)x/(float)y;
-
- if(z<0.01)
-
-{
-
- throw new MyException("number is too 
-
-small");
-
- }
-
- }
-
- catch(MyException e)
-
- {
-
- System.out.println("caught 
-
-MyException");
-
- System.out.println(e.getMessage());
-
-System.out.println(e);
-
- }
-
- finally
-
- {
-
- System.out.println("i am always 
-
-here");
-
- }
-
- }
-
- }
-
-
-
-
- P14
-class A extends Thread
-{
  public void run()
+
  {
+
  for(int i=1; i<=5; i++)
+
  {
+
  System.out.println("\tFrom Thread A : i = "+ i);
+
  }
+
  System.out.println("Exit from A");
- }
-}
-class B extends Thread
+
+ class B implements Runnable
+
 {
+
  public void run()
+
  {
+
  for(int j=1; j<=5; j++)
+
  {
+
  System.out.println("\tFrom Thread B : j = "+ j);
+
  }
+
  System.out.println("Exit from B");
+
  }
+
 }
-class C extends Thread
+
+class C implements Runnable
+
 {
+
  public void run()
+
  {
+
  for(int k=1; k<=5; k++)
+
  {
+
  System.out.println("\tFrom Thread C : k = "+ k);
+
  }
+
  System.out.println("Exit from C");
- }
-}
-class TestThread
+
+ class TestThread1
+
 {
+
  public static void main(String args[])
 
  {
 
  A a = new A();
 
- a.start();
+ Thread t1 = new Thread(a);
+
+ t1.start();
 
  B b = new B();
 
- b.start();
+ Thread t2 = new Thread(b);
+
+ t2.start();
 
  C c = new C();
 
- c.start();
+ Thread t3 = new Thread(c);
 
- }
-
-}
-
-
-
-P14
+ t3.start();
