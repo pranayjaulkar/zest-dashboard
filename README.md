@@ -43,88 +43,31 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/deploym
 
 
 
-import java.lang.Thread;
-
-class A implements Runnable
-
+import java.applet.*;
+import java.awt.*;
+public class Shape extends Applet
+{ 
+public void paint(Graphics g)
 {
-
- public void run()
-
- {
-
- for(int i=1; i<=5; i++)
-
- {
-
- System.out.println("\tFrom Thread A : i = "+ i);
-
- }
-
- System.out.println("Exit from A");
-
- class B implements Runnable
-
-{
-
- public void run()
-
- {
-
- for(int j=1; j<=5; j++)
-
- {
-
- System.out.println("\tFrom Thread B : j = "+ j);
-
- }
-
- System.out.println("Exit from B");
-
- }
-
+g.drawLine(10,10,15,15);
+g.drawRect(10,60,40,30);
+g.fillRect(60,10,30,80);
+g.drawLine(100,10,230,140);
+g.drawLine(100,140,230,10);
+g.drawOval(10,10,50,50);
+g.drawOval(10,120,155,95);
 }
-
-class C implements Runnable
-
-{
-
- public void run()
-
- {
-
- for(int k=1; k<=5; k++)
-
- {
-
- System.out.println("\tFrom Thread C : k = "+ k);
-
- }
-
- System.out.println("Exit from C");
-
- class TestThread1
-
-{
-
- public static void main(String args[])
-
- {
-
- A a = new A();
-
- Thread t1 = new Thread(a);
-
- t1.start();
-
- B b = new B();
-
- Thread t2 = new Thread(b);
-
- t2.start();
-
- C c = new C();
-
- Thread t3 = new Thread(c);
-
- t3.start();
+}
+Shape.html
+<HTML>
+<!WELCOME WORLD>
+<HEAD>
+<TITLE>
+</TITLE>
+</HEAD>
+<BODY>
+<APPLET CODE=Shape.class
+WIDTH =400 HEIGHT=200>
+</APPLET>
+</BODY>
+</HTML>
