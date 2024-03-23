@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import ModalProvider from "@/providers/ModalProvider";
-import { ToasterProvider } from "@/providers/ToastProvider";
+import { ToastProvider } from "@/providers/ToastProvider";
 import { ThemeProvider } from "@/providers/ThemeProvider";
 import LoadingBarProvider from "@/providers/LoadingBarProvider";
 import { Suspense } from "react";
@@ -28,7 +28,7 @@ export default function RootLayout({
             <Suspense fallback={null}>
               <LoadingBarProvider />
             </Suspense>
-            <ToasterProvider />
+            <ToastProvider />
             <ModalProvider />
             {children}
           </ThemeProvider>
