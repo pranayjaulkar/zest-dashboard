@@ -90,6 +90,9 @@ export default function Client<
     }
   };
 
+  let isOrderFlag;
+  if (data?.length > 0) isOrderFlag = isOrder(data[0]) ? true : false;
+
   return (
     <>
       <AlertModal
@@ -100,14 +103,14 @@ export default function Client<
       />
       <div
         className={`flex items-center ${
-          isOrder(data[0]) ? "justify-start" : "justify-between"
+          isOrderFlag ? "justify-start" : "justify-between"
         }`}
       >
         <Heading
-          title={`${entityName} (${data.length})`}
+          title={`${entityName} (${data?.length || 0})`}
           description={`Manage ${entityNamePlural} for your store`}
         />
-        {!isOrder(data[0]) && (
+        {!isOrderFlag && (
           <Link
             href={`/${params.storeId}/${entityNamePlural}/new`}
             onClick={() => {
