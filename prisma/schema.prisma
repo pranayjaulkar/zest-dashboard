@@ -164,7 +164,8 @@ model ProductVariation {
   productId String
   product   Product @relation("ProductVariationToProduct", fields: [productId], references: [id], onUpdate: Cascade)
 
-  inStock   Int
+  name      String
+  quantity  Int
   updatedAt DateTime @updatedAt
   createdAt DateTime @default(now())
 

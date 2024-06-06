@@ -16,6 +16,9 @@ export default async function Navbar() {
       userId,
     },
   });
+  if (!stores.length) {
+    redirect("/");
+  }
 
   return (
     <div className="border-b">

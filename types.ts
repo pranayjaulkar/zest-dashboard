@@ -1,4 +1,11 @@
-import { Order } from "@prisma/client";
+import {
+  Color,
+  Order,
+  Product,
+  ProductVariation,
+  Size,
+  Image,
+} from "@prisma/client";
 
 export const isOrder = (obj: any): obj is Order => {
   return (
@@ -10,4 +17,23 @@ export const isOrder = (obj: any): obj is Order => {
     obj.updatedAt instanceof Date &&
     typeof obj.id === "string"
   );
+};
+
+export type ProductWithPriceTypeConverted =
+  | Omit<Product, "price"> & { price: number } & {
+      productVariations: (ProductVariation & { size: Size } & {
+        color: Color;
+      })[];
+    } & {
+      images: Image[];
+    };
+
+export type _ProductVariation = {
+  sizeId: string;
+  colorId: string;
+  quantity: number;
+  size: Size;
+  color: Color;
+  name: string;
+  selected?: boolean;
 };

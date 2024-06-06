@@ -10,7 +10,10 @@ export default async function ProductsPage({
 }) {
   let products = await prismadb.product.findMany({
     where: { storeId: params.storeId },
-    include: { category: true, size: true, color: true },
+    include: {
+      category: true,
+      productVariations: { include: { size: true, color: true } },
+    },
     orderBy: { createdAt: "desc" },
   });
   const formattedProducts = products.map((item) => ({

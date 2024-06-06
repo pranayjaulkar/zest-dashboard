@@ -1,7 +1,7 @@
 import prismadb from "@/lib/prismadb";
 import { auth } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
-import { Product, Image } from "@prisma/client";
+import { Product, Image, ProductVariation } from "@prisma/client";
 import cloudinary from "@/cloudinary";
 
 export async function GET(
@@ -16,9 +16,8 @@ export async function GET(
       where: { id: params.productId },
       include: {
         category: true,
-        color: true,
-        size: true,
         images: true,
+        productVariations: { include: { color: true, size: true } },
       },
     });
     return NextResponse.json(product);
@@ -35,7 +34,9 @@ export async function PATCH(
   try {
     const { userId } = auth();
     const body = await req.json();
-    const productData: Product & { images: Image[] } = body;
+    const productData: Product & { images: Image[] } & {
+      productVariations: ProductVariation[];
+    } = body;
     if (!userId) {
       return new NextResponse("Unauthorized", { status: 404 });
     }
@@ -47,12 +48,6 @@ export async function PATCH(
     }
     if (!productData.categoryId) {
       return new NextResponse("Category is required", { status: 400 });
-    }
-    if (!productData.colorId) {
-      return new NextResponse("Color is required", { status: 400 });
-    }
-    if (!productData.sizeId) {
-      return new NextResponse("Size is required", { status: 400 });
     }
     if (!productData.images || !productData.images.length) {
       return new NextResponse("Images are required", { status: 400 });
@@ -75,7 +70,7 @@ export async function PATCH(
       where: { id: params.productId },
       include: { images: true },
     });
-
+    //delete all images in cloudinary database
     if (product && product?.images.length) {
       const imagesPublicIdArray: string[] | undefined = product?.images.map(
         (image) => image.cloudinaryPublicId
@@ -92,10 +87,18 @@ export async function PATCH(
       data: {
         ...productData,
         images: {
+          //delete every image records
           deleteMany: {},
+          //recreate new images records
           createMany: {
             data: productData.images,
           },
+        },
+        productVariations: {
+          //delete every variation records
+          deleteMany: {},
+          //recreate variation records
+          createMany: { data: productData.productVariations },
         },
       },
     });
@@ -139,21 +142,41 @@ export async function DELETE(
       (image) => image.cloudinaryPublicId
     );
     let imageDeleteResponse;
-    if (product && product?.images.length) {
+    // Delete all images from cloudinary database
+    if (product?.images.length) {
       imageDeleteResponse = await cloudinary.api.delete_resources(
         imagesPublicIdArray || []
       );
-    }
-    if (imageDeleteResponse?.deleted) {
-      await prismadb.image.deleteMany({
+      if (imageDeleteResponse?.deleted) {
+        // Delete all corresponding image records from database
+        await prismadb.image.deleteMany({
+          where: { productId: params.productId },
+        });
+
+        // Delete all corresponding product variations
+        await prismadb.productVariation.deleteMany({
+          where: { productId: params.productId },
+        });
+        const deletedProduct = await prismadb.product.delete({
+          where: { id: params.productId },
+        });
+        return NextResponse.json(deletedProduct);
+      } else {
+        console.trace(
+          "[PRODUCT_DELETE]",
+          "imageDeleteResponse: ",
+          imageDeleteResponse
+        );
+        return new NextResponse("Something went wrong", { status: 500 });
+      }
+    } else {
+      await prismadb.productVariation.deleteMany({
         where: { productId: params.productId },
       });
       const deletedProduct = await prismadb.product.delete({
         where: { id: params.productId },
       });
       return NextResponse.json(deletedProduct);
-    } else {
-      return new NextResponse("Something went wrong", { status: 500 });
     }
   } catch (error: any) {
     console.trace("[PRODUCT_DELETE]", error);

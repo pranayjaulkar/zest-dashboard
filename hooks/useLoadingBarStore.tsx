@@ -16,7 +16,7 @@ function setIntervalIncrement(prevState: useLoadingBarStoreProps) {
 
 let intervalId: any;
 export const useLoadingBarStore = create<useLoadingBarStoreProps>((set) => ({
-  progress: 0,
+  progress: 15,
   setProgress: (n) => set({ progress: n }),
   start: () => {
     set((prevProgress) => {

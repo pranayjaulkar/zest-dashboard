@@ -1,17 +1,23 @@
 "use client";
+import * as z from "zod";
+import toast from "react-hot-toast";
+import axios from "axios";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { useLoadingBarStore } from "@/hooks/useLoadingBarStore";
+import VariationsSection from "./VariationsSection";
+import { Category, Size, Color } from "@prisma/client";
+import { _ProductVariation, ProductWithPriceTypeConverted } from "@/types";
+import { AlertModal } from "@/components/modals/AlertModal";
+import ImageUpload from "@/components/ui/imageUpload";
 import { Button } from "@/components/ui/button";
 import Heading from "@/components/ui/heading";
 import { Separator } from "@/components/ui/separator";
-import { Trash as TrashIcon } from "lucide-react";
-import * as z from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { useState } from "react";
 import { Input } from "@/components/ui/input";
-import axios from "axios";
-import { useParams, useRouter } from "next/navigation";
-import toast from "react-hot-toast";
-import { AlertModal } from "@/components/modals/AlertModal";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Trash as TrashIcon } from "lucide-react";
 import {
   Form,
   FormControl,
@@ -20,8 +26,6 @@ import {
   FormItem,
   FormLabel,
 } from "@/components/ui/form";
-import ImageUpload from "@/components/ui/imageUpload";
-import { Product, Image, Category, Size, Color } from "@prisma/client";
 import {
   Select,
   SelectContent,
@@ -29,17 +33,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
-import { useLoadingBarStore } from "@/hooks/useLoadingBarStore";
-
-type ProductWithPriceNumber = Omit<Product, "price"> & { price: number };
+import {
+  getProductVariations,
+  getColorsFromVariations,
+  getSizesFromVariations,
+} from "@/lib/utils";
 
 interface ProductFormProps {
-  initialData: (ProductWithPriceNumber & { images: Image[] }) | null;
+  initialData: ProductWithPriceTypeConverted | null;
   categories: Category[];
   sizes: Size[];
   colors: Color[];
 }
+
 const formSchema = z.object({
   name: z.string().min(1),
   images: z
@@ -47,14 +53,14 @@ const formSchema = z.object({
       url: z.string().min(1),
       cloudinaryPublicId: z.string(),
     })
-    .array(),
+    .array()
+    .nonempty(),
   categoryId: z.string().min(1),
-  sizeId: z.string().min(1),
-  colorId: z.string().min(1),
   price: z.coerce.number().min(1),
   isFeatured: z.boolean().default(false).optional(),
   isArchived: z.boolean().default(false).optional(),
 });
+
 export type ProductFormValue = z.infer<typeof formSchema>;
 
 const ProductForm: React.FC<ProductFormProps> = ({
@@ -66,8 +72,25 @@ const ProductForm: React.FC<ProductFormProps> = ({
   const params = useParams();
   const router = useRouter();
   const [open, setOpen] = useState(false);
+  const [disabled, setDisabled] = useState(true);
+  const [selectedColors, setSelectedColors] = useState<Color[]>(
+    initialData?.id
+      ? getColorsFromVariations(initialData.productVariations)
+      : []
+  );
+  const [selectedSizes, setSelectedSizes] = useState<Size[]>(
+    initialData?.id ? getSizesFromVariations(initialData.productVariations) : []
+  );
+  const [productVariations, setProductVariations] = useState<
+    _ProductVariation[]
+  >([]);
   const [loading, setLoading] = useState(false);
   const loadingBar = useLoadingBarStore();
+  const title = initialData?.id ? "Edit product" : "Create product";
+  const description = initialData?.id ? "Edit a product" : "Add a new Product";
+  const toastMessage = initialData?.id ? "Product updated" : "Product created";
+  const action = initialData?.id ? "Save changes" : "Create product";
+
   const form = useForm<ProductFormValue>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -77,30 +100,38 @@ const ProductForm: React.FC<ProductFormProps> = ({
       name: "",
       images: [],
       price: 0,
+      productVariations: [],
       categoryId: "",
-      colorId: "",
-      sizeId: "",
       isFeatured: false,
       isArchived: false,
     },
   });
-
-  const title = initialData?.id ? "Edit product" : "Create product";
-  const description = initialData?.id ? "Edit a product" : "Add a new Product";
-  const toastMessage = initialData?.id ? "Product updated" : "Product created";
-  const action = initialData?.id ? "Save changes" : "Create product";
 
   const onSubmit = async (data: ProductFormValue) => {
     try {
       setLoading(true);
       loadingBar.start();
       if (initialData?.id) {
+        const variations = productVariations.map((v) => ({
+          sizeId: v.sizeId,
+          colorId: v.colorId,
+          quantity: v.quantity,
+          name: v.name,
+        }));
+        const newData = { ...data, productVariations: variations };
         await axios.patch(
           `/api/stores/${params.storeId}/products/${params.productId}`,
-          data
+          newData
         );
       } else {
-        await axios.post(`/api/stores/${params.storeId}/products`, data);
+        const variations = productVariations.map((v) => ({
+          sizeId: v.sizeId,
+          colorId: v.colorId,
+          quantity: v.quantity,
+          name: v.name,
+        }));
+        const newData = { ...data, productVariations: variations };
+        await axios.post(`/api/stores/${params.storeId}/products`, newData);
       }
       router.refresh();
       router.push(`/${params.storeId}/products`);
@@ -133,6 +164,22 @@ const ProductForm: React.FC<ProductFormProps> = ({
     }
   };
 
+  useEffect(() => {
+    setProductVariations(
+      getProductVariations(
+        selectedColors,
+        selectedSizes,
+        initialData?.productVariations
+      )
+    );
+  }, [selectedColors, selectedSizes, initialData]);
+
+  useEffect(() => {
+    if (selectedColors.length && selectedSizes.length) {
+      setDisabled(false);
+    } else setDisabled(true);
+  }, [selectedColors, selectedSizes]);
+
   return (
     <>
       <AlertModal
@@ -160,6 +207,8 @@ const ProductForm: React.FC<ProductFormProps> = ({
           onSubmit={form.handleSubmit(onSubmit)}
           className="space-y-8 w-full"
         >
+          {/* Image */}
+
           <FormField
             control={form.control}
             name="images"
@@ -181,6 +230,9 @@ const ProductForm: React.FC<ProductFormProps> = ({
               </FormItem>
             )}
           />
+
+          {/* Name */}
+
           <div className="grid grid-cols-3 gap-8">
             <FormField
               control={form.control}
@@ -199,6 +251,9 @@ const ProductForm: React.FC<ProductFormProps> = ({
                 </FormItem>
               )}
             />
+
+            {/* Price  */}
+
             <FormField
               control={form.control}
               name="price"
@@ -216,6 +271,9 @@ const ProductForm: React.FC<ProductFormProps> = ({
                 </FormItem>
               )}
             />
+
+            {/* Category  */}
+
             <FormField
               control={form.control}
               name="categoryId"
@@ -248,63 +306,10 @@ const ProductForm: React.FC<ProductFormProps> = ({
               )}
             />
           </div>
+
+          {/* IsFeatured  */}
+
           <div className="grid grid-cols-3 gap-8">
-            <FormField
-              control={form.control}
-              name="colorId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Color</FormLabel>
-                  <Select
-                    disabled={loading}
-                    onValueChange={field.onChange}
-                    value={field.value}
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger className="w-[180px]">
-                        <SelectValue placeholder="Select a Color" {...field} />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {colors.map((color) => (
-                        <SelectItem key={color.id} value={color.id}>
-                          {color.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="sizeId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Size</FormLabel>
-                  <Select
-                    disabled={loading}
-                    onValueChange={field.onChange}
-                    value={field.value}
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger className="w-[180px]">
-                        <SelectValue placeholder="Select a Size" {...field} />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {sizes.map((size) => (
-                        <SelectItem key={size.id} value={size.id}>
-                          {size.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </FormItem>
-              )}
-            />
             <FormField
               control={form.control}
               name="isFeatured"
@@ -323,6 +328,9 @@ const ProductForm: React.FC<ProductFormProps> = ({
                 </FormItem>
               )}
             />
+
+            {/* IsArchived */}
+
             <FormField
               control={form.control}
               name="isArchived"
@@ -342,6 +350,22 @@ const ProductForm: React.FC<ProductFormProps> = ({
               )}
             />
           </div>
+          <Separator />
+
+          {/* Variation Tables */}
+
+          <VariationsSection
+            colors={colors}
+            sizes={sizes}
+            productVariations={productVariations}
+            setProductVariations={setProductVariations}
+            disabled={disabled}
+            selectedColors={selectedColors}
+            setSelectedColors={setSelectedColors}
+            selectedSizes={selectedSizes}
+            setSelectedSizes={setSelectedSizes}
+            initialData={initialData}
+          />
           <Button disabled={loading} className="ml-auto" type="submit">
             {action}
           </Button>

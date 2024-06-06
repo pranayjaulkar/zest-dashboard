@@ -26,6 +26,7 @@ export default function StoreModal() {
   const loadingBar = useLoadingBarStore();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const onClose = useStoreModal((state) => state.onClose);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: { name: "" },
@@ -37,6 +38,7 @@ export default function StoreModal() {
       loadingBar.start();
       const res = await axios.post("/api/stores", values);
       toast.success("created store successfully");
+      onClose();
       router.push(`/${res.data.id}`);
       setLoading(false);
     } catch (err) {

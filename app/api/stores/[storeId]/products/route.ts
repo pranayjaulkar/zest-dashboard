@@ -25,14 +25,16 @@ export async function POST(
     if (!productData.categoryId) {
       return new NextResponse("Category is required", { status: 400 });
     }
-    if (!productData.colorId) {
-      return new NextResponse("Color is required", { status: 400 });
-    }
-    if (!productData.sizeId) {
-      return new NextResponse("Size is required", { status: 400 });
-    }
     if (!productData.images || !productData.images.length) {
       return new NextResponse("Images are required", { status: 400 });
+    }
+    if (
+      !productData.productVariations ||
+      !productData.productVariations.length
+    ) {
+      return new NextResponse("Product Variations are required", {
+        status: 400,
+      });
     }
     if (!params.storeId) {
       return new NextResponse("Store id is required", { status: 400 });
@@ -54,6 +56,9 @@ export async function POST(
             data: productData.images,
           },
         },
+        productVariations: {
+          createMany: { data: productData.productVariations },
+        },
       },
     });
     return NextResponse.json(product);
@@ -69,11 +74,15 @@ export async function GET(
 ) {
   try {
     const url = new URL(req.url);
+
     const searchParams = new URLSearchParams(url.search);
+
     const categoryId = searchParams.get("categoryId") || undefined;
     const sizeId = searchParams.get("sizeId") || undefined;
     const colorId = searchParams.get("colorId") || undefined;
-    const isFeatured = searchParams.get("isFeatured") || undefined;
+    const isFeatured = searchParams.get("isFeatured");
+    const isArchived = searchParams.get("isArchived");
+
     if (!params.storeId) {
       return new NextResponse("Store id is required", { status: 400 });
     }
@@ -82,12 +91,22 @@ export async function GET(
       where: {
         storeId: params.storeId,
         categoryId,
-        sizeId,
-        colorId,
         isFeatured: isFeatured ? true : undefined,
-        isArchived: false,
+        isArchived: isArchived ? true : undefined,
+        productVariations:
+          sizeId || colorId
+            ? {
+                some: {
+                  OR: [{ sizeId }, { colorId }],
+                },
+              }
+            : {},
       },
-      include: { images: true, category: true, color: true, size: true },
+      include: {
+        images: true,
+        category: true,
+        productVariations: { include: { size: true, color: true } },
+      },
       orderBy: { createdAt: "desc" },
     });
     return NextResponse.json(products);
