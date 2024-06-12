@@ -1,18 +1,15 @@
-import prismadb from "@/lib/prismadb";
-import { auth } from "@clerk/nextjs";
+import prisma from "@/prisma/client";
+import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { Size } from "@prisma/client";
-import cloudinary from "@/cloudinary";
+import cloudinary from "@/cloudinary.config";
 
-export async function GET(
-  req: Request,
-  { params }: { params: { sizeId: string } }
-) {
+export async function GET(req: Request, { params }: { params: { sizeId: string } }) {
   try {
     if (!params.sizeId) {
       return new NextResponse("Size id is required", { status: 400 });
     }
-    const size = await prismadb.size.findUnique({
+    const size = await prisma.size.findUnique({
       where: { id: params.sizeId },
     });
     return NextResponse.json(size);
@@ -44,14 +41,14 @@ export async function PATCH(
       return new NextResponse("Size id is required", { status: 400 });
     }
 
-    const storeByUserId = await prismadb.store.findFirst({
+    const storeByUserId = await prisma.store.findFirst({
       where: { id: params.storeId, userId },
     });
 
     if (!storeByUserId) {
       return new NextResponse("Unauthorized", { status: 403 });
     }
-    const updatedSize = await prismadb.size.update({
+    const updatedSize = await prisma.size.update({
       where: { id: params.sizeId },
       data: { name, value },
     });
@@ -77,18 +74,18 @@ export async function DELETE(
     if (!params.storeId) {
       return new NextResponse("Store id is required", { status: 400 });
     }
-    const storeByUserId = await prismadb.store.findFirst({
+    const storeByUserId = await prisma.store.findFirst({
       where: { id: params.storeId, userId },
     });
 
     if (!storeByUserId) {
       return new NextResponse("Unauthorized", { status: 403 });
     }
-    const deletedSize = await prismadb.size.delete({
+    const deletedSize = await prisma.size.delete({
       where: { id: params.sizeId },
     });
     return NextResponse.json(deletedSize);
-  } catch (error:any) {
+  } catch (error: any) {
     console.trace("[Size_DELETE]", error);
     if (error?.code === "P2014") {
       return new NextResponse(error.code, { status: 400 });

@@ -1,18 +1,15 @@
-import prismadb from "@/lib/prismadb";
-import { auth } from "@clerk/nextjs";
+import prisma from "@/prisma/client";
+import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { Product, Image, ProductVariation } from "@prisma/client";
-import cloudinary from "@/cloudinary";
+import cloudinary from "@/cloudinary.config";
 
-export async function GET(
-  req: Request,
-  { params }: { params: { productId: string } }
-) {
+export async function GET(req: Request, { params }: { params: { productId: string } }) {
   try {
     if (!params.productId) {
       return new NextResponse("Product id is required", { status: 400 });
     }
-    const product = await prismadb.product.findUnique({
+    const product = await prisma.product.findUnique({
       where: { id: params.productId },
       include: {
         category: true,
@@ -27,10 +24,7 @@ export async function GET(
   }
 }
 
-export async function PATCH(
-  req: Request,
-  { params }: { params: { storeId: string; productId: string } }
-) {
+export async function PATCH(req: Request, { params }: { params: { storeId: string; productId: string } }) {
   try {
     const { userId } = auth();
     const body = await req.json();
@@ -59,30 +53,25 @@ export async function PATCH(
       return new NextResponse("Product id is required", { status: 400 });
     }
 
-    const storeByUserId = await prismadb.store.findFirst({
+    const storeByUserId = await prisma.store.findFirst({
       where: { id: params.storeId, userId },
     });
 
     if (!storeByUserId) {
       return new NextResponse("Unauthorized", { status: 403 });
     }
-    const product = await prismadb.product.findUnique({
+    const product = await prisma.product.findUnique({
       where: { id: params.productId },
       include: { images: true },
     });
     //delete all images in cloudinary database
     if (product && product?.images.length) {
-      const imagesPublicIdArray: string[] | undefined = product?.images.map(
-        (image) => image.cloudinaryPublicId
-      );
-      const imageDeleteResponse = await cloudinary.api.delete_resources(
-        imagesPublicIdArray || []
-      );
-      if (!imageDeleteResponse?.deleted)
-        console.trace("[PRODUCT_PATCH]: Unsuccesfull Image Deletion");
+      const imagesPublicIdArray: string[] | undefined = product?.images.map((image) => image.cloudinaryPublicId);
+      const imageDeleteResponse = await cloudinary.api.delete_resources(imagesPublicIdArray || []);
+      if (!imageDeleteResponse?.deleted) console.trace("[PRODUCT_PATCH]: Unsuccesfull Image Deletion");
     }
 
-    const updatedProduct = await prismadb.product.update({
+    const updatedProduct = await prisma.product.update({
       where: { id: params.productId },
       data: {
         ...productData,
@@ -109,10 +98,7 @@ export async function PATCH(
   }
 }
 
-export async function DELETE(
-  req: Request,
-  { params }: { params: { storeId: string; productId: string } }
-) {
+export async function DELETE(req: Request, { params }: { params: { storeId: string; productId: string } }) {
   try {
     const { userId } = auth();
     if (!userId) {
@@ -124,56 +110,47 @@ export async function DELETE(
     if (!params.storeId) {
       return new NextResponse("Store id is required", { status: 400 });
     }
-    const storeByUserId = await prismadb.store.findFirst({
+    const storeByUserId = await prisma.store.findFirst({
       where: { id: params.storeId, userId },
     });
-    const product: (Product & { images: Image[] }) | null =
-      await prismadb.product.findUnique({
-        where: { id: params.productId },
-        include: {
-          images: true,
-        },
-      });
+    const product: (Product & { images: Image[] }) | null = await prisma.product.findUnique({
+      where: { id: params.productId },
+      include: {
+        images: true,
+      },
+    });
 
     if (!storeByUserId) {
       return new NextResponse("Unauthorized", { status: 403 });
     }
-    const imagesPublicIdArray: string[] | undefined = product?.images.map(
-      (image) => image.cloudinaryPublicId
-    );
+    const imagesPublicIdArray: string[] | undefined = product?.images.map((image) => image.cloudinaryPublicId);
     let imageDeleteResponse;
     // Delete all images from cloudinary database
     if (product?.images.length) {
-      imageDeleteResponse = await cloudinary.api.delete_resources(
-        imagesPublicIdArray || []
-      );
+      imageDeleteResponse = await cloudinary.api.delete_resources(imagesPublicIdArray || []);
       if (imageDeleteResponse?.deleted) {
         // Delete all corresponding image records from database
-        await prismadb.image.deleteMany({
+        await prisma.image.deleteMany({
           where: { productId: params.productId },
         });
 
         // Delete all corresponding product variations
-        await prismadb.productVariation.deleteMany({
+        await prisma.productVariation.deleteMany({
           where: { productId: params.productId },
         });
-        const deletedProduct = await prismadb.product.delete({
+        const deletedProduct = await prisma.product.delete({
           where: { id: params.productId },
         });
         return NextResponse.json(deletedProduct);
       } else {
-        console.trace(
-          "[PRODUCT_DELETE]",
-          "imageDeleteResponse: ",
-          imageDeleteResponse
-        );
+        console.trace("[PRODUCT_DELETE]", "imageDeleteResponse: ", imageDeleteResponse);
         return new NextResponse("Something went wrong", { status: 500 });
       }
     } else {
-      await prismadb.productVariation.deleteMany({
+      await prisma.productVariation.deleteMany({
         where: { productId: params.productId },
       });
-      const deletedProduct = await prismadb.product.delete({
+      const deletedProduct = await prisma.product.delete({
         where: { id: params.productId },
       });
       return NextResponse.json(deletedProduct);

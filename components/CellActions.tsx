@@ -4,7 +4,7 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdownMenu";
+} from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import {
   Copy as CopyIcon,
@@ -24,16 +24,31 @@ interface CellActionsProps<TData> {
   onDelete: (id: string) => void;
 }
 
-export default function CellActions<
-  TData extends { id: string; label?: string; name?: string }
->({ row, entityNamePlural, entityName, onDelete }: CellActionsProps<TData>) {
+export default function CellActions<TData extends { id: string; label?: string; name?: string }>({
+  row,
+  entityNamePlural,
+  entityName,
+  onDelete,
+}: CellActionsProps<TData>) {
   const params = useParams();
   const pathname = usePathname();
-
   const loadingBar = useLoadingBarStore();
-  const onCopy = (id: string) => {
+
+  const handleCopy = (id: string) => {
     navigator.clipboard.writeText(id);
     toast.success(`${entityName} ID copied to the clipboard`);
+  };
+
+  const handleUpdate = () => {
+    try {
+      if (pathname !== `/${params.storeId}/${entityNamePlural}/${row.id}`) {
+        loadingBar.start();
+      }
+    } catch (error) {
+      loadingBar.done();
+      console.trace(error);
+      toast.error("Something went wrong");
+    }
   };
 
   return (
@@ -45,27 +60,16 @@ export default function CellActions<
             <MoreHorizontalIcon className="h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent
-          className="bg-white border-[1px] border-border z-20 rounded-md"
-          align="end"
-        >
-          <DropdownMenuLabel className="py-1 px-2 m-1 min-w-[128px] font-bold">
-            Actions
-          </DropdownMenuLabel>
+        <DropdownMenuContent className="bg-white border-[1px] border-border z-20 rounded-md" align="end">
+          <DropdownMenuLabel className="py-1 px-2 m-1 min-w-[128px] font-bold">Actions</DropdownMenuLabel>
           <DropdownMenuItem
             className="flex justify-start rounded-md border-0  py-1 px-2 m-1 min-w-[128px] hover:bg-gray-100 cursor-pointer"
-            onClick={() => onCopy(row.id)}
+            onClick={() => handleCopy(row.id)}
           >
             <CopyIcon className="mr-2 h-4 w-4" />
             Copy ID
           </DropdownMenuItem>
-          <Link
-            href={`/${params.storeId}/${entityNamePlural}/${row.id}`}
-            onClick={() => {
-              if (pathname !== `/${params.storeId}/${entityNamePlural}/${row.id}`)
-                loadingBar.start();
-            }}
-          >
+          <Link href={`/${params.storeId}/${entityNamePlural}/${row.id}`} onClick={handleUpdate}>
             <DropdownMenuItem className="flex justify-start border-0  rounded-md py-1 px-2 m-1 min-w-[128px] hover:bg-gray-100 cursor-pointer">
               <EditIcon className="mr-2 h-4 w-4" />
               Update

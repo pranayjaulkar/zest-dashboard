@@ -1,8 +1,8 @@
-import prismadb from "@/lib/prismadb";
-import { auth } from "@clerk/nextjs";
+import prisma from "@/prisma/client";
+import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { Color } from "@prisma/client";
-import cloudinary from "@/cloudinary";
+import cloudinary from "@/cloudinary.config";
 
 export async function GET(
   req: Request,
@@ -12,7 +12,7 @@ export async function GET(
     if (!params.colorId) {
       return new NextResponse("Color id is required", { status: 400 });
     }
-    const color = await prismadb.color.findUnique({
+    const color = await prisma.color.findUnique({
       where: { id: params.colorId },
     });
     return NextResponse.json(color);
@@ -44,14 +44,14 @@ export async function PATCH(
       return new NextResponse("Color id is required", { status: 400 });
     }
 
-    const storeByUserId = await prismadb.store.findFirst({
+    const storeByUserId = await prisma.store.findFirst({
       where: { id: params.storeId, userId },
     });
 
     if (!storeByUserId) {
       return new NextResponse("Unauthorized", { status: 403 });
     }
-    const updatedColor = await prismadb.color.update({
+    const updatedColor = await prisma.color.update({
       where: { id: params.colorId },
       data: { name, value },
     });
@@ -77,14 +77,14 @@ export async function DELETE(
     if (!params.storeId) {
       return new NextResponse("Store id is required", { status: 400 });
     }
-    const storeByUserId = await prismadb.store.findFirst({
+    const storeByUserId = await prisma.store.findFirst({
       where: { id: params.storeId, userId },
     });
 
     if (!storeByUserId) {
       return new NextResponse("Unauthorized", { status: 403 });
     }
-    const deletedColor = await prismadb.color.delete({
+    const deletedColor = await prisma.color.delete({
       where: { id: params.colorId },
     });
     return NextResponse.json(deletedColor);

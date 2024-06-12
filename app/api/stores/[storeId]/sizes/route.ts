@@ -1,5 +1,5 @@
-import prismadb from "@/lib/prismadb";
-import { auth } from "@clerk/nextjs";
+import prisma from "@/prisma/client";
+import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
 export async function POST(
@@ -24,14 +24,14 @@ export async function POST(
     if (!params.storeId) {
       return new NextResponse("Store id is required", { status: 400 });
     }
-    const storeByUserId = await prismadb.store.findFirst({
+    const storeByUserId = await prisma.store.findFirst({
       where: { id: params.storeId, userId },
     });
 
     if (!storeByUserId) {
       return new NextResponse("Unauthorized", { status: 403 });
     }
-    const size = await prismadb.size.create({
+    const size = await prisma.size.create({
       data: {
         name,
         value,
@@ -54,7 +54,7 @@ export async function GET(
       return new NextResponse("Store id is required", { status: 400 });
     }
 
-    const categories = await prismadb.size.findMany({
+    const categories = await prisma.size.findMany({
       where: { storeId: params.storeId },
     });
     return NextResponse.json(categories);

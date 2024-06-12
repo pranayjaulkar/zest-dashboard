@@ -1,5 +1,5 @@
 import { Size } from "@prisma/client";
-import prismadb from "@/lib/prismadb";
+import prisma from "@/prisma/client";
 import Client from "@/components/Client";
 import columns from "./(components)/columns";
 
@@ -8,7 +8,7 @@ export default async function SizesPage({
 }: {
   params: { storeId: string };
 }) {
-  const sizes: Size[] = await prismadb.size.findMany({
+  const sizes: Size[] = await prisma.size.findMany({
     where: { storeId: params.storeId },
     orderBy: { createdAt: "desc" },
   });

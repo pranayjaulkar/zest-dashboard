@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs";
-import prismadb from "@/lib/prismadb";
-import { SignedInAuthObject, SignedOutAuthObject } from "@clerk/nextjs/server";
+import { auth } from "@clerk/nextjs/server";
+import prisma from "@/prisma/client";
 type store = {
   id: string;
   name: string;
@@ -12,7 +11,7 @@ type store = {
 
 export async function POST(req: Request) {
   try {
-    const { userId }: SignedInAuthObject | SignedOutAuthObject = auth();
+    const { userId } = auth();
     const { name } = await req.json();
     if (!userId) {
       return new NextResponse("Unauthorized", { status: 401 });
@@ -20,7 +19,7 @@ export async function POST(req: Request) {
     if (!name) {
       return new NextResponse("Name is Required", { status: 400 });
     }
-    const store = await prismadb.store.create({
+    const store = await prisma.store.create({
       data: { name, userId },
     });
     return NextResponse.json(store);
@@ -35,7 +34,7 @@ export async function GET(req: Request) {
     if (!storeId) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
-    const store = await prismadb.store.findFirst({
+    const store = await prisma.store.findFirst({
       where: { id: storeId },
     });
     return NextResponse.json(store);

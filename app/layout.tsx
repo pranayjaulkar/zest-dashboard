@@ -2,7 +2,7 @@ import "./globals.css";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
-import ModalProvider from "@/providers/ModalProvider";
+import CreateModalProvider from "@/providers/CreateModalProvider";
 import { ToastProvider } from "@/providers/ToastProvider";
 import { ThemeProvider } from "@/providers/ThemeProvider";
 import LoadingBarProvider from "@/providers/LoadingBarProvider";
@@ -11,15 +11,11 @@ import { Suspense } from "react";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Ecommerce",
+  title: "Zest Dashboard",
   description: "Ecommerce Website",
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <ClerkProvider>
       <html lang="en">
@@ -29,7 +25,7 @@ export default function RootLayout({
               <LoadingBarProvider />
             </Suspense>
             <ToastProvider />
-            <ModalProvider />
+            <CreateModalProvider />
             {children}
           </ThemeProvider>
         </body>

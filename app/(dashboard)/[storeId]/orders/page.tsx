@@ -1,5 +1,5 @@
 import { formatter } from "@/lib/utils";
-import prismadb from "@/lib/prismadb";
+import prisma from "@/prisma/client";
 import Client from "@/components/Client";
 import columns from "./(components)/columns";
 
@@ -8,7 +8,7 @@ export default async function OrdersPage({
 }: {
   params: { storeId: string };
 }) {
-  let orders = await prismadb.order.findMany({
+  let orders = await prisma.order.findMany({
     where: { storeId: params.storeId },
     include: { orderItems: { include: { product: true } } },
     orderBy: { createdAt: "desc" },

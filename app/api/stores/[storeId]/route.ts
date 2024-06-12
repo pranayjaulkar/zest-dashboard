@@ -1,5 +1,5 @@
-import prismadb from "@/lib/prismadb";
-import { auth } from "@clerk/nextjs";
+import prisma from "@/prisma/client";
+import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
 export async function GET(
@@ -10,7 +10,7 @@ export async function GET(
     if (!params.storeId) {
       return new NextResponse("Store id is required", { status: 400 });
     }
-    const store = await prismadb.store.findUnique({
+    const store = await prisma.store.findUnique({
       where: { id: params.storeId },
     });
     return NextResponse.json(store);
@@ -38,7 +38,7 @@ export async function PATCH(
     if (!params.storeId) {
       return new NextResponse("Store id is required", { status: 400 });
     }
-    const store = await prismadb.store.updateMany({
+    const store = await prisma.store.updateMany({
       where: { id: params.storeId, userId },
       data: { name },
     });
@@ -62,7 +62,7 @@ export async function DELETE(
     if (!params.storeId) {
       return new NextResponse("Store id is required", { status: 400 });
     }
-    const store = await prismadb.store.deleteMany({
+    const store = await prisma.store.deleteMany({
       where: { id: params.storeId, userId },
     });
     return NextResponse.json(store);

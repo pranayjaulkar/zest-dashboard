@@ -1,4 +1,4 @@
-import prismadb from "@/lib/prismadb";
+import prisma from "@/prisma/client";
 
 interface GraphData {
   name: string;
@@ -6,7 +6,7 @@ interface GraphData {
 }
 
 export async function getGraphRevenue(storeId: string) {
-  const paidOrders = await prismadb.order.findMany({
+  const paidOrders = await prisma.order.findMany({
     where: { storeId, isPaid: true },
     include: {
       orderItems: {
@@ -41,4 +41,32 @@ export async function getGraphRevenue(storeId: string) {
     graphData[parseInt(month)].total = monthlyRevenue[parseInt(month)];
   }
   return graphData;
+}
+
+export async function getSalesCount(storeId: string) {
+  const salesCount = await prisma.order.count({
+    where: { storeId, isPaid: true },
+  });
+  return salesCount;
+}
+
+export async function getStockCount(storeId: string) {
+  const stockCount = await prisma.product.count({
+    where: { storeId, isArchived: true },
+  });
+  return stockCount;
+}
+
+export async function getTotalRevenue(storeId: string) {
+  const paidOrders = await prisma.order.findMany({
+    where: { storeId, isPaid: true },
+    include: { orderItems: { include: { product: true } } },
+  });
+  const totalRevenue = paidOrders.reduce((total, order) => {
+    const orderTotal = order.orderItems.reduce((orderSum, item) => {
+      return orderSum + item.product.price.toNumber();
+    }, 0);
+    return orderTotal + total;
+  }, 0);
+  return totalRevenue;
 }

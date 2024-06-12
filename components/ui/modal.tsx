@@ -12,7 +12,7 @@ interface ModalProps {
   title: string;
   description: string;
   isOpen: boolean;
-  setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  setOpen?: React.Dispatch<React.SetStateAction<boolean>>;
   children?: React.ReactNode;
 }
 

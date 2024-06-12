@@ -1,17 +1,18 @@
 "use client";
-import { useStoreModal } from "@/hooks/useCreateModalStore";
+import { useCreateModalStore } from "@/hooks/useCreateModalStore";
 import { useEffect } from "react";
 
-const findUser = () => {
-  return async () => {};
-};
-
 export default function Home() {
-  const onOpen = useStoreModal((state) => state.onOpen);
-  const isOpen = useStoreModal((state) => state.isOpen);
+  const createModal = useCreateModalStore();
+
+  // if no store was found with the account then show create store modal
+  // set cancel to false to not show cancel button and set closable to false 
+  // to disable closing of modal
   useEffect(() => {
-    onOpen();
-  }, [onOpen]);
+    createModal.setCancel(false);
+    createModal.setClosable(false);
+    createModal.open();
+  }, []);
 
   return null;
 }

@@ -4,11 +4,11 @@ import Heading from "@/components/ui/heading";
 import { Separator } from "@/components/ui/separator";
 import { Plus as PlusIcon } from "lucide-react";
 import { useParams, usePathname } from "next/navigation";
-import { DataTable } from "@/components/ui/dataTable";
+import { DataTable } from "@/components/ui/data-table";
 import { ColumnDef } from "@tanstack/react-table";
 import { useState } from "react";
 import { format } from "date-fns";
-import ApiList from "@/components/ui/apiList";
+import ApiList from "@/components/ui/api-list";
 import { useLoadingBarStore } from "@/hooks/useLoadingBarStore";
 import Link from "next/link";
 import CellActions from "./CellActions";
@@ -25,9 +25,7 @@ interface ClientProps<TData> {
   searchKey: string;
 }
 
-export default function Client<
-  TData extends { id: string; label?: string; name?: string }
->({
+export default function Client<TData extends { id: string; label?: string; name?: string }>({
   data,
   columns,
   entityName,
@@ -42,9 +40,15 @@ export default function Client<
   const [rowId, setRowId] = useState("");
   const pathname = usePathname();
 
-  const onDelete = async (id: string) => {
-    setOpen(true);
-    setRowId(id);
+  const openAlertDialog = async (id: string) => {
+    try {
+      // open alert dialog
+      setOpen(true);
+      setRowId(id);
+    } catch (error) {
+      console.trace("error: ", error);
+      toast.error("Something Went Wrong");
+    }
   };
 
   const columnDefs: ColumnDef<TData>[] = [
@@ -52,8 +56,7 @@ export default function Client<
       if (column.accessorKey === "createdAt")
         return {
           ...column,
-          cell: ({ row }: { row: any }) =>
-            format(row.original.createdAt, "dd-MM-yyyy"),
+          cell: ({ row }: { row: any }) => format(row.original.createdAt, "dd-MM-yyyy"),
         };
       else return column;
     }),
@@ -64,29 +67,24 @@ export default function Client<
           entityName={entityName}
           entityNamePlural={entityNamePlural}
           row={row.original}
-          onDelete={onDelete}
+          onDelete={openAlertDialog}
         />
       ),
     },
   ];
 
-  const onConfirm = async () => {
+  const handleDelete = async () => {
     try {
       setLoading(true);
-      loadingBar.start();
-      await axios.delete(
-        `/api/stores/${params.storeId}/${entityNamePlural}/${rowId}`
-      );
-      setRows((previousData) =>
-        previousData.filter((element) => element.id !== rowId)
-      );
-      setLoading(false);
-      setOpen(false);
-      loadingBar.done();
+      await axios.delete(`/api/stores/${params.storeId}/${entityNamePlural}/${rowId}`);
+      setRows((previousData) => previousData.filter((element) => element.id !== rowId));
       toast.success(`${entityName} deleted`);
     } catch (error) {
       console.trace("error: ", error);
       toast.error("Something Went Wrong");
+    } finally {
+      setLoading(false);
+      setOpen(false);
     }
   };
 
@@ -95,17 +93,8 @@ export default function Client<
 
   return (
     <>
-      <AlertModal
-        isOpen={open}
-        setOpen={setOpen}
-        onConfirm={onConfirm}
-        loading={loading}
-      />
-      <div
-        className={`flex items-center ${
-          isOrderFlag ? "justify-start" : "justify-between"
-        }`}
-      >
+      <AlertModal isOpen={open} setOpen={setOpen} onConfirm={handleDelete} loading={loading} />
+      <div className={`flex items-center ${isOrderFlag ? "justify-start" : "justify-between"}`}>
         <Heading
           title={`${entityName} (${data?.length || 0})`}
           description={`Manage ${entityNamePlural} for your store`}
@@ -114,8 +103,7 @@ export default function Client<
           <Link
             href={`/${params.storeId}/${entityNamePlural}/new`}
             onClick={() => {
-              if (pathname !== `/${params.storeId}/${entityNamePlural}/new`)
-                loadingBar.start();
+              if (pathname !== `/${params.storeId}/${entityNamePlural}/new`) loadingBar.start();
             }}
           >
             <Button>
@@ -129,10 +117,7 @@ export default function Client<
       <DataTable columns={columnDefs} data={rows} searchKey={searchKey} />
       <Heading title="API" description={`API calls for ${entityNamePlural}`} />
       <Separator />
-      <ApiList
-        entityName={entityNamePlural}
-        entityIdName={`${entityName.toLowerCase()}Id`}
-      />
+      <ApiList entityName={entityNamePlural} entityIdName={`${entityName.toLowerCase()}Id`} />
     </>
   );
 }

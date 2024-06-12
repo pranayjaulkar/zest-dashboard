@@ -12,13 +12,7 @@ import axios from "axios";
 import { useParams, useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { AlertModal } from "@/components/modals/AlertModal";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-} from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
 import { useLoadingBarStore } from "@/hooks/useLoadingBarStore";
 
 interface ColorFormProps {
@@ -30,10 +24,7 @@ interface ColorFormProps {
 }
 const formSchema = z.object({
   name: z.string().min(1),
-  value: z
-    .string()
-    .min(4)
-    .regex(/^#/, { message: "String must be a valid hex code. e.g #55bef2" }),
+  value: z.string().min(4).regex(/^#/, { message: "String must be a valid hex code. e.g #55bef2" }),
 });
 export type ColorFormValue = z.infer<typeof formSchema>;
 
@@ -57,18 +48,16 @@ const ColorForm: React.FC<ColorFormProps> = ({ initialData }) => {
       setLoading(true);
       loadingBar.start();
       if (initialData?.id) {
-        await axios.patch(
-          `/api/stores/${params.storeId}/colors/${params.colorId}`,
-          data
-        );
+        await axios.patch(`/api/stores/${params.storeId}/colors/${params.colorId}`, data);
       } else {
         await axios.post(`/api/stores/${params.storeId}/colors`, data);
       }
-      router.refresh();
       router.push(`/${params.storeId}/colors`);
+      router.refresh();
       toast.success(toastMessage);
     } catch (error) {
       console.trace("error", error);
+      loadingBar.done();
       toast.error("Something Went Wrong");
     } finally {
       setLoading(false);
@@ -79,15 +68,14 @@ const ColorForm: React.FC<ColorFormProps> = ({ initialData }) => {
     try {
       setLoading(true);
       loadingBar.start();
-      await axios.delete(
-        `/api/stores/${params.storeId}/colors/${params.colorId}`
-      );
+      await axios.delete(`/api/stores/${params.storeId}/colors/${params.colorId}`);
       router.push(`/${params.storeId}/colors/`);
       router.refresh();
 
       toast.success("Color deleted");
     } catch (error) {
       console.trace("error: ", error);
+      loadingBar.done();
       toast.error("Something went wrong");
     } finally {
       setLoading(false);
@@ -97,31 +85,19 @@ const ColorForm: React.FC<ColorFormProps> = ({ initialData }) => {
 
   return (
     <>
-      <AlertModal
-        isOpen={open}
-        setOpen={setOpen}
-        onConfirm={onDelete}
-        loading={loading}
-      />
+      <AlertModal isOpen={open} setOpen={setOpen} onConfirm={onDelete} loading={loading} />
       <div className="flex items-center justify-between">
         <Heading title={title} description={description} />
 
         {initialData?.id && (
-          <Button
-            variant="destructive"
-            color="icon"
-            onClick={() => setOpen(true)}
-          >
+          <Button variant="destructive" color="icon" onClick={() => setOpen(true)}>
             <TrashIcon className="h-4 w-4" />
           </Button>
         )}
       </div>
       <Separator />
       <Form {...form}>
-        <form
-          onSubmit={form.handleSubmit(onSubmit)}
-          className="space-y-8 w-full"
-        >
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 w-full">
           <div className="grid grid-cols-3 gap-8">
             <FormField
               control={form.control}
@@ -154,10 +130,7 @@ const ColorForm: React.FC<ColorFormProps> = ({ initialData }) => {
                         onChange={(event) => field.onChange(event.target.value)}
                         value={field.value || ""}
                       />
-                      <div
-                        className="border p-4 rounded-full"
-                        style={{ backgroundColor: field.value }}
-                      />
+                      <div className="border p-4 rounded-full" style={{ backgroundColor: field.value }} />
                     </div>
                   </FormControl>
                 </FormItem>

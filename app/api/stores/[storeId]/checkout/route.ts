@@ -1,7 +1,7 @@
 import Stripe from "stripe";
 import { NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
-import prismadb from "@/lib/prismadb";
+import prisma from "@/prisma/client";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -21,7 +21,7 @@ export async function POST(
   if (!productIds || productIds.length === 0) {
     return new NextResponse("Product ids are required", { status: 400 });
   }
-  const products = await prismadb.product.findMany({
+  const products = await prisma.product.findMany({
     where: { id: { in: productIds } },
   });
   const line_items: Stripe.Checkout.SessionCreateParams.LineItem[] = [];
@@ -37,7 +37,7 @@ export async function POST(
       },
     });
   });
-  const order = await prismadb.order.create({
+  const order = await prisma.order.create({
     data: {
       storeId: params.storeId,
       isPaid: false,

@@ -1,11 +1,4 @@
-import {
-  Color,
-  Order,
-  Product,
-  ProductVariation,
-  Size,
-  Image,
-} from "@prisma/client";
+import { Color, Order, Product, ProductVariation, Size, Image } from "@prisma/client";
 
 export const isOrder = (obj: any): obj is Order => {
   return (
@@ -17,6 +10,17 @@ export const isOrder = (obj: any): obj is Order => {
     obj.updatedAt instanceof Date &&
     typeof obj.id === "string"
   );
+};
+
+export type ImageType = {
+  id?: string;
+  productId?: string;
+  storeId?: string;
+  product?: Product;
+  createdAt?: Date;
+  updatedAt?: Date;
+  url: string;
+  cloudinaryPublicId: string;
 };
 
 export type ProductWithPriceTypeConverted =

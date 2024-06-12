@@ -1,15 +1,12 @@
-import prismadb from "@/lib/prismadb";
-import { auth } from "@clerk/nextjs";
+import prisma from "@/prisma/client";
+import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
-export async function POST(
-  req: Request,
-  { params }: { params: { storeId: string } }
-) {
+export async function POST(req: Request, { params }: { params: { storeId: string } }) {
   try {
     const { userId } = auth();
     const body = await req.json();
-    const { label, image } = body;
+    const { label, imageUrl, cloudinaryPublicId } = body;
 
     if (!userId) {
       return new NextResponse("Unauthorized", { status: 404 });
@@ -18,24 +15,24 @@ export async function POST(
     if (!label) {
       return new NextResponse("Label is required", { status: 400 });
     }
-    if (!image.url || !image.cloudinaryPublicId) {
-      return new NextResponse("Image is required", { status: 400 });
+    if (!imageUrl || !cloudinaryPublicId) {
+      return new NextResponse("Image Url is required", { status: 400 });
     }
     if (!params.storeId) {
       return new NextResponse("Store id is required", { status: 400 });
     }
-    const storeByUserId = await prismadb.store.findFirst({
+    const storeByUserId = await prisma.store.findFirst({
       where: { id: params.storeId, userId },
     });
 
     if (!storeByUserId) {
       return new NextResponse("Unauthorized", { status: 403 });
     }
-    const billboard = await prismadb.billboard.create({
+    const billboard = await prisma.billboard.create({
       data: {
         label,
-        imageUrl: image.url,
-        imagePublicId: image.cloudinaryPublicId,
+        imageUrl,
+        cloudinaryPublicId,
         storeId: params.storeId,
       },
     });
@@ -46,16 +43,13 @@ export async function POST(
   }
 }
 
-export async function GET(
-  req: Request,
-  { params }: { params: { storeId: string } }
-) {
+export async function GET(req: Request, { params }: { params: { storeId: string } }) {
   try {
     if (!params.storeId) {
       return new NextResponse("Store id is required", { status: 400 });
     }
 
-    const billboards = await prismadb.billboard.findMany({
+    const billboards = await prisma.billboard.findMany({
       where: { storeId: params.storeId },
     });
     return NextResponse.json(billboards);

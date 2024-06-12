@@ -11,7 +11,7 @@ import { ProductWithPriceTypeConverted, _ProductVariation } from "@/types";
 import { useState } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { Color, Size } from "@prisma/client";
-import { DataTable } from "@/components/ui/dataTable";
+import { DataTable } from "@/components/ui/data-table";
 
 interface VariationsTableProps {
   productVariations: _ProductVariation[];
@@ -210,7 +210,7 @@ export default function VariationsSection({
         </div>
       </div>
       <Table
-        className={`border rounded-l ${
+        className={`border rounded-md ${
           disabled ? "text-gray-300 cursor-not-allowed" : ""
         }`}
       >

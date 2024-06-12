@@ -1,5 +1,5 @@
 import { Billboard, Category } from "@prisma/client";
-import prismadb from "@/lib/prismadb";
+import prisma from "@/prisma/client";
 import Client from "@/components/Client";
 import columns from "./(components)/columns";
 
@@ -9,7 +9,7 @@ export default async function CategoriesPage({
   params: { storeId: string };
 }) {
   const categories: (Category & { billboard: Billboard })[] | null =
-    await prismadb.category.findMany({
+    await prisma.category.findMany({
       where: { storeId: params.storeId },
       include: { billboard: true },
       orderBy: { createdAt: "desc" },

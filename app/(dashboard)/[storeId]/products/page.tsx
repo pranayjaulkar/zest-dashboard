@@ -1,4 +1,4 @@
-import prismadb from "@/lib/prismadb";
+import prisma from "@/prisma/client";
 import { formatter } from "@/lib/utils";
 import Client from "@/components/Client";
 import columns from "./(components)/columns";
@@ -8,7 +8,7 @@ export default async function ProductsPage({
 }: {
   params: { storeId: string };
 }) {
-  let products = await prismadb.product.findMany({
+  let products = await prisma.product.findMany({
     where: { storeId: params.storeId },
     include: {
       category: true,

@@ -1,5 +1,5 @@
 import { Color } from "@prisma/client";
-import prismadb from "@/lib/prismadb";
+import prisma from "@/prisma/client";
 import Client from "@/components/Client";
 import columns from "./(components)/columns";
 
@@ -8,7 +8,7 @@ export default async function ColorsPage({
 }: {
   params: { storeId: string };
 }) {
-  const colors: Color[] = await prismadb.color.findMany({
+  const colors: Color[] = await prisma.color.findMany({
     where: { storeId: params.storeId },
     orderBy: { createdAt: "desc" },
   });

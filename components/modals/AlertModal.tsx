@@ -1,21 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Modal } from "../ui/modals";
+import { Modal } from "../ui/modal";
 import { Button } from "../ui/button";
 
 interface AlertModalProps {
   isOpen: boolean;
-  setOpen:React.Dispatch<React.SetStateAction<boolean>>;
+  setOpen: React.Dispatch<React.SetStateAction<boolean>>;
   onConfirm: () => void;
   loading: boolean;
 }
-export const AlertModal: React.FC<AlertModalProps> = ({
-  isOpen,
-  setOpen,
-  onConfirm,
-  loading,
-}) => {
+export const AlertModal: React.FC<AlertModalProps> = ({ isOpen, setOpen, onConfirm, loading }) => {
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -32,11 +27,7 @@ export const AlertModal: React.FC<AlertModalProps> = ({
       setOpen={setOpen}
     >
       <div className="pt-6 space-x-2 flex items-center justify-end w-full">
-        <Button
-          disabled={loading}
-          variant="outline"
-          onClick={() => setOpen(false)}
-        >
+        <Button disabled={loading} variant="outline" onClick={() => setOpen(false)}>
           Cancel
         </Button>
         <Button disabled={loading} variant="destructive" onClick={onConfirm}>

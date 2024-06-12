@@ -4,21 +4,25 @@ import { useEffect } from "react";
 import LoadingBar from "react-top-loading-bar";
 import { usePathname, useSearchParams } from "next/navigation";
 
-interface LoadingBarProviderProps {}
+interface LoadingBarProviderProps {
+  color?: string;
+  height?: number;
+}
 
-const LoadingBarProvider: React.FC<LoadingBarProviderProps> = () => {
+const LoadingBarProvider: React.FC<LoadingBarProviderProps> = ({ color, height, ...props }) => {
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  useEffect(() => {
-    loadingBar.done();
-  }, [pathname, searchParams]);
   const loadingBar = useLoadingBarStore();
+  useEffect(() => {
+    if (loadingBar.progress) loadingBar.done();
+  }, [pathname, searchParams]);
   return (
     <LoadingBar
-      color="#f11946"
-      height={3}
+      color={color || "#f11946"}
+      height={height || 3}
       progress={loadingBar.progress}
       onLoaderFinished={() => loadingBar.setProgress(0)}
+      {...props}
     />
   );
 };

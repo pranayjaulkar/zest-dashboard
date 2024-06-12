@@ -1,21 +1,13 @@
 "use client";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { useStoreModal } from "@/hooks/useCreateModalStore";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { useCreateModalStore } from "@/hooks/useCreateModalStore";
 import { Store } from "@prisma/client";
 import { useParams, usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useStores } from "@/hooks/useStores";
 import { Button } from "../../ui/button";
 import { cn } from "@/lib/utils";
-import {
-  Check,
-  ChevronsUpDown,
-  Store as StoreIcon,
-  PlusCircle,
-} from "lucide-react";
+import { Check, ChevronsUpDown, Store as StoreIcon, PlusCircle } from "lucide-react";
 import {
   Command,
   CommandEmpty,
@@ -26,38 +18,40 @@ import {
   CommandSeparator,
 } from "../../ui/command";
 import { useLoadingBarStore } from "@/hooks/useLoadingBarStore";
-type PopoverTriggerProps = React.ComponentPropsWithoutRef<
-  typeof PopoverTrigger
->;
+type PopoverTriggerProps = React.ComponentPropsWithoutRef<typeof PopoverTrigger>;
 
 interface StoreSwitcherProps extends PopoverTriggerProps {
   items: Store[];
 }
 
-export default function StoreSwitcher({
-  className,
-  items = [],
-}: StoreSwitcherProps) {
-  const storeModal = useStoreModal();
+export default function StoreSwitcher({ className, items = [] }: StoreSwitcherProps) {
+  const createModal = useCreateModalStore();
   const loadingBar = useLoadingBarStore();
   const pathname = usePathname();
   const params = useParams();
   const router = useRouter();
+  const { stores, setStores } = useStores();
   const [open, setOpen] = useState(false);
-  const formattedItems = items.map((item) => ({
+  const formattedStores = stores.map((item) => ({
     label: item.name,
     value: item.id,
   }));
-  const currentStore = formattedItems.find(
-    (item) => item.value === params.storeId
-  );
+
+  const currentStore = formattedStores.find((item) => item.value === params.storeId);
+
   const onStoreSelect = (store: { value: string; label: string }) => {
     setOpen(false);
     if (pathname !== `/${store.value}`) {
       loadingBar.start();
       router.push(`/${store.value}`);
+      router.refresh();
     }
   };
+
+  useEffect(() => {
+    setStores(items);
+  }, []);
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -80,21 +74,12 @@ export default function StoreSwitcher({
             <CommandInput placeholder="Search Store..." />
             <CommandEmpty>No store found</CommandEmpty>
             <CommandGroup>
-              {formattedItems.map((store) => (
-                <CommandItem
-                  key={store.value}
-                  onSelect={() => onStoreSelect(store)}
-                  className="text-sm"
-                >
+              {formattedStores.map((store) => (
+                <CommandItem key={store.value} onSelect={() => onStoreSelect(store)} className="text-sm">
                   <StoreIcon className="mr-2 h-4 w-4" />
                   {store.label}
                   <Check
-                    className={cn(
-                      "ml-auto h-4 w-4",
-                      currentStore?.value == store?.value
-                        ? "opacity-100"
-                        : "opacity-0"
-                    )}
+                    className={cn("ml-auto h-4 w-4", currentStore?.value == store?.value ? "opacity-100" : "opacity-0")}
                   />
                 </CommandItem>
               ))}
@@ -105,7 +90,7 @@ export default function StoreSwitcher({
             <CommandItem
               onSelect={() => {
                 setOpen(false);
-                storeModal.onOpen();
+                createModal.open();
               }}
             >
               <PlusCircle className="mr-2 h-5 w-5" />

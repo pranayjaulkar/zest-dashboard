@@ -13,16 +13,11 @@ import axios from "axios";
 import { useParams, useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { AlertModal } from "@/components/modals/AlertModal";
-import { ApiAlert } from "@/components/ui/apiAlert";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-} from "@/components/ui/form";
+import { ApiAlert } from "@/components/ui/api-alert";
+import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
 import { useOrigin } from "@/hooks/useOrigin";
 import { useLoadingBarStore } from "@/hooks/useLoadingBarStore";
+import { useStores } from "@/hooks/useStores";
 
 interface SettingsFormProps {
   initialData: Store | null;
@@ -40,6 +35,7 @@ const SettingsForm: React.FC<SettingsFormProps> = ({ initialData }) => {
 
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const { stores, setStores } = useStores();
   const form = useForm<SettingsFormValue>({
     resolver: zodResolver(formSchema),
     defaultValues: initialData ? initialData : { name: "" },
@@ -52,6 +48,8 @@ const SettingsForm: React.FC<SettingsFormProps> = ({ initialData }) => {
       router.refresh();
       toast.success("Store updated");
     } catch (error) {
+      console.trace("error: ", error);
+      loadingBar.done();
       toast.error("Something Went Wrong");
     } finally {
       setLoading(false);
@@ -63,27 +61,23 @@ const SettingsForm: React.FC<SettingsFormProps> = ({ initialData }) => {
       setLoading(true);
       loadingBar.start();
       await axios.delete(`/api/stores/${params.storeId}`);
-      router.refresh();
+      setStores(stores.filter((store) => store.id !== params.storeId));
       router.push("/");
+      router.refresh();
       toast.success("Store deleted");
-      setLoading(false);
-      setOpen(false);
     } catch (error) {
-      setLoading(false);
-      setOpen(false);
+      console.trace("error: ", error);
       loadingBar.done();
       toast.error("Something Went Wrong");
+    } finally {
+      setLoading(false);
+      setOpen(false);
     }
   };
 
   return (
     <div className="flex-1 space-y-4 p-8 pt-6">
-      <AlertModal
-        isOpen={open}
-        setOpen={setOpen}
-        onConfirm={onDelete}
-        loading={loading}
-      />
+      <AlertModal isOpen={open} setOpen={setOpen} onConfirm={onDelete} loading={loading} />
       <div className="flex items-center justify-between ">
         <Heading title="Settings" description="Manage store preferences" />
         <Button variant="destructive" size="icon" onClick={() => setOpen(true)}>
@@ -92,10 +86,7 @@ const SettingsForm: React.FC<SettingsFormProps> = ({ initialData }) => {
       </div>
       <Separator />
       <Form {...form}>
-        <form
-          onSubmit={form.handleSubmit(onSubmit)}
-          className="space-y-8 w-full"
-        >
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 w-full">
           <div className="grid grid-cols-3 gap-8">
             <FormField
               control={form.control}
@@ -121,11 +112,7 @@ const SettingsForm: React.FC<SettingsFormProps> = ({ initialData }) => {
         </form>
       </Form>
       <Separator />
-      <ApiAlert
-        title="NEXT_PUBLIC_API_URL"
-        description={`${origin}/api/stores/${params.storeId}`}
-        variant="public"
-      />
+      <ApiAlert title="NEXT_PUBLIC_API_URL" description={`${origin}/api/stores/${params.storeId}`} variant="public" />
     </div>
   );
 };

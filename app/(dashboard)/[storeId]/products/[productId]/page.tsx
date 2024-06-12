@@ -1,13 +1,9 @@
-import prismadb from "@/lib/prismadb";
+import prisma from "@/prisma/client";
 import ProductForm from "./(components)/ProductForm";
 import { ProductWithPriceTypeConverted } from "@/types";
 
-export default async function ProductPage({
-  params,
-}: {
-  params: { productId: string; storeId: string };
-}) {
-  const product = await prismadb.product.findUnique({
+export default async function ProductPage({ params }: { params: { productId: string; storeId: string } }) {
+  const product = await prisma.product.findUnique({
     where: {
       id: params.productId,
     },
@@ -17,15 +13,15 @@ export default async function ProductPage({
     },
   });
 
-  const categories = await prismadb.category.findMany({
+  const categories = await prisma.category.findMany({
     where: { storeId: params.storeId },
   });
 
-  const sizes = await prismadb.size.findMany({
+  const sizes = await prisma.size.findMany({
     where: { storeId: params.storeId },
   });
 
-  const colors = await prismadb.color.findMany({
+  const colors = await prisma.color.findMany({
     where: { storeId: params.storeId },
   });
 
@@ -40,17 +36,10 @@ export default async function ProductPage({
     };
   }
 
-  const date = new Date(Date.now());
-
   return (
     <div className="flex-col max-w-screen-xl mx-auto">
       <div className="flex-1 space-y-4 p-8 pt-6">
-        <ProductForm
-          initialData={productPriceTypeConverted}
-          categories={categories}
-          colors={colors}
-          sizes={sizes}
-        />
+        <ProductForm initialData={productPriceTypeConverted} categories={categories} colors={colors} sizes={sizes} />
       </div>
     </div>
   );

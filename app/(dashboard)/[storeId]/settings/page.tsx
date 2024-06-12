@@ -1,13 +1,13 @@
 import { Store } from "@prisma/client";
 import SettingsForm from "./components/SettingsForm";
-import prismadb from "@/lib/prismadb";
+import prisma from "@/prisma/client";
 
 export default async function SettingsPage({
   params,
 }: {
   params: { storeId: string };
 }) {
-  const store: Store | null = await prismadb.store.findFirst({
+  const store: Store | null = await prisma.store.findFirst({
     where: { id: params.storeId },
   });
   return (

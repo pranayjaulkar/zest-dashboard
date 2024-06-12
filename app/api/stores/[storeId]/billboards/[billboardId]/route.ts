@@ -1,18 +1,15 @@
-import prismadb from "@/lib/prismadb";
-import { auth } from "@clerk/nextjs";
+import prisma from "@/prisma/client";
+import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { Billboard } from "@prisma/client";
-import cloudinary from "@/cloudinary";
+import cloudinary from "@/cloudinary.config";
 
-export async function GET(
-  req: Request,
-  { params }: { params: { billboardId: string } }
-) {
+export async function GET(req: Request, { params }: { params: { billboardId: string } }) {
   try {
     if (!params.billboardId) {
       return new NextResponse("Billboard id is required", { status: 400 });
     }
-    const billboard = await prismadb.billboard.findUnique({
+    const billboard = await prisma.billboard.findUnique({
       where: { id: params.billboardId },
     });
     return NextResponse.json(billboard);
@@ -22,14 +19,11 @@ export async function GET(
   }
 }
 
-export async function PATCH(
-  req: Request,
-  { params }: { params: { storeId: string; billboardId: string } }
-) {
+export async function PATCH(req: Request, { params }: { params: { storeId: string; billboardId: string } }) {
   try {
     const { userId } = auth();
     const body = await req.json();
-    const { label, image } = body;
+    const { label, imageUrl, cloudinaryPublicId } = body;
 
     if (!userId) {
       return new NextResponse("Unauthorized", { status: 404 });
@@ -37,26 +31,26 @@ export async function PATCH(
     if (!label) {
       return new NextResponse("Label is required", { status: 400 });
     }
-    if (!image.url || !image.cloudinaryPublicId) {
+    if (!imageUrl || !cloudinaryPublicId) {
       return new NextResponse("Image Url is required", { status: 400 });
     }
     if (!params.billboardId) {
       return new NextResponse("Billboard id is required", { status: 400 });
     }
 
-    const storeByUserId = await prismadb.store.findFirst({
+    const storeByUserId = await prisma.store.findFirst({
       where: { id: params.storeId, userId },
     });
 
     if (!storeByUserId) {
       return new NextResponse("Unauthorized", { status: 403 });
     }
-    const updatedBillboard = await prismadb.billboard.updateMany({
+    const updatedBillboard = await prisma.billboard.update({
       where: { id: params.billboardId },
       data: {
         label,
-        imageUrl: image.url,
-        imagePublicId: image.cloudinaryPublicId,
+        imageUrl,
+        cloudinaryPublicId,
       },
     });
     return NextResponse.json(updatedBillboard);
@@ -66,10 +60,7 @@ export async function PATCH(
   }
 }
 
-export async function DELETE(
-  req: Request,
-  { params }: { params: { storeId: string; billboardId: string } }
-) {
+export async function DELETE(req: Request, { params }: { params: { storeId: string; billboardId: string } }) {
   try {
     const { userId } = auth();
     if (!userId) {
@@ -81,10 +72,10 @@ export async function DELETE(
     if (!params.storeId) {
       return new NextResponse("Store id is required", { status: 400 });
     }
-    const storeByUserId = await prismadb.store.findFirst({
+    const storeByUserId = await prisma.store.findFirst({
       where: { id: params.storeId, userId },
     });
-    const billboard: Billboard | null = await prismadb.billboard.findUnique({
+    const billboard: Billboard | null = await prisma.billboard.findUnique({
       where: { id: params.billboardId },
     });
 
@@ -92,16 +83,11 @@ export async function DELETE(
       return new NextResponse("Unauthorized", { status: 403 });
     }
     let imageDeleteResponse;
-    if (billboard && billboard.imagePublicId) {
-      imageDeleteResponse = await cloudinary.uploader.destroy(
-        billboard.imagePublicId
-      );
+    if (billboard && billboard.cloudinaryPublicId) {
+      imageDeleteResponse = await cloudinary.uploader.destroy(billboard.cloudinaryPublicId);
     }
-    if (
-      imageDeleteResponse?.result === "ok" ||
-      imageDeleteResponse?.result === "not found"
-    ) {
-      const deletedBillboard = await prismadb.billboard.delete({
+    if (imageDeleteResponse?.result === "ok" || imageDeleteResponse?.result === "not found") {
+      const deletedBillboard = await prisma.billboard.delete({
         where: { id: params.billboardId },
       });
       return NextResponse.json(deletedBillboard);

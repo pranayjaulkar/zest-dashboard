@@ -12,13 +12,7 @@ import axios from "axios";
 import { useParams, useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { AlertModal } from "@/components/modals/AlertModal";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-} from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
 import { useLoadingBarStore } from "@/hooks/useLoadingBarStore";
 
 interface SizeFormProps {
@@ -54,18 +48,16 @@ const SizeForm: React.FC<SizeFormProps> = ({ initialData }) => {
       setLoading(true);
       loadingBar.start();
       if (initialData?.id) {
-        await axios.patch(
-          `/api/stores/${params.storeId}/sizes/${params.sizeId}`,
-          data
-        );
+        await axios.patch(`/api/stores/${params.storeId}/sizes/${params.sizeId}`, data);
       } else {
         await axios.post(`/api/stores/${params.storeId}/sizes`, data);
       }
-      router.refresh();
       router.push(`/${params.storeId}/sizes`);
+      router.refresh();
       toast.success(toastMessage);
     } catch (error) {
       console.trace("error", error);
+      loadingBar.done();
       toast.error("Something Went Wrong");
     } finally {
       setLoading(false);
@@ -76,15 +68,13 @@ const SizeForm: React.FC<SizeFormProps> = ({ initialData }) => {
     try {
       setLoading(true);
       loadingBar.start();
-      await axios.delete(
-        `/api/stores/${params.storeId}/sizes/${params.sizeId}`
-      );
+      await axios.delete(`/api/stores/${params.storeId}/sizes/${params.sizeId}`);
       router.push(`/${params.storeId}/sizes/`);
       router.refresh();
-
       toast.success("Size deleted");
     } catch (error) {
       console.trace("error: ", error);
+      loadingBar.done();
       toast.error("Something went wrong");
     } finally {
       setLoading(false);
@@ -94,31 +84,19 @@ const SizeForm: React.FC<SizeFormProps> = ({ initialData }) => {
 
   return (
     <>
-      <AlertModal
-        isOpen={open}
-        setOpen={setOpen}
-        onConfirm={onDelete}
-        loading={loading}
-      />
+      <AlertModal isOpen={open} setOpen={setOpen} onConfirm={onDelete} loading={loading} />
       <div className="flex items-center justify-between">
         <Heading title={title} description={description} />
 
         {initialData?.id && (
-          <Button
-            variant="destructive"
-            size="icon"
-            onClick={() => setOpen(true)}
-          >
+          <Button variant="destructive" size="icon" onClick={() => setOpen(true)}>
             <TrashIcon className="h-4 w-4" />
           </Button>
         )}
       </div>
       <Separator />
       <Form {...form}>
-        <form
-          onSubmit={form.handleSubmit(onSubmit)}
-          className="space-y-8 w-full"
-        >
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 w-full">
           <div className="grid grid-cols-3 gap-8">
             <FormField
               control={form.control}

@@ -3,11 +3,9 @@ import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
 import { useLoadingBarStore } from "@/hooks/useLoadingBarStore";
+import { Store } from "@prisma/client";
 
-export default function MainNav({
-  className,
-  ...props
-}: React.HTMLAttributes<HTMLElement>) {
+export default function MainNav({ className, stores, ...props }: { className: string; stores: Store[] }) {
   const pathname = usePathname();
   const params = useParams();
   const loadingBar = useLoadingBarStore();
@@ -55,7 +53,7 @@ export default function MainNav({
   ];
 
   return (
-    <nav className={cn("flex items-center space-x-4 lg:space-x-6", className)}>
+    <nav className={cn("flex items-center space-x-4 lg:space-x-6", className)} {...props}>
       {routes.map((route) => (
         <Link
           key={route.href}
@@ -65,9 +63,7 @@ export default function MainNav({
           }}
           className={cn(
             "text-sm font-medium transition-colors hover:text-primary",
-            route.active
-              ? "text-black dark:text-white"
-              : "text-muted-foreground"
+            route.active ? "text-black dark:text-white" : "text-muted-foreground"
           )}
         >
           {route.label}

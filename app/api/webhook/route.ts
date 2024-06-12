@@ -2,7 +2,7 @@ import Stripe from "stripe";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
-import prismadb from "@/lib/prismadb";
+import prisma from "@/prisma/client";
 
 export async function POST(req: Request) {
   const body = await req.text();
@@ -30,7 +30,7 @@ export async function POST(req: Request) {
   ];
   const addressString = addressComponents.filter((c) => c !== null).join(", ");
   if (event.type === "checkout.session.completed") {
-    const order = await prismadb.order.update({
+    const order = await prisma.order.update({
       where: { id: session?.metadata?.orderId },
       data: {
         isPaid: true,
@@ -43,10 +43,6 @@ export async function POST(req: Request) {
     const productIds = order.orderItems.map(
       (orderItems) => orderItems.productId
     );
-    await prismadb.product.updateMany({
-      where: { id: { in: [...productIds] } },
-      data: { isArchived: true },
-    });
   }
   return new NextResponse(null, { status: 200 });
 }

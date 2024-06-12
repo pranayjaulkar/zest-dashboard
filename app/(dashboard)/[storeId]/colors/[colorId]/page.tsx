@@ -1,4 +1,4 @@
-import prismadb from "@/lib/prismadb";
+import prisma from "@/prisma/client";
 import ColorForm from "./(components)/ColorForm";
 
 export default async function ColorPage({
@@ -6,7 +6,7 @@ export default async function ColorPage({
 }: {
   params: { colorId: string };
 }) {
-  const color = await prismadb.color.findUnique({
+  const color = await prisma.color.findUnique({
     where: {
       id: params.colorId,
     },

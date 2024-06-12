@@ -9,35 +9,18 @@ import { useParams, useRouter } from "next/navigation";
 import { useLoadingBarStore } from "@/hooks/useLoadingBarStore";
 import VariationsSection from "./VariationsSection";
 import { Category, Size, Color } from "@prisma/client";
-import { _ProductVariation, ProductWithPriceTypeConverted } from "@/types";
+import { _ProductVariation, ImageType, ProductWithPriceTypeConverted } from "@/types";
 import { AlertModal } from "@/components/modals/AlertModal";
-import ImageUpload from "@/components/ui/imageUpload";
+import ImageUpload from "@/components/ui/image-upload";
 import { Button } from "@/components/ui/button";
 import Heading from "@/components/ui/heading";
 import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Trash as TrashIcon } from "lucide-react";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-} from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  getProductVariations,
-  getColorsFromVariations,
-  getSizesFromVariations,
-} from "@/lib/utils";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel } from "@/components/ui/form";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { getProductVariations, getColorsFromVariations, getSizesFromVariations } from "@/lib/utils";
 
 interface ProductFormProps {
   initialData: ProductWithPriceTypeConverted | null;
@@ -48,13 +31,6 @@ interface ProductFormProps {
 
 const formSchema = z.object({
   name: z.string().min(1),
-  images: z
-    .object({
-      url: z.string().min(1),
-      cloudinaryPublicId: z.string(),
-    })
-    .array()
-    .nonempty(),
   categoryId: z.string().min(1),
   price: z.coerce.number().min(1),
   isFeatured: z.boolean().default(false).optional(),
@@ -63,84 +39,77 @@ const formSchema = z.object({
 
 export type ProductFormValue = z.infer<typeof formSchema>;
 
-const ProductForm: React.FC<ProductFormProps> = ({
-  initialData,
-  categories,
-  colors,
-  sizes,
-}) => {
+const ProductForm: React.FC<ProductFormProps> = ({ initialData, categories, colors, sizes }) => {
   const params = useParams();
   const router = useRouter();
+  const loadingBar = useLoadingBarStore();
   const [open, setOpen] = useState(false);
   const [disabled, setDisabled] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [images, setImages] = useState<ImageType[]>([]);
+  const [productVariations, setProductVariations] = useState<_ProductVariation[]>([]);
   const [selectedColors, setSelectedColors] = useState<Color[]>(
-    initialData?.id
-      ? getColorsFromVariations(initialData.productVariations)
-      : []
+    initialData?.id ? getColorsFromVariations(initialData.productVariations) : []
   );
   const [selectedSizes, setSelectedSizes] = useState<Size[]>(
     initialData?.id ? getSizesFromVariations(initialData.productVariations) : []
   );
-  const [productVariations, setProductVariations] = useState<
-    _ProductVariation[]
-  >([]);
-  const [loading, setLoading] = useState(false);
-  const loadingBar = useLoadingBarStore();
   const title = initialData?.id ? "Edit product" : "Create product";
   const description = initialData?.id ? "Edit a product" : "Add a new Product";
   const toastMessage = initialData?.id ? "Product updated" : "Product created";
   const action = initialData?.id ? "Save changes" : "Create product";
+  const defaultValues = initialData
+    ? {
+        ...initialData,
+        price: parseFloat(String(initialData?.price)),
+      }
+    : {
+        name: "",
+        price: 0,
+        productVariations: [],
+        categoryId: "",
+        isFeatured: false,
+        isArchived: false,
+      };
 
   const form = useForm<ProductFormValue>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      ...initialData,
-      price: parseFloat(String(initialData?.price)),
-    } || {
-      name: "",
-      images: [],
-      price: 0,
-      productVariations: [],
-      categoryId: "",
-      isFeatured: false,
-      isArchived: false,
-    },
+    defaultValues,
   });
 
   const onSubmit = async (data: ProductFormValue) => {
     try {
-      setLoading(true);
-      loadingBar.start();
-      if (initialData?.id) {
-        const variations = productVariations.map((v) => ({
-          sizeId: v.sizeId,
-          colorId: v.colorId,
-          quantity: v.quantity,
-          name: v.name,
-        }));
-        const newData = { ...data, productVariations: variations };
-        await axios.patch(
-          `/api/stores/${params.storeId}/products/${params.productId}`,
-          newData
-        );
+      if (!images.length) {
+        toast.error("No images. Please upload images");
+      } else if (!productVariations.length) {
+        toast.error("No product variants. Create product variant");
+      } else if (!productVariations.find((pv) => pv.selected === true)) {
+        toast.error("No product variants selected");
       } else {
+        setLoading(true);
+        loadingBar.start();
+        // remove selected field from productVariations
         const variations = productVariations.map((v) => ({
           sizeId: v.sizeId,
           colorId: v.colorId,
           quantity: v.quantity,
           name: v.name,
         }));
-        const newData = { ...data, productVariations: variations };
-        await axios.post(`/api/stores/${params.storeId}/products`, newData);
+        const newData = { ...data, images, productVariations: variations };
+        if (initialData?.id) {
+          await axios.patch(`/api/stores/${params.storeId}/products/${params.productId}`, newData);
+        } else {
+          await axios.post(`/api/stores/${params.storeId}/products`, newData);
+        }
+        router.push(`/${params.storeId}/products`);
+        router.refresh();
+        toast.success(toastMessage);
       }
-      router.refresh();
-      router.push(`/${params.storeId}/products`);
-      toast.success(toastMessage);
     } catch (error) {
+      loadingBar.done();
+      setLoading(false);
       console.trace("error", error);
       toast.error("Something Went Wrong");
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -148,16 +117,14 @@ const ProductForm: React.FC<ProductFormProps> = ({
     try {
       setLoading(true);
       loadingBar.start();
-      await axios.delete(
-        `/api/stores/${params.storeId}/products/${params.productId}`
-      );
+      await axios.delete(`/api/stores/${params.storeId}/products/${params.productId}`);
       router.push(`/${params.storeId}/products/`);
       router.refresh();
-
       toast.success("Product deleted");
     } catch (error) {
       console.trace("error: ", error);
       toast.error("Something went wrong");
+      loadingBar.done();
     } finally {
       setLoading(false);
       setOpen(false);
@@ -165,13 +132,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
   };
 
   useEffect(() => {
-    setProductVariations(
-      getProductVariations(
-        selectedColors,
-        selectedSizes,
-        initialData?.productVariations
-      )
-    );
+    setProductVariations(getProductVariations(selectedColors, selectedSizes, initialData?.productVariations));
   }, [selectedColors, selectedSizes, initialData]);
 
   useEffect(() => {
@@ -180,55 +141,33 @@ const ProductForm: React.FC<ProductFormProps> = ({
     } else setDisabled(true);
   }, [selectedColors, selectedSizes]);
 
+  useEffect(() => {
+    if (initialData?.images)
+      setImages(initialData.images.map((img) => ({ url: img.url, cloudinaryPublicId: img.cloudinaryPublicId })));
+  }, []);
+
   return (
     <>
-      <AlertModal
-        isOpen={open}
-        setOpen={setOpen}
-        onConfirm={onDelete}
-        loading={loading}
-      />
+      <AlertModal isOpen={open} setOpen={setOpen} onConfirm={onDelete} loading={loading} />
       <div className="flex items-center justify-between">
         <Heading title={title} description={description} />
 
         {initialData?.id && (
-          <Button
-            variant="destructive"
-            size="icon"
-            onClick={() => setOpen(true)}
-          >
+          <Button variant="destructive" size="icon" onClick={() => setOpen(true)}>
             <TrashIcon className="h-4 w-4" />
           </Button>
         )}
       </div>
       <Separator />
       <Form {...form}>
-        <form
-          onSubmit={form.handleSubmit(onSubmit)}
-          className="space-y-8 w-full"
-        >
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 w-full">
           {/* Image */}
 
-          <FormField
-            control={form.control}
-            name="images"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Upload Product Images</FormLabel>
-                <FormControl>
-                  <ImageUpload
-                    value={field.value || []}
-                    disabled={loading}
-                    onChange={(updatedImages) => field.onChange(updatedImages)}
-                    onRemove={(url) =>
-                      field.onChange(
-                        field.value.filter((image) => image.url !== url)
-                      )
-                    }
-                  />
-                </FormControl>
-              </FormItem>
-            )}
+          <ImageUpload
+            multiple
+            images={images}
+            onUpload={(image) => setImages((prev) => [...prev, image])}
+            onRemove={(url) => setImages(images.filter((img) => img.url !== url))}
           />
 
           {/* Name */}
@@ -245,7 +184,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
                       disabled={loading}
                       placeholder="Product Name"
                       onChange={(event) => field.onChange(event.target.value)}
-                      value={field.value || ""}
+                      value={field.value}
                     />
                   </FormControl>
                 </FormItem>
@@ -262,6 +201,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
                   <FormLabel>Price</FormLabel>
                   <FormControl>
                     <Input
+                      type="number"
                       disabled={loading}
                       placeholder="Product Price"
                       onChange={(event) => field.onChange(event.target.value)}
@@ -288,10 +228,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
                   >
                     <FormControl>
                       <SelectTrigger className="w-[180px]">
-                        <SelectValue
-                          placeholder="Select a category"
-                          {...field}
-                        />
+                        <SelectValue placeholder="Select a category" {...field} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -315,15 +252,10 @@ const ProductForm: React.FC<ProductFormProps> = ({
               name="isFeatured"
               render={({ field }) => (
                 <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                  <Checkbox
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                  <div className="space-y-l leading-none">
+                  <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                  <div className="space-y-2 leading-none">
                     <FormLabel>Featured</FormLabel>
-                    <FormDescription>
-                      This product will appear on the homepage.
-                    </FormDescription>
+                    <FormDescription>This product will appear on the homepage.</FormDescription>
                   </div>
                 </FormItem>
               )}
@@ -336,15 +268,10 @@ const ProductForm: React.FC<ProductFormProps> = ({
               name="isArchived"
               render={({ field }) => (
                 <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                  <Checkbox
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                  <div className="space-y-l leading-none">
+                  <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                  <div className="space-y-2 leading-none">
                     <FormLabel>Archived</FormLabel>
-                    <FormDescription>
-                      This product will not appear anywhere in the store.
-                    </FormDescription>
+                    <FormDescription>This product will not appear anywhere in the store.</FormDescription>
                   </div>
                 </FormItem>
               )}

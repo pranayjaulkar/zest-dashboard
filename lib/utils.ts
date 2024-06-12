@@ -1,12 +1,11 @@
+import { type ClassValue, clsx } from "clsx"
+import { twMerge } from "tailwind-merge"
 import { _ProductVariation } from "@/types";
 import { Color, ProductVariation, Size } from "@prisma/client";
-import { type ClassValue, clsx } from "clsx";
-import { twMerge } from "tailwind-merge";
-
 
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
+  return twMerge(clsx(inputs))
 }
 
 export const formatter = new Intl.NumberFormat("en-US", {
