@@ -22,7 +22,7 @@ interface ClientProps<TData> {
   entityNamePlural: string;
   entityName: string;
   searchKey: string;
-  order: boolean;
+  order?: boolean;
 }
 
 export default function Client<TData extends { id: string; label?: string; name?: string }>({
