@@ -8,12 +8,12 @@ interface LoadingBarStore {
   done: () => void;
 }
 function increaseProgress(prev: LoadingBarStore) {
-  if (prev.progress < 80) return { progress: prev.progress + getRandomNumber(5, 35) };
+  if (prev.progress < 65) return { progress: prev.progress + getRandomNumber(5, 35) };
   else return { progress: prev.progress };
 }
 
 let intervalId: any;
-export const useLoadingBarStore = create<LoadingBarStore>((set) => ({
+export const useLoadingBarStore = create<LoadingBarStore>((set, get) => ({
   progress: 0,
   setProgress: (num) => set({ progress: num }),
   // start() method starts the loading bar
@@ -30,7 +30,7 @@ export const useLoadingBarStore = create<LoadingBarStore>((set) => ({
     // increase progress by 5-15 every 400 milliseconds
     // store intervalId
     intervalId = setInterval(() => {
-      set((prev) => increaseProgress(prev));
+      set(increaseProgress(get()));
     }, 1500);
   },
 

@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import Heading from "@/components/ui/heading";
 import { Separator } from "@/components/ui/separator";
 import { Plus as PlusIcon } from "lucide-react";
-import { useParams, usePathname } from "next/navigation";
+import { useParams, usePathname, useRouter } from "next/navigation";
 import { DataTable } from "@/components/ui/data-table";
 import { ColumnDef } from "@tanstack/react-table";
 import { useState } from "react";
@@ -15,7 +15,6 @@ import CellActions from "./CellActions";
 import { AlertModal } from "./modals/AlertModal";
 import axios from "axios";
 import toast from "react-hot-toast";
-import { isOrder } from "@/types";
 
 interface ClientProps<TData> {
   data: TData[];
@@ -23,6 +22,7 @@ interface ClientProps<TData> {
   entityNamePlural: string;
   entityName: string;
   searchKey: string;
+  order: boolean;
 }
 
 export default function Client<TData extends { id: string; label?: string; name?: string }>({
@@ -31,9 +31,11 @@ export default function Client<TData extends { id: string; label?: string; name?
   entityName,
   entityNamePlural,
   searchKey,
+  order,
 }: ClientProps<TData>) {
   const params = useParams();
   const loadingBar = useLoadingBarStore();
+  const router = useRouter();
   const [rows, setRows] = useState(data);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -83,23 +85,21 @@ export default function Client<TData extends { id: string; label?: string; name?
       console.trace("error: ", error);
       toast.error("Something Went Wrong");
     } finally {
+      router.refresh();
       setLoading(false);
       setOpen(false);
     }
   };
 
-  let isOrderFlag;
-  if (data?.length > 0) isOrderFlag = isOrder(data[0]) ? true : false;
-
   return (
     <>
       <AlertModal isOpen={open} setOpen={setOpen} onConfirm={handleDelete} loading={loading} />
-      <div className={`flex items-center ${isOrderFlag ? "justify-start" : "justify-between"}`}>
+      <div className={`flex items-center ${order ? "justify-start" : "justify-between"}`}>
         <Heading
           title={`${entityName} (${data?.length || 0})`}
           description={`Manage ${entityNamePlural} for your store`}
         />
-        {!isOrderFlag && (
+        {!order && (
           <Link
             href={`/${params.storeId}/${entityNamePlural}/new`}
             onClick={() => {

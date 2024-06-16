@@ -23,7 +23,7 @@ export async function PATCH(req: Request, { params }: { params: { storeId: strin
   try {
     const { userId } = auth();
     const body = await req.json();
-    const { label, imageUrl, cloudinaryPublicId } = body;
+    const { label, active, imageUrl, cloudinaryPublicId } = body;
 
     if (!userId) {
       return new NextResponse("Unauthorized", { status: 404 });
@@ -49,6 +49,7 @@ export async function PATCH(req: Request, { params }: { params: { storeId: strin
       where: { id: params.billboardId },
       data: {
         label,
+        active,
         imageUrl,
         cloudinaryPublicId,
       },

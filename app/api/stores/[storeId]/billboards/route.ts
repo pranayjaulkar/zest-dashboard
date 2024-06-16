@@ -6,7 +6,7 @@ export async function POST(req: Request, { params }: { params: { storeId: string
   try {
     const { userId } = auth();
     const body = await req.json();
-    const { label, imageUrl, cloudinaryPublicId } = body;
+    const { label, active, imageUrl, cloudinaryPublicId } = body;
 
     if (!userId) {
       return new NextResponse("Unauthorized", { status: 404 });
@@ -31,6 +31,7 @@ export async function POST(req: Request, { params }: { params: { storeId: string
     const billboard = await prisma.billboard.create({
       data: {
         label,
+        active,
         imageUrl,
         cloudinaryPublicId,
         storeId: params.storeId,
@@ -52,6 +53,7 @@ export async function GET(req: Request, { params }: { params: { storeId: string 
     const billboards = await prisma.billboard.findMany({
       where: { storeId: params.storeId },
     });
+    
     return NextResponse.json(billboards);
   } catch (error) {
     console.trace("[Bilboard_GET]", error);

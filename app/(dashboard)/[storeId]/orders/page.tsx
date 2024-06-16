@@ -3,14 +3,10 @@ import prisma from "@/prisma/client";
 import Client from "@/components/Client";
 import columns from "./(components)/columns";
 
-export default async function OrdersPage({
-  params,
-}: {
-  params: { storeId: string };
-}) {
-  let orders = await prisma.order.findMany({
+export default async function OrdersPage({ params }: { params: { storeId: string } }) {
+  const orders = await prisma.order.findMany({
     where: { storeId: params.storeId },
-    include: { orderItems: { include: { product: true } } },
+    include: { orderItems: { include: { product: true, productVariation: true } } },
     orderBy: { createdAt: "desc" },
   });
   const formattedOrders = orders.map((item) => ({
@@ -27,10 +23,11 @@ export default async function OrdersPage({
   }));
 
   return (
-   <div className="flex-col max-w-screen-xl mx-auto">
+    <div className="flex-col max-w-screen-xl mx-auto">
       <div className="flex-1 space-y-4 p-8 pt-6">
         <Client
           data={formattedOrders}
+          order
           columns={columns}
           entityName="Order"
           entityNamePlural="orders"

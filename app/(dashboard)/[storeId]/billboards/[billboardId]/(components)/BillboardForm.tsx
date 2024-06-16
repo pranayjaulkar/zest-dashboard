@@ -14,6 +14,7 @@ import { AlertModal } from "@/components/modals/AlertModal";
 import { useLoadingBarStore } from "@/hooks/useLoadingBarStore";
 import { Billboard } from "@prisma/client";
 import { ImageType } from "@/types";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface BillboardFormProps {
   initialData: Billboard | null;
@@ -29,6 +30,7 @@ const BillboardForm: React.FC<BillboardFormProps> = ({ initialData }) => {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [label, setLabel] = useState("");
+  const [active, setActive] = useState(false);
   const [images, setImages] = useState<ImageType[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -41,7 +43,7 @@ const BillboardForm: React.FC<BillboardFormProps> = ({ initialData }) => {
   const handleSubmit = async (event: any) => {
     try {
       event.preventDefault();
-      const data = { imageUrl: images[0].url, cloudinaryPublicId: images[0].cloudinaryPublicId, label };
+      const data = { active, imageUrl: images[0].url, cloudinaryPublicId: images[0].cloudinaryPublicId, label };
       if (billboardSchema.safeParse(data).success) {
         setError("");
         setLoading(true);
@@ -88,6 +90,7 @@ const BillboardForm: React.FC<BillboardFormProps> = ({ initialData }) => {
     if (initialData) {
       setLabel(initialData.label);
       setImages([{ url: initialData.imageUrl, cloudinaryPublicId: initialData.cloudinaryPublicId }]);
+      setActive(initialData.active || false);
     }
   }, []);
 
@@ -106,14 +109,23 @@ const BillboardForm: React.FC<BillboardFormProps> = ({ initialData }) => {
       <Separator />
       <form action="" onSubmit={handleSubmit} className="space-y-8 w-full">
         <ImageUpload images={images} onUpload={(image) => setImages([image])} onRemove={() => setImages([])} />
-        <div className="flex w-60 flex-col space-y-2">
-          <Input
-            disabled={loading}
-            placeholder="Billboard Label"
-            onChange={(event) => setLabel(event.target.value)}
-            value={label}
-          />
-          {error && <p className="text-sm text-red-500">{error}</p>}
+        <div className="flex flex-col space-y-8">
+          <div className="flex flex-col w-60 space-y-2">
+            <Input
+              disabled={loading}
+              placeholder="Billboard Label"
+              onChange={(event) => setLabel(event.target.value)}
+              value={label}
+            />
+            {error && <p className="text-sm text-red-500">{error}</p>}
+          </div>
+          <div>
+            <div className="flex items-center w-60 space-x-4">
+              <Checkbox checked={active} onCheckedChange={() => setActive((prev) => !prev)} />
+              <label htmlFor="">Active</label>
+            </div>
+            <span className="text-sm mt-2 text-slate-500">Active bilboards will be shown on the home page</span>
+          </div>
         </div>
         <Button disabled={loading} className="ml-auto" type="submit">
           {action}

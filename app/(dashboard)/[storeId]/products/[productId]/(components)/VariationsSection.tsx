@@ -1,12 +1,5 @@
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ProductWithPriceTypeConverted, _ProductVariation } from "@/types";
 import { useState } from "react";
 import { ColumnDef } from "@tanstack/react-table";
@@ -15,9 +8,7 @@ import { DataTable } from "@/components/ui/data-table";
 
 interface VariationsTableProps {
   productVariations: _ProductVariation[];
-  setProductVariations: React.Dispatch<
-    React.SetStateAction<_ProductVariation[]>
-  >;
+  setProductVariations: React.Dispatch<React.SetStateAction<_ProductVariation[]>>;
   selectedColors: Color[];
   colors: Color[];
   setSelectedColors: React.Dispatch<React.SetStateAction<Color[]>>;
@@ -47,10 +38,7 @@ export default function VariationsSection({
       id: "select",
       header: ({ table }) => (
         <Checkbox
-          checked={
-            table.getIsAllPageRowsSelected() ||
-            (table.getIsSomePageRowsSelected() && "indeterminate")
-          }
+          checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && "indeterminate")}
           onCheckedChange={(value) => {
             table.toggleAllPageRowsSelected(!!value);
             if (value) setSelectedColors(colors);
@@ -61,18 +49,11 @@ export default function VariationsSection({
       ),
       cell: ({ row }) => (
         <Checkbox
-          checked={
-            initialData?.id
-              ? !!selectedColors.find((s) => s.id === row.original.id)
-              : row.getIsSelected()
-          }
+          checked={initialData?.id ? !!selectedColors.find((s) => s.id === row.original.id) : row.getIsSelected()}
           onCheckedChange={(value) => {
             row.toggleSelected(!!value);
             if (value) setSelectedColors([...selectedColors, row.original]);
-            else
-              setSelectedColors(
-                selectedColors.filter((c) => c.id !== row.original.id)
-              );
+            else setSelectedColors(selectedColors.filter((c) => c.id !== row.original.id));
           }}
           aria-label="Select row"
         />
@@ -89,10 +70,7 @@ export default function VariationsSection({
       header: "Value",
       cell: ({ row }) => (
         <div className="flex items-center gap-x-2">
-          <div
-            className="h-6 w-6 rounded-full border"
-            style={{ backgroundColor: row.original.value }}
-          ></div>
+          <div className="h-6 w-6 rounded-full border" style={{ backgroundColor: row.original.value }}></div>
           <div className="w-16">{row.original.value}</div>
         </div>
       ),
@@ -104,10 +82,7 @@ export default function VariationsSection({
       id: "select",
       header: ({ table }) => (
         <Checkbox
-          checked={
-            table.getIsAllPageRowsSelected() ||
-            (table.getIsSomePageRowsSelected() && "indeterminate")
-          }
+          checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && "indeterminate")}
           onCheckedChange={(value) => {
             table.toggleAllPageRowsSelected(!!value);
             if (value) setSelectedSizes(sizes);
@@ -118,18 +93,11 @@ export default function VariationsSection({
       ),
       cell: ({ row }) => (
         <Checkbox
-          checked={
-            initialData?.id
-              ? !!selectedSizes.find((s) => s.id === row.original.id)
-              : row.getIsSelected()
-          }
+          checked={initialData?.id ? !!selectedSizes.find((s) => s.id === row.original.id) : row.getIsSelected()}
           onCheckedChange={(value) => {
             row.toggleSelected(!!value);
             if (value) setSelectedSizes([...selectedSizes, row.original]);
-            else
-              setSelectedSizes(
-                selectedSizes.filter((s) => s.id !== row.original.id)
-              );
+            else setSelectedSizes(selectedSizes.filter((s) => s.id !== row.original.id));
           }}
           aria-label="Select row"
         />
@@ -183,9 +151,7 @@ export default function VariationsSection({
     <div className="w-full space-y-8">
       <div className="flex flex-col">
         <label className="text-xl font-bold">Product Variations</label>
-        <span className="text-sm">
-          Select Variations and enter quantity of each selected variation
-        </span>
+        <span className="text-sm">Select Variations and enter quantity of each selected variation</span>
       </div>
       <div className="grid grid-cols-2 gap-8">
         <div>
@@ -209,19 +175,11 @@ export default function VariationsSection({
           />
         </div>
       </div>
-      <Table
-        className={`border rounded-md ${
-          disabled ? "text-gray-300 cursor-not-allowed" : ""
-        }`}
-      >
+      <Table className={`border rounded-md ${disabled ? "text-gray-300 cursor-not-allowed" : ""}`}>
         <TableHeader>
           <TableRow>
             <TableHead>
-              <Checkbox
-                disabled={disabled}
-                checked={allChecked}
-                onCheckedChange={onAllCheckedChange}
-              />
+              <Checkbox disabled={disabled} checked={allChecked} onCheckedChange={onAllCheckedChange} />
             </TableHead>
             <TableHead className="w-[100px] text-inherit">Name</TableHead>
             <TableHead className="text-inherit">Size</TableHead>
@@ -233,21 +191,13 @@ export default function VariationsSection({
           {productVariations.map((v) => (
             <TableRow key={v.name}>
               <TableCell>
-                <Checkbox
-                  checked={v.selected}
-                  onCheckedChange={(value: boolean) =>
-                    onCheckedChange(!!value, v)
-                  }
-                />
+                <Checkbox checked={v.selected} onCheckedChange={(value: boolean) => onCheckedChange(!!value, v)} />
               </TableCell>
               <TableCell className="font-medium">{v.name}</TableCell>
               <TableCell>{v.size.name}</TableCell>
               <TableCell>
                 <div className="flex items-center gap-x-2">
-                  <div
-                    className="h-6 w-6 rounded-full border"
-                    style={{ backgroundColor: v.color.value }}
-                  ></div>
+                  <div className="h-6 w-6 rounded-full border" style={{ backgroundColor: v.color.value }}></div>
                   <div className="w-16">{v.color.name}</div>
                 </div>
               </TableCell>
@@ -255,7 +205,7 @@ export default function VariationsSection({
                 <input
                   type="number"
                   className="border-2 p-2 rounded-md w-32"
-                  value={v.quantity === 0 ? "" : v.quantity}
+                  value={v.quantity}
                   onChange={(e) => onQuantityChange(e, v)}
                 />
               </TableCell>
