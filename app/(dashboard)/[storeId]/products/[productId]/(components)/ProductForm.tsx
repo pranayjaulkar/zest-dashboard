@@ -77,7 +77,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData, categories, colo
     defaultValues,
   });
 
-  const onSubmit = async (data: ProductFormValue) => {
+  const onSubmit = async (data: ProductFormValue, event: any) => {
     try {
       if (!images.length) {
         toast.error("No images. Please upload images");
@@ -87,7 +87,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData, categories, colo
         toast.error("No product variants selected");
       } else {
         setLoading(true);
-        loadingBar.start();
+        loadingBar.start(event);
         // remove selected field from productVariations
         const variations = productVariations.map((v) => ({
           sizeId: v.sizeId,
@@ -113,10 +113,10 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData, categories, colo
     }
   };
 
-  const onDelete = async () => {
+  const onDelete = async (event: any) => {
     try {
       setLoading(true);
-      loadingBar.start();
+      loadingBar.start(event);
       await axios.delete(`/api/stores/${params.storeId}/products/${params.productId}`);
       router.push(`/${params.storeId}/products/`);
       router.refresh();

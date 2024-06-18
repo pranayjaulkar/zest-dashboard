@@ -47,7 +47,7 @@ const BillboardForm: React.FC<BillboardFormProps> = ({ initialData }) => {
       if (billboardSchema.safeParse(data).success) {
         setError("");
         setLoading(true);
-        loadingBar.start();
+        loadingBar.start(event);
         if (initialData?.id) {
           await axios.patch(`/api/stores/${params.storeId}/billboards/${params.billboardId}`, data);
         } else {
@@ -68,10 +68,10 @@ const BillboardForm: React.FC<BillboardFormProps> = ({ initialData }) => {
     }
   };
 
-  const handleDelete = async () => {
+  const handleDelete = async (event: any) => {
     try {
       setLoading(true);
-      loadingBar.start();
+      loadingBar.start(event);
       await axios.delete(`/api/stores/${params.storeId}/billboards/${params.billboardId}`);
       router.push(`/${params.storeId}/billboards/`);
       router.refresh();

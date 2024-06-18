@@ -102,8 +102,8 @@ export default function Client<TData extends { id: string; label?: string; name?
         {!order && (
           <Link
             href={`/${params.storeId}/${entityNamePlural}/new`}
-            onClick={() => {
-              if (pathname !== `/${params.storeId}/${entityNamePlural}/new`) loadingBar.start();
+            onClick={(event: any) => {
+              if (pathname !== `/${params.storeId}/${entityNamePlural}/new`) loadingBar.start(event);
             }}
           >
             <Button>

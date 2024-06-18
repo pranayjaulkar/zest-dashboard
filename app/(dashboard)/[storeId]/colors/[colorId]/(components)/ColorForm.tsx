@@ -43,10 +43,10 @@ const ColorForm: React.FC<ColorFormProps> = ({ initialData }) => {
   const description = initialData?.id ? "Edit a color" : "Add a new Color";
   const toastMessage = initialData?.id ? "Color updated" : "Color created";
   const action = initialData?.id ? "Save changes" : "Create color";
-  const onSubmit = async (data: ColorFormValue) => {
+  const onSubmit = async (data: ColorFormValue, event: any) => {
     try {
       setLoading(true);
-      loadingBar.start();
+      loadingBar.start(event);
       if (initialData?.id) {
         await axios.patch(`/api/stores/${params.storeId}/colors/${params.colorId}`, data);
       } else {
@@ -64,14 +64,13 @@ const ColorForm: React.FC<ColorFormProps> = ({ initialData }) => {
     }
   };
 
-  const onDelete = async () => {
+  const onDelete = async (event: any) => {
     try {
       setLoading(true);
-      loadingBar.start();
+      loadingBar.start(event);
       await axios.delete(`/api/stores/${params.storeId}/colors/${params.colorId}`);
       router.push(`/${params.storeId}/colors/`);
       router.refresh();
-
       toast.success("Color deleted");
     } catch (error) {
       console.trace("error: ", error);

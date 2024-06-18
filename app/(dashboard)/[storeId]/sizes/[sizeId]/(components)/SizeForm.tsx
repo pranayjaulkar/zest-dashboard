@@ -43,10 +43,10 @@ const SizeForm: React.FC<SizeFormProps> = ({ initialData }) => {
   const description = initialData?.id ? "Edit a size" : "Add a new Size";
   const toastMessage = initialData?.id ? "Size updated" : "Size created";
   const action = initialData?.id ? "Save changes" : "Create size";
-  const onSubmit = async (data: SizeFormValue) => {
+  const onSubmit = async (data: SizeFormValue, event: any) => {
     try {
       setLoading(true);
-      loadingBar.start();
+      loadingBar.start(event);
       if (initialData?.id) {
         await axios.patch(`/api/stores/${params.storeId}/sizes/${params.sizeId}`, data);
       } else {
@@ -64,10 +64,10 @@ const SizeForm: React.FC<SizeFormProps> = ({ initialData }) => {
     }
   };
 
-  const onDelete = async () => {
+  const onDelete = async (event: any) => {
     try {
       setLoading(true);
-      loadingBar.start();
+      loadingBar.start(event);
       await axios.delete(`/api/stores/${params.storeId}/sizes/${params.sizeId}`);
       router.push(`/${params.storeId}/sizes/`);
       router.refresh();

@@ -39,10 +39,10 @@ export default function StoreSwitcher({ className, items = [] }: StoreSwitcherPr
 
   const currentStore = formattedStores.find((item) => item.value === params.storeId);
 
-  const onStoreSelect = (store: { value: string; label: string }) => {
+  const onStoreSelect = (store: { value: string; label: string }, event: any) => {
     setOpen(false);
     if (pathname !== `/${store.value}`) {
-      loadingBar.start();
+      loadingBar.start(event);
       router.push(`/${store.value}`);
       router.refresh();
     }
@@ -75,7 +75,7 @@ export default function StoreSwitcher({ className, items = [] }: StoreSwitcherPr
             <CommandEmpty>No store found</CommandEmpty>
             <CommandGroup>
               {formattedStores.map((store) => (
-                <CommandItem key={store.value} onSelect={() => onStoreSelect(store)} className="text-sm">
+                <CommandItem key={store.value} onSelect={(event) => onStoreSelect(store, event)} className="text-sm">
                   <StoreIcon className="mr-2 h-4 w-4" />
                   {store.label}
                   <Check

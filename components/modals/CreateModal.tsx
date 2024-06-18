@@ -26,7 +26,7 @@ export default function CreateModal() {
       if (formSchema.safeParse(name).success) {
         setError("");
         setLoading(true);
-        loadingBar.start();
+        loadingBar.start(event);
         const res = await axios.post("/api/stores", { name });
         toast.success("Created store successfully");
         createModal.close();

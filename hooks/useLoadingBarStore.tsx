@@ -4,7 +4,7 @@ import { create } from "zustand";
 interface LoadingBarStore {
   progress: number;
   setProgress: (progress: number) => void;
-  start: () => void;
+  start: (event?: React.MouseEvent<HTMLAnchorElement>) => void;
   done: () => void;
 }
 function increaseProgress(prev: LoadingBarStore) {
@@ -20,18 +20,20 @@ export const useLoadingBarStore = create<LoadingBarStore>((set, get) => ({
   // use when manually redirecting to a page.
   // when manually redirecting dont call done() method.
   // it will be called automatically when the route changes.
-  start: () => {
+  start: (event) => {
     // if loading bar is already started then clear the previous
     // loading bar progress and restart loading bar
     // this case is for when start() method is called multiple times
     // before the previous is finished
     clearInterval(intervalId);
-    set({ progress: 15 });
-    // increase progress by 5-15 every 400 milliseconds
-    // store intervalId
-    intervalId = setInterval(() => {
-      set(increaseProgress(get()));
-    }, 1500);
+    if (!(event?.ctrlKey || event?.shiftKey || event?.altKey || event?.metaKey)) {
+      set({ progress: 15 });
+      // increase progress by 5-15 every 400 milliseconds
+      // store intervalId
+      intervalId = setInterval(() => {
+        set(increaseProgress(get()));
+      }, 1500);
+    }
   },
 
   // call this method after start when you want to

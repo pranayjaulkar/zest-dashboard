@@ -13,20 +13,8 @@ import axios from "axios";
 import { useParams, useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { AlertModal } from "@/components/modals/AlertModal";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-} from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useLoadingBarStore } from "@/hooks/useLoadingBarStore";
 
 interface CategoryFormProps {
@@ -39,10 +27,7 @@ const formSchema = z.object({
 });
 export type CategoryFormValue = z.infer<typeof formSchema>;
 
-const CategoryForm: React.FC<CategoryFormProps> = ({
-  initialData,
-  billboards,
-}) => {
+const CategoryForm: React.FC<CategoryFormProps> = ({ initialData, billboards }) => {
   const params = useParams();
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -60,15 +45,12 @@ const CategoryForm: React.FC<CategoryFormProps> = ({
   const description = initialData ? "Edit a category" : "Add a new Category";
   const toastMessage = initialData ? "Category updated" : "Category created";
   const action = initialData ? "Save changes" : "Create category";
-  const onSubmit = async (data: CategoryFormValue) => {
+  const onSubmit = async (data: CategoryFormValue, event: any) => {
     try {
       setLoading(true);
-      loadingBar.start();
+      loadingBar.start(event);
       if (initialData) {
-        await axios.patch(
-          `/api/stores/${params.storeId}/categories/${params.categoryId}`,
-          data
-        );
+        await axios.patch(`/api/stores/${params.storeId}/categories/${params.categoryId}`, data);
       } else {
         await axios.post(`/api/stores/${params.storeId}/categories`, data);
       }
@@ -84,13 +66,11 @@ const CategoryForm: React.FC<CategoryFormProps> = ({
     }
   };
 
-  const onDelete = async () => {
+  const onDelete = async (event: any) => {
     try {
       setLoading(true);
-      loadingBar.start();
-      await axios.delete(
-        `/api/stores/${params.storeId}/categories/${params.categoryId}`
-      );
+      loadingBar.start(event);
+      await axios.delete(`/api/stores/${params.storeId}/categories/${params.categoryId}`);
       router.push(`/${params.storeId}/categories/`);
       router.refresh();
       toast.success("Category deleted");
@@ -106,31 +86,19 @@ const CategoryForm: React.FC<CategoryFormProps> = ({
 
   return (
     <>
-      <AlertModal
-        isOpen={open}
-        setOpen={setOpen}
-        onConfirm={onDelete}
-        loading={loading}
-      />
+      <AlertModal isOpen={open} setOpen={setOpen} onConfirm={onDelete} loading={loading} />
       <div className="flex items-center justify-between">
         <Heading title={title} description={description} />
 
         {initialData && (
-          <Button
-            variant="destructive"
-            size="icon"
-            onClick={() => setOpen(true)}
-          >
+          <Button variant="destructive" size="icon" onClick={() => setOpen(true)}>
             <TrashIcon className="h-4 w-4" />
           </Button>
         )}
       </div>
       <Separator />
       <Form {...form}>
-        <form
-          onSubmit={form.handleSubmit(onSubmit)}
-          className="space-y-8 w-full"
-        >
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 w-full">
           <div className="grid grid-cols-3 gap-8">
             <FormField
               control={form.control}
@@ -139,11 +107,7 @@ const CategoryForm: React.FC<CategoryFormProps> = ({
                 <FormItem>
                   <FormLabel>Name</FormLabel>
                   <FormControl>
-                    <Input
-                      disabled={loading}
-                      placeholder="Category Name"
-                      {...field}
-                    />
+                    <Input disabled={loading} placeholder="Category Name" {...field} />
                   </FormControl>
                 </FormItem>
               )}
@@ -162,10 +126,7 @@ const CategoryForm: React.FC<CategoryFormProps> = ({
                   >
                     <FormControl>
                       <SelectTrigger className="w-[180px]">
-                        <SelectValue
-                          placeholder="Select a billboard"
-                          {...field}
-                        />
+                        <SelectValue placeholder="Select a billboard" {...field} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>

@@ -58,8 +58,8 @@ export default function MainNav({ className, stores, ...props }: { className: st
         <Link
           key={route.href}
           href={route.href}
-          onClick={() => {
-            if (pathname !== route.href) loadingBar.start();
+          onClick={(event) => {
+            if (pathname !== route.href) loadingBar.start(event);
           }}
           className={cn(
             "text-sm font-medium transition-colors hover:text-primary",

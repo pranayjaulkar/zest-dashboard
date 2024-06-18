@@ -40,10 +40,10 @@ const SettingsForm: React.FC<SettingsFormProps> = ({ initialData }) => {
     resolver: zodResolver(formSchema),
     defaultValues: initialData ? initialData : { name: "" },
   });
-  const onSubmit = async (data: SettingsFormValue) => {
+  const onSubmit = async (data: SettingsFormValue, event: any) => {
     try {
       setLoading(true);
-      loadingBar.start();
+      loadingBar.start(event);
       await axios.patch(`/api/stores/${params.storeId}`, data);
       router.refresh();
       toast.success("Store updated");
@@ -56,10 +56,10 @@ const SettingsForm: React.FC<SettingsFormProps> = ({ initialData }) => {
     }
   };
 
-  const onDelete = async () => {
+  const onDelete = async (event: any) => {
     try {
       setLoading(true);
-      loadingBar.start();
+      loadingBar.start(event);
       await axios.delete(`/api/stores/${params.storeId}`);
       setStores(stores.filter((store) => store.id !== params.storeId));
       router.push("/");

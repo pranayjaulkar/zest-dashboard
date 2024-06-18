@@ -7,7 +7,7 @@ import { Button } from "../ui/button";
 interface AlertModalProps {
   isOpen: boolean;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  onConfirm: () => void;
+  onConfirm: (event: any) => void;
   loading: boolean;
 }
 export const AlertModal: React.FC<AlertModalProps> = ({ isOpen, setOpen, onConfirm, loading }) => {
@@ -20,12 +20,7 @@ export const AlertModal: React.FC<AlertModalProps> = ({ isOpen, setOpen, onConfi
   if (!isMounted) return null;
 
   return (
-    <Modal
-      title="Are you sure?"
-      description="This action cannot be undone."
-      isOpen={isOpen}
-      setOpen={setOpen}
-    >
+    <Modal title="Are you sure?" description="This action cannot be undone." isOpen={isOpen} setOpen={setOpen}>
       <div className="pt-6 space-x-2 flex items-center justify-end w-full">
         <Button disabled={loading} variant="outline" onClick={() => setOpen(false)}>
           Cancel

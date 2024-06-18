@@ -39,10 +39,10 @@ export default function CellActions<TData extends { id: string; label?: string; 
     toast.success(`${entityName} ID copied to the clipboard`);
   };
 
-  const handleUpdate = () => {
+  const handleUpdate = (event: any) => {
     try {
       if (pathname !== `/${params.storeId}/${entityNamePlural}/${row.id}`) {
-        loadingBar.start();
+        loadingBar.start(event);
       }
     } catch (error) {
       loadingBar.done();
