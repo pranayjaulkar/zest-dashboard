@@ -46,6 +46,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData, categories, colo
   const [open, setOpen] = useState(false);
   const [disabled, setDisabled] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [deletedImages, setDeletedImages] = useState<ImageType[]>([]);
   const [images, setImages] = useState<ImageType[]>([]);
   const [productVariations, setProductVariations] = useState<_ProductVariation[]>([]);
   const [selectedColors, setSelectedColors] = useState<Color[]>(
@@ -88,14 +89,16 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData, categories, colo
       } else {
         setLoading(true);
         loadingBar.start(event);
-        // remove selected field from productVariations
-        const variations = productVariations.map((v) => ({
-          sizeId: v.sizeId,
-          colorId: v.colorId,
-          quantity: v.quantity,
-          name: v.name,
-        }));
-        const newData = { ...data, images, productVariations: variations };
+        const variations = productVariations
+          .filter((v) => v.selected)
+          .map((v) => ({
+            sizeId: v.sizeId,
+            colorId: v.colorId,
+            productId: v.productId,
+            quantity: v.quantity,
+            name: v.name,
+          }));
+        const newData = { productData: { ...data, images, productVariations: variations }, deletedImages };
         if (initialData?.id) {
           await axios.patch(`/api/stores/${params.storeId}/products/${params.productId}`, newData);
         } else {
@@ -109,7 +112,9 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData, categories, colo
       loadingBar.done();
       setLoading(false);
       console.trace("error", error);
-      toast.error("Something Went Wrong");
+      if (axios.isAxiosError(error) && error?.response?.data)
+        toast.error(error.response.data + (error.response.status === 500 && 500));
+      else toast.error("Something went wrong.");
     }
   };
 
@@ -121,9 +126,11 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData, categories, colo
       router.push(`/${params.storeId}/products/`);
       router.refresh();
       toast.success("Product deleted");
-    } catch (error) {
+    } catch (error: any) {
       console.trace("error: ", error);
-      toast.error("Something went wrong");
+      if (axios.isAxiosError(error) && error?.response?.data)
+        toast.error(error.response.data + (error.response.status === 500 && 500));
+      else toast.error("Something went wrong.");
       loadingBar.done();
     } finally {
       setLoading(false);
@@ -167,7 +174,10 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData, categories, colo
             multiple
             images={images}
             onUpload={(image) => setImages((prev) => [...prev, image])}
-            onRemove={(url) => setImages(images.filter((img) => img.url !== url))}
+            onRemove={(url) => {
+              setDeletedImages((prev) => [...prev, images.filter((img) => img.url === url)[0]]);
+              setImages(images.filter((img) => img.url !== url));
+            }}
           />
 
           {/* Name */}

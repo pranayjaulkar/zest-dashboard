@@ -27,12 +27,12 @@ export const useLoadingBarStore = create<LoadingBarStore>((set, get) => ({
     // before the previous is finished
     clearInterval(intervalId);
     if (!(event?.ctrlKey || event?.shiftKey || event?.altKey || event?.metaKey)) {
-      set({ progress: 15 });
+      set({ progress: 30 });
       // increase progress by 5-15 every 400 milliseconds
       // store intervalId
       intervalId = setInterval(() => {
         set(increaseProgress(get()));
-      }, 1500);
+      }, 2500);
     }
   },
 

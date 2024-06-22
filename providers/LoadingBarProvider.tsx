@@ -18,8 +18,7 @@ const LoadingBarProvider: React.FC<LoadingBarProviderProps> = ({ color, height, 
   }, [pathname, searchParams]);
   return (
     <LoadingBar
-      color={color || "#f11946"}
-      height={height || 3}
+      height={height || 2}
       progress={loadingBar.progress}
       onLoaderFinished={() => loadingBar.setProgress(0)}
       {...props}

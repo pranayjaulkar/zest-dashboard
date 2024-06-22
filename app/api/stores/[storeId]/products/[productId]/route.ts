@@ -3,6 +3,22 @@ import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { Product, Image, ProductVariation } from "@prisma/client";
 import cloudinary from "@/cloudinary.config";
+import { getDeletedProductVariations, getNewProductVariations } from "@/lib/utils";
+import { ProductSchema } from "@/types";
+
+const deleteCloudinaryImages = (images: Image[], deletedImages: Image[]) => {
+  if (images.length) {
+    const imagesPublicIdArray: string[] = [
+      ...images.map((image) => image.cloudinaryPublicId),
+      ...deletedImages.map((image: Image) => image.cloudinaryPublicId),
+    ];
+    cloudinary.api.delete_resources(imagesPublicIdArray, (err, res) => {
+      if (err || !res?.deleted) {
+        console.trace("[PRODUCT_PATCH]: Unsuccesfull Image Deletion", err || "");
+      }
+    });
+  }
+};
 
 export async function GET(req: Request, { params }: { params: { productId: string } }) {
   try {
@@ -28,29 +44,15 @@ export async function PATCH(req: Request, { params }: { params: { storeId: strin
   try {
     const { userId } = auth();
     const body = await req.json();
-    const productData: Product & { images: Image[] } & {
-      productVariations: ProductVariation[];
-    } = body;
+    const { productData, deletedImages } = body;
+    try {
+      ProductSchema.parse(productData);
+    } catch (error) {
+      return NextResponse.json({ message: "Invalid Product data", error });
+    }
+
     if (!userId) {
       return new NextResponse("Unauthorized", { status: 404 });
-    }
-    if (!productData.name) {
-      return new NextResponse("Name is required", { status: 400 });
-    }
-    if (!productData.price) {
-      return new NextResponse("Price is required", { status: 400 });
-    }
-    if (!productData.categoryId) {
-      return new NextResponse("Category is required", { status: 400 });
-    }
-    if (!productData.images || !productData.images.length) {
-      return new NextResponse("Images are required", { status: 400 });
-    }
-    if (!params.storeId) {
-      return new NextResponse("Store id is required", { status: 400 });
-    }
-    if (!params.productId) {
-      return new NextResponse("Product id is required", { status: 400 });
     }
 
     const storeByUserId = await prisma.store.findFirst({
@@ -60,38 +62,77 @@ export async function PATCH(req: Request, { params }: { params: { storeId: strin
     if (!storeByUserId) {
       return new NextResponse("Unauthorized", { status: 403 });
     }
+
     const product = await prisma.product.findUnique({
       where: { id: params.productId },
-      include: { images: true },
+      include: { images: true, productVariations: true },
     });
-    //delete all images in cloudinary database
-    if (product && product?.images.length) {
-      const imagesPublicIdArray: string[] | undefined = product?.images.map((image) => image.cloudinaryPublicId);
-      const imageDeleteResponse = await cloudinary.api.delete_resources(imagesPublicIdArray || []);
-      if (!imageDeleteResponse?.deleted) console.trace("[PRODUCT_PATCH]: Unsuccesfull Image Deletion");
-    }
+    if (product) {
+      //delete all deleted images in cloudinary database
+      deleteCloudinaryImages(product.images, deletedImages);
 
-    const updatedProduct = await prisma.product.update({
-      where: { id: params.productId },
-      data: {
-        ...productData,
-        images: {
-          //delete every image records
-          deleteMany: {},
-          //recreate new images records
-          createMany: {
-            data: productData.images,
+      // get newly create variations
+      const newProductVariations = getNewProductVariations(product.productVariations, productData.productVariations);
+
+      // get deleted variations
+      let deletedProductVariations = getDeletedProductVariations(
+        product.productVariations,
+        productData.productVariations
+      );
+
+      let disconnectVariations: ProductVariation[] = [];
+
+      if (deletedProductVariations.length) {
+        // get orderItems which are using product variations that are to be deleted
+        const orderItems = await prisma.orderItem.findMany({
+          where: { productVariationId: { in: deletedProductVariations.map((pv) => pv.id) } },
+          include: { order: true },
+        });
+
+        // if there are orderItems then return error
+        if (orderItems?.length && orderItems.find((item) => !item.order.delivered)) {
+          return new NextResponse("Product Variation cannot be deleted because it is used in an order", {
+            status: 400,
+          });
+        }
+
+        // if not then separate variations that are used by orderItems
+        // from the ones that are to be deleted
+        disconnectVariations = deletedProductVariations.filter((v) =>
+          orderItems.find((item) => item.productVariationId === v.id)
+        );
+
+        deletedProductVariations = deletedProductVariations.filter(
+          (v) => !orderItems.find((item) => item.productVariationId === v.id)
+        );
+      }
+
+      let updatedProduct = null;
+
+      updatedProduct = await prisma.product.update({
+        where: { id: params.productId },
+        data: {
+          ...productData,
+          images: {
+            //delete every image records
+            deleteMany: {},
+            //recreate new images records
+            createMany: {
+              data: productData.images,
+            },
+          },
+          productVariations: {
+            disconnect: disconnectVariations.map((v) => ({ id: v.id })),
+            deleteMany: { id: { in: deletedProductVariations.map((pv) => pv.id) } },
+            createMany: { data: newProductVariations },
           },
         },
-        productVariations: {
-          //delete every variation records
-          deleteMany: {},
-          //recreate variation records
-          createMany: { data: productData.productVariations },
-        },
-      },
-    });
-    return NextResponse.json(updatedProduct);
+      });
+
+      return NextResponse.json(updatedProduct);
+    } else {
+      return new NextResponse(`Product with ID ${params.productId} not found`, { status: 404 });
+    }
   } catch (error) {
     console.trace("[PRODUCT_PATCH]", error);
     return new NextResponse("Internal error", { status: 500 });

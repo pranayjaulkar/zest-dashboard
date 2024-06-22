@@ -1,13 +1,8 @@
-import Stripe from "stripe";
 import { NextRequest, NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import prisma from "@/prisma/client";
 
-type Customer = {
-  address: string;
-  phone: string;
-};
-export async function GET(req: NextRequest) {
+export async function GET(req: NextRequest, { params }: { params: { storeId: string } }) {
   try {
     const searchParams = req.nextUrl.searchParams;
     const session_id = searchParams.get("session_id");
@@ -30,10 +25,14 @@ export async function GET(req: NextRequest) {
             address: `${line1}${line2}${city}${postal_code}${state}${country}`,
           },
         });
-        return NextResponse.redirect(new URL(`${process.env.FRONTEND_STORE_URL}/cart?success=1`));
+        return NextResponse.redirect(
+          new URL(`${process.env.NEXT_PUBLIC_FRONTEND_STORE_URL}/stores/${params.storeId}/cart?success=1`)
+        );
       }
     }
-    return NextResponse.redirect(new URL(`${process.env.FRONTEND_STORE_URL}/cart?cancel=1`));
+    return NextResponse.redirect(
+      new URL(`${process.env.NEXT_PUBLIC_FRONTEND_STORE_URL}/stores/${params.storeId}/cart?cancel=1`)
+    );
   } catch (error) {
     console.trace("[ORDER_GET]", error);
     return NextResponse.json("Internal Error", { status: 500 });

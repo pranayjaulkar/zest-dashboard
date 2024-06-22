@@ -112,6 +112,11 @@ const SettingsForm: React.FC<SettingsFormProps> = ({ initialData }) => {
         </form>
       </Form>
       <Separator />
+      <ApiAlert
+        title="STORE_URL"
+        description={`${process.env.NEXT_PUBLIC_FRONTEND_STORE_URL}/stores/${params.storeId}`}
+        variant="public"
+      />
       <ApiAlert title="NEXT_PUBLIC_API_URL" description={`${origin}/api/stores/${params.storeId}`} variant="public" />
     </div>
   );

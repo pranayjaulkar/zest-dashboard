@@ -11,24 +11,30 @@ import {
   Edit as EditIcon,
   MoreHorizontal as MoreHorizontalIcon,
   Trash as TrashIcon,
+  Check as CheckIcon,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { useParams, usePathname } from "next/navigation";
 import { useLoadingBarStore } from "@/hooks/useLoadingBarStore";
 import Link from "next/link";
+import { Order } from "@prisma/client";
 
 interface CellActionsProps<TData> {
   row: TData;
   entityNamePlural: string;
   entityName: string;
+  order?: boolean;
   onDelete: (id: string) => void;
+  onMarkDelivered: (id: string) => void;
 }
 
-export default function CellActions<TData extends { id: string; label?: string; name?: string }>({
+export default function CellActions<TData extends { id: string; label?: string; name?: string } | Order>({
   row,
   entityNamePlural,
   entityName,
+  order,
   onDelete,
+  onMarkDelivered,
 }: CellActionsProps<TData>) {
   const params = useParams();
   const pathname = usePathname();
@@ -69,12 +75,24 @@ export default function CellActions<TData extends { id: string; label?: string; 
             <CopyIcon className="mr-2 h-4 w-4" />
             Copy ID
           </DropdownMenuItem>
-          <Link href={`/${params.storeId}/${entityNamePlural}/${row.id}`} onClick={handleUpdate}>
-            <DropdownMenuItem className="flex justify-start border-0  rounded-md py-1 px-2 m-1 min-w-[128px] hover:bg-gray-100 cursor-pointer">
-              <EditIcon className="mr-2 h-4 w-4" />
-              Update
+          {!order && (
+            <Link href={`/${params.storeId}/${entityNamePlural}/${row.id}`} onClick={handleUpdate}>
+              <DropdownMenuItem className="flex justify-start border-0  rounded-md py-1 px-2 m-1 min-w-[128px] hover:bg-gray-100 cursor-pointer">
+                <EditIcon className="mr-2 h-4 w-4" />
+                Update
+              </DropdownMenuItem>
+            </Link>
+          )}
+          {order && (
+            <DropdownMenuItem
+              disabled={"delivered" in row && row.delivered ? true : false}
+              className="flex justify-start border-0 rounded-md  py-1 px-2 m-1 min-w-[128px] hover:bg-gray-100 cursor-pointer"
+              onClick={() => onMarkDelivered(row.id)}
+            >
+              <CheckIcon className="mr-2 h-4 w-4" />
+              {"delivered" in row && row.delivered ? "Marked as Delivered" : "Mark as delivered"}
             </DropdownMenuItem>
-          </Link>
+          )}
           <DropdownMenuItem
             className="flex justify-start border-0 rounded-md  py-1 px-2 m-1 min-w-[128px] hover:bg-gray-100 cursor-pointer"
             onClick={() => onDelete(row.id)}

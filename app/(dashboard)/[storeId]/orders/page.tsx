@@ -9,16 +9,17 @@ export default async function OrdersPage({ params }: { params: { storeId: string
     include: { orderItems: { include: { product: true, productVariation: true } } },
     orderBy: { createdAt: "desc" },
   });
-  const formattedOrders = orders.map((item) => ({
-    ...item,
+  const formattedOrders = orders.map((order) => ({
+    ...order,
     totalPrice: formatter.format(
-      item.orderItems.reduce((total, item) => {
+      order.orderItems.reduce((total, item) => {
         return total + Number(item.product.price);
       }, 0)
     ),
-    orderItems: item.orderItems.map((orderItem) => ({
-      ...orderItem.product,
-      price: formatter.format(Number(orderItem.product.price)),
+    orderItems: order.orderItems.map((item) => ({
+      ...item,
+      // convert price to number before passing it to client component
+      product: { ...item.product, price: formatter.format(Number(item.product.price)) },
     })),
   }));
 

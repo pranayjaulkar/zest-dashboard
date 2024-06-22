@@ -9,11 +9,11 @@ import { DataTable } from "@/components/ui/data-table";
 interface VariationsTableProps {
   productVariations: _ProductVariation[];
   setProductVariations: React.Dispatch<React.SetStateAction<_ProductVariation[]>>;
-  selectedColors: Color[];
   colors: Color[];
-  setSelectedColors: React.Dispatch<React.SetStateAction<Color[]>>;
-  selectedSizes: Size[];
   sizes: Size[];
+  selectedColors: Color[];
+  selectedSizes: Size[];
+  setSelectedColors: React.Dispatch<React.SetStateAction<Color[]>>;
   setSelectedSizes: React.Dispatch<React.SetStateAction<Size[]>>;
   initialData: ProductWithPriceTypeConverted | null;
   disabled: boolean;
@@ -128,7 +128,7 @@ export default function VariationsSection({
   const onCheckedChange = (value: boolean, v: _ProductVariation) => {
     setProductVariations(
       productVariations.map((productVariation) => {
-        return productVariation.name === v.name
+        return productVariation.sizeId === v.sizeId && productVariation.colorId === v.colorId
           ? {
               ...productVariation,
               selected: value,

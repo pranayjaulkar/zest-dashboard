@@ -1,14 +1,12 @@
 "use client";
-import { Product } from "@prisma/client";
+import { OrderItem, Product } from "@prisma/client";
 
 const columns = [
   {
     accessorKey: "products",
     header: "Products",
     cell: ({ row }: { row: any }) =>
-      row.original.orderItems
-        .map((orderItem: Product) => orderItem.name)
-        .join(", "),
+      row.original.orderItems.map((orderItem: OrderItem & { product: Product }) => orderItem.product.name).join(", "),
   },
   {
     accessorKey: "createdAt",

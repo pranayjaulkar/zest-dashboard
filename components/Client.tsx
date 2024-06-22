@@ -15,6 +15,7 @@ import CellActions from "./CellActions";
 import { AlertModal } from "./modals/AlertModal";
 import axios from "axios";
 import toast from "react-hot-toast";
+import { Order, OrderItem, Product, ProductVariation } from "@prisma/client";
 
 interface ClientProps<TData> {
   data: TData[];
@@ -24,6 +25,8 @@ interface ClientProps<TData> {
   searchKey: string;
   order?: boolean;
 }
+
+type FormattedOrder = Order & { orderItems: OrderItem[] } & { totalPrice: number };
 
 export default function Client<TData extends { id: string; label?: string; name?: string }>({
   data,
@@ -53,6 +56,21 @@ export default function Client<TData extends { id: string; label?: string; name?
     }
   };
 
+  const handleMarkDelivered = async (order: FormattedOrder) => {
+    try {
+      setLoading(true);
+      const { totalPrice, orderItems, ...newOrder } = order;
+      await axios.patch(`/api/stores/${params.storeId}/orders/${order?.id}`, { ...newOrder, delivered: true });
+      toast.success("Order marked as delivered");
+    } catch (error) {
+      console.trace("error: ", error);
+      toast.error("Something Went Wrong");
+    } finally {
+      router.refresh();
+      setLoading(false);
+    }
+  };
+
   const columnDefs: ColumnDef<TData>[] = [
     ...columns.map((column) => {
       if (column.accessorKey === "createdAt")
@@ -66,6 +84,8 @@ export default function Client<TData extends { id: string; label?: string; name?
       id: "actions",
       cell: ({ row }) => (
         <CellActions
+          order={order}
+          onMarkDelivered={() => handleMarkDelivered(row.original as unknown as FormattedOrder)}
           entityName={entityName}
           entityNamePlural={entityNamePlural}
           row={row.original}

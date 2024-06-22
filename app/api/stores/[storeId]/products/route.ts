@@ -1,13 +1,11 @@
+import cloudinary from "@/cloudinary.config";
 import prisma from "@/prisma/client";
+import { ProductSchema } from "@/types";
 import { auth } from "@clerk/nextjs/server";
 import { Product, Image } from "@prisma/client";
 import { NextResponse } from "next/server";
 
-
-export async function GET(
-  req: Request,
-  { params }: { params: { storeId: string } }
-) {
+export async function GET(req: Request, { params }: { params: { storeId: string } }) {
   try {
     const url = new URL(req.url);
 
@@ -52,44 +50,21 @@ export async function GET(
   }
 }
 
-
-
-export async function POST(
-  req: Request,
-  { params }: { params: { storeId: string } }
-) {
+export async function POST(req: Request, { params }: { params: { storeId: string } }) {
   try {
     const { userId } = auth();
     const body = await req.json();
-    let productData = body;
+    const { product: productData, deletedImages } = body;
+    try {
+      ProductSchema.parse(productData);
+    } catch (error) {
+      return NextResponse.json({ message: "Invalid Product data", error });
+    }
 
     if (!userId) {
       return new NextResponse("Unauthorized", { status: 404 });
     }
 
-    if (!productData.name) {
-      return new NextResponse("Name is required", { status: 400 });
-    }
-    if (!productData.price) {
-      return new NextResponse("Price is required", { status: 400 });
-    }
-    if (!productData.categoryId) {
-      return new NextResponse("Category is required", { status: 400 });
-    }
-    if (!productData.images || !productData.images.length) {
-      return new NextResponse("Images are required", { status: 400 });
-    }
-    if (
-      !productData.productVariations ||
-      !productData.productVariations.length
-    ) {
-      return new NextResponse("Product Variations are required", {
-        status: 400,
-      });
-    }
-    if (!params.storeId) {
-      return new NextResponse("Store id is required", { status: 400 });
-    }
     const storeByUserId = await prisma.store.findFirst({
       where: { id: params.storeId, userId },
     });
@@ -97,6 +72,17 @@ export async function POST(
     if (!storeByUserId) {
       return new NextResponse("Unauthorized", { status: 403 });
     }
+
+    const imagesPublicIdArray: string[] = [
+      ...productData?.images.map((image: Image) => image.cloudinaryPublicId),
+      ...deletedImages?.map((image: Image) => image.cloudinaryPublicId),
+    ];
+
+    cloudinary.api.delete_resources(imagesPublicIdArray, (err, res) => {
+      if (err || !res?.deleted) {
+        console.trace("[PRODUCT_PATCH]: Unsuccesfull Image Deletion", err || "");
+      }
+    });
 
     const product: Product = await prisma.product.create({
       data: {
