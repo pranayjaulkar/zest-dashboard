@@ -1,56 +1,69 @@
 "use client";
-import { Button } from "@/components/ui/button";
-import Heading from "@/components/ui/heading";
-import { Separator } from "@/components/ui/separator";
-import { Trash as TrashIcon } from "lucide-react";
 import * as z from "zod";
+import axios from "axios";
+import toast from "react-hot-toast";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Store } from "@prisma/client";
 import { useForm } from "react-hook-form";
 import { useState } from "react";
-import { Input } from "@/components/ui/input";
-import axios from "axios";
 import { useParams, useRouter } from "next/navigation";
-import toast from "react-hot-toast";
-import { AlertModal } from "@/components/modals/AlertModal";
-import { ApiAlert } from "@/components/ui/api-alert";
-import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
 import { useOrigin } from "@/hooks/useOrigin";
 import { useLoadingBarStore } from "@/hooks/useLoadingBarStore";
 import { useStores } from "@/hooks/useStores";
 
+import { Button } from "@/components/ui/button";
+import Heading from "@/components/ui/heading";
+import { Separator } from "@/components/ui/separator";
+import { Trash as TrashIcon } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { AlertModal } from "@/components/modals/AlertModal";
+import { ApiAlert } from "@/components/ui/api-alert";
+import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
+
 interface SettingsFormProps {
   initialData: Store | null;
 }
+
 const formSchema = z.object({
   name: z.string().min(1),
 });
+
 type SettingsFormValue = z.infer<typeof formSchema>;
 
-const SettingsForm: React.FC<SettingsFormProps> = ({ initialData }) => {
+const SettingsForm = ({ initialData }: SettingsFormProps) => {
   const params = useParams();
   const origin = useOrigin();
   const router = useRouter();
   const loadingBar = useLoadingBarStore();
-
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const { stores, setStores } = useStores();
+
   const form = useForm<SettingsFormValue>({
     resolver: zodResolver(formSchema),
     defaultValues: initialData ? initialData : { name: "" },
   });
+
   const onSubmit = async (data: SettingsFormValue, event: any) => {
     try {
       setLoading(true);
       loadingBar.start(event);
+
       await axios.patch(`/api/stores/${params.storeId}`, data);
-      router.refresh();
+
       toast.success("Store updated");
+
+      router.refresh();
     } catch (error) {
-      console.trace("error: ", error);
       loadingBar.done();
-      toast.error("Something Went Wrong");
+
+      console.trace("error: ", error);
+
+      if (axios.isAxiosError(error))
+        toast.error(
+          error?.response?.status === 500 ? "Internal Server Error" : "Something went wrong. Please try again."
+        );
+      else toast.error("Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -60,15 +73,25 @@ const SettingsForm: React.FC<SettingsFormProps> = ({ initialData }) => {
     try {
       setLoading(true);
       loadingBar.start(event);
+
       await axios.delete(`/api/stores/${params.storeId}`);
+
       setStores(stores.filter((store) => store.id !== params.storeId));
+
+      toast.success("Store deleted");
+
       router.push("/");
       router.refresh();
-      toast.success("Store deleted");
     } catch (error) {
-      console.trace("error: ", error);
       loadingBar.done();
-      toast.error("Something Went Wrong");
+
+      console.trace("error: ", error);
+
+      if (axios.isAxiosError(error))
+        toast.error(
+          error?.response?.status === 500 ? "Internal Server Error" : "Something went wrong. Please try again."
+        );
+      else toast.error("Something went wrong. Please try again.");
     } finally {
       setLoading(false);
       setOpen(false);
@@ -95,12 +118,7 @@ const SettingsForm: React.FC<SettingsFormProps> = ({ initialData }) => {
                 <FormItem>
                   <FormLabel>Name</FormLabel>
                   <FormControl>
-                    <Input
-                      disabled={loading}
-                      placeholder="Store name"
-                      // value={field.value}
-                      {...field}
-                    />
+                    <Input disabled={loading} placeholder="Store name" {...field} />
                   </FormControl>
                 </FormItem>
               )}

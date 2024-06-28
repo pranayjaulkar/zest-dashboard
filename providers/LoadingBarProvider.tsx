@@ -9,13 +9,15 @@ interface LoadingBarProviderProps {
   height?: number;
 }
 
-const LoadingBarProvider: React.FC<LoadingBarProviderProps> = ({ color, height, ...props }) => {
+const LoadingBarProvider = ({ color, height, ...props }: LoadingBarProviderProps) => {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const loadingBar = useLoadingBarStore();
+
   useEffect(() => {
     if (loadingBar.progress) loadingBar.done();
   }, [pathname, searchParams]);
+
   return (
     <LoadingBar
       height={height || 2}

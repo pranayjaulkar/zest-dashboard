@@ -1,14 +1,15 @@
 import { formatter } from "@/lib/utils";
 import prisma from "@/prisma/client";
 import Client from "@/components/Client";
-import columns from "./(components)/columns";
+import columns from "@/app/(dashboard)/[storeId]/orders/(components)/columns";
 
 export default async function OrdersPage({ params }: { params: { storeId: string } }) {
   const orders = await prisma.order.findMany({
     where: { storeId: params.storeId },
-    include: { orderItems: { include: { product: true, productVariation: true } } },
+    include: { orderItems: { include: { product: true, productVariation: { include: { color: true, size: true } } } } },
     orderBy: { createdAt: "desc" },
   });
+
   const formattedOrders = orders.map((order) => ({
     ...order,
     totalPrice: formatter.format(

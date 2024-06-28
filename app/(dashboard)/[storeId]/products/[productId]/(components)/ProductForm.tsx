@@ -7,20 +7,21 @@ import { useForm } from "react-hook-form";
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useLoadingBarStore } from "@/hooks/useLoadingBarStore";
-import VariationsSection from "./VariationsSection";
 import { Category, Size, Color } from "@prisma/client";
 import { _ProductVariation, ImageType, ProductWithPriceTypeConverted } from "@/types";
-import { AlertModal } from "@/components/modals/AlertModal";
-import ImageUpload from "@/components/ui/image-upload";
-import { Button } from "@/components/ui/button";
+import { Trash as TrashIcon } from "lucide-react";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel } from "@/components/ui/form";
+import { getProductVariations, getColorsFromVariations, getSizesFromVariations } from "@/lib/utils";
+
+import VariationsSection from "./VariationsSection";
 import Heading from "@/components/ui/heading";
+import ImageUpload from "@/components/ui/image-upload";
+import { AlertModal } from "@/components/modals/AlertModal";
+import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Trash as TrashIcon } from "lucide-react";
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { getProductVariations, getColorsFromVariations, getSizesFromVariations } from "@/lib/utils";
 
 interface ProductFormProps {
   initialData: ProductWithPriceTypeConverted | null;
@@ -37,9 +38,9 @@ const formSchema = z.object({
   isArchived: z.boolean().default(false).optional(),
 });
 
-export type ProductFormValue = z.infer<typeof formSchema>;
+type ProductFormValue = z.infer<typeof formSchema>;
 
-const ProductForm: React.FC<ProductFormProps> = ({ initialData, categories, colors, sizes }) => {
+const ProductForm = ({ initialData, categories, colors, sizes }: ProductFormProps) => {
   const params = useParams();
   const router = useRouter();
   const loadingBar = useLoadingBarStore();
@@ -50,15 +51,15 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData, categories, colo
   const [images, setImages] = useState<ImageType[]>([]);
   const [productVariations, setProductVariations] = useState<_ProductVariation[]>([]);
   const [selectedColors, setSelectedColors] = useState<Color[]>(
-    initialData?.id ? getColorsFromVariations(initialData.productVariations) : []
+    initialData ? getColorsFromVariations(initialData.productVariations) : []
   );
   const [selectedSizes, setSelectedSizes] = useState<Size[]>(
-    initialData?.id ? getSizesFromVariations(initialData.productVariations) : []
+    initialData ? getSizesFromVariations(initialData.productVariations) : []
   );
-  const title = initialData?.id ? "Edit product" : "Create product";
-  const description = initialData?.id ? "Edit a product" : "Add a new Product";
-  const toastMessage = initialData?.id ? "Product updated" : "Product created";
-  const action = initialData?.id ? "Save changes" : "Create product";
+  const title = initialData ? "Edit product" : "Create product";
+  const description = initialData ? "Edit a product" : "Add a new Product";
+  const toastMessage = initialData ? "Product updated" : "Product created";
+  const action = initialData ? "Save changes" : "Create product";
   const defaultValues = initialData
     ? {
         ...initialData,
@@ -89,6 +90,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData, categories, colo
       } else {
         setLoading(true);
         loadingBar.start(event);
+
         const variations = productVariations
           .filter((v) => v.selected)
           .map((v) => ({
@@ -98,23 +100,33 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData, categories, colo
             quantity: v.quantity,
             name: v.name,
           }));
+
         const newData = { productData: { ...data, images, productVariations: variations }, deletedImages };
-        if (initialData?.id) {
+
+        if (initialData) {
           await axios.patch(`/api/stores/${params.storeId}/products/${params.productId}`, newData);
         } else {
           await axios.post(`/api/stores/${params.storeId}/products`, newData);
         }
+
+        toast.success(toastMessage);
+
         router.push(`/${params.storeId}/products`);
         router.refresh();
-        toast.success(toastMessage);
       }
     } catch (error) {
       loadingBar.done();
       setLoading(false);
+
       console.trace("error", error);
-      if (axios.isAxiosError(error) && error?.response?.data)
-        toast.error(error.response.data + (error.response.status === 500 && 500));
-      else toast.error("Something went wrong.");
+
+      if (axios.isAxiosError(error))
+        if (error?.response?.data?.code === "P2014") toast.error(error.response.data.message);
+        else
+          toast.error(
+            error?.response?.status === 500 ? "Internal Server Error" : "Something went wrong. Please try again."
+          );
+      else toast.error("Something went wrong. Please try again.");
     }
   };
 
@@ -122,16 +134,25 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData, categories, colo
     try {
       setLoading(true);
       loadingBar.start(event);
+
       await axios.delete(`/api/stores/${params.storeId}/products/${params.productId}`);
+
       router.push(`/${params.storeId}/products/`);
       router.refresh();
-      toast.success("Product deleted");
+
+      toast.success("Product deleted successfully.");
     } catch (error: any) {
-      console.trace("error: ", error);
-      if (axios.isAxiosError(error) && error?.response?.data)
-        toast.error(error.response.data + (error.response.status === 500 && 500));
-      else toast.error("Something went wrong.");
       loadingBar.done();
+
+      console.trace("error: ", error);
+
+      if (axios.isAxiosError(error))
+        if (error?.response?.data?.code === "P2014") toast.error(error.response.data.message);
+        else
+          toast.error(
+            error?.response?.status === 500 ? "Internal Server Error" : "Something went wrong. Please try again."
+          );
+      else toast.error("Something went wrong. Please try again.");
     } finally {
       setLoading(false);
       setOpen(false);
@@ -159,7 +180,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData, categories, colo
       <div className="flex items-center justify-between">
         <Heading title={title} description={description} />
 
-        {initialData?.id && (
+        {initialData && (
           <Button variant="destructive" size="icon" onClick={() => setOpen(true)}>
             <TrashIcon className="h-4 w-4" />
           </Button>
@@ -215,7 +236,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData, categories, colo
                       disabled={loading}
                       placeholder="Product Price"
                       onChange={(event) => field.onChange(event.target.value)}
-                      value={field.value || ""}
+                      value={field.value}
                     />
                   </FormControl>
                 </FormItem>

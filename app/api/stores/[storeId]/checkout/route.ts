@@ -2,41 +2,26 @@ import Stripe from "stripe";
 import { NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import prisma from "@/prisma/client";
+import { Color, Product, ProductVariation, Size } from "@prisma/client";
 
 interface _OrderItem {
   productId: string;
+  product: Product;
   productVariationId: string;
+  productVariation: ProductVariation & { size: Size } & { color: Color };
 }
 
 export async function POST(req: Request, { params }: { params: { storeId: string } }) {
   try {
     let { orderItems }: { orderItems: _OrderItem[] } = await req.json();
+
     if (!orderItems || orderItems.length === 0) {
       return new NextResponse("Order Items are required", { status: 400 });
     }
 
-    const productIds = orderItems.map((orderItem) => orderItem.productId);
-    const variationIds = orderItems.map((orderItem) => orderItem.productVariationId);
-
-    const products = await prisma.product.findMany({
-      where: { id: { in: productIds } },
-    });
-    const productVariations = await prisma.productVariation.findMany({
-      where: { id: { in: variationIds } },
-      include: { size: true, color: true },
-    });
-
-    const newOrderItems = orderItems.map((orderItem) => {
-      const product = products.filter((product) => product.id === orderItem.productId)[0];
-      const productVariation = productVariations.filter(
-        (productVariation) => productVariation.id === orderItem.productVariationId
-      )[0];
-      return { product, productVariation };
-    });
-
     const line_items: Stripe.Checkout.SessionCreateParams.LineItem[] = [];
 
-    newOrderItems.forEach((orderItem) => {
+    orderItems.forEach((orderItem) => {
       line_items.push({
         quantity: 1,
         price_data: {
@@ -45,7 +30,7 @@ export async function POST(req: Request, { params }: { params: { storeId: string
             name: orderItem.product.name,
             description: `Size: ${orderItem.productVariation.size.name}, Color: ${orderItem.productVariation.color.name}`,
           },
-          unit_amount: orderItem.product.price.toNumber() * 100,
+          unit_amount: Number(orderItem.product.price) * 100,
         },
       });
     });
@@ -55,7 +40,7 @@ export async function POST(req: Request, { params }: { params: { storeId: string
         storeId: params.storeId,
         isPaid: false,
         orderItems: {
-          create: newOrderItems.map((orderItem) => ({
+          create: orderItems.map((orderItem) => ({
             product: { connect: { id: orderItem.product.id } },
             productVariation: { connect: { id: orderItem.productVariation.id } },
           })),
@@ -63,10 +48,14 @@ export async function POST(req: Request, { params }: { params: { storeId: string
       },
     });
 
-    await prisma.productVariation.updateMany({
-      where: { id: { in: variationIds } },
-      data: { quantity: { decrement: 1 } },
-    });
+    prisma.productVariation
+      .updateMany({
+        where: { id: { in: orderItems.map((orderItem) => orderItem.productVariationId) } },
+        data: { quantity: { decrement: 1 } },
+      })
+      .catch((error) => {
+        console.trace(error);
+      });
 
     const session = await stripe.checkout.sessions.create({
       line_items,

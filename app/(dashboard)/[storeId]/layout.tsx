@@ -1,10 +1,11 @@
 import Navbar from "@/components/Navbar/Navbar";
-type Props = {
+
+export default async function DashboardLayout({
+  children,
+}: {
   children: React.ReactNode;
   params: { storeId: string };
-};
-
-export default async function DashboardLayout({ children }: Props) {
+}) {
   return (
     <div>
       <Navbar />

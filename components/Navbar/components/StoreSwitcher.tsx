@@ -1,12 +1,14 @@
 "use client";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useCreateModalStore } from "@/hooks/useCreateModalStore";
 import { Store } from "@prisma/client";
 import { useParams, usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useStores } from "@/hooks/useStores";
-import { Button } from "../../ui/button";
 import { cn } from "@/lib/utils";
+import { useLoadingBarStore } from "@/hooks/useLoadingBarStore";
+
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Button } from "../../ui/button";
 import { Check, ChevronsUpDown, Store as StoreIcon, PlusCircle } from "lucide-react";
 import {
   Command,
@@ -17,7 +19,7 @@ import {
   CommandList,
   CommandSeparator,
 } from "../../ui/command";
-import { useLoadingBarStore } from "@/hooks/useLoadingBarStore";
+
 type PopoverTriggerProps = React.ComponentPropsWithoutRef<typeof PopoverTrigger>;
 
 interface StoreSwitcherProps extends PopoverTriggerProps {
@@ -32,6 +34,7 @@ export default function StoreSwitcher({ className, items = [] }: StoreSwitcherPr
   const router = useRouter();
   const { stores, setStores } = useStores();
   const [open, setOpen] = useState(false);
+  
   const formattedStores = stores.map((item) => ({
     label: item.name,
     value: item.id,

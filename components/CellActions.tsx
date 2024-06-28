@@ -1,3 +1,11 @@
+import toast from "react-hot-toast";
+import { useParams, usePathname } from "next/navigation";
+import { useLoadingBarStore } from "@/hooks/useLoadingBarStore";
+import { Order } from "@prisma/client";
+import axios from "axios";
+
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -5,7 +13,6 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
 import {
   Copy as CopyIcon,
   Edit as EditIcon,
@@ -13,11 +20,6 @@ import {
   Trash as TrashIcon,
   Check as CheckIcon,
 } from "lucide-react";
-import toast from "react-hot-toast";
-import { useParams, usePathname } from "next/navigation";
-import { useLoadingBarStore } from "@/hooks/useLoadingBarStore";
-import Link from "next/link";
-import { Order } from "@prisma/client";
 
 interface CellActionsProps<TData> {
   row: TData;
@@ -52,8 +54,14 @@ export default function CellActions<TData extends { id: string; label?: string; 
       }
     } catch (error) {
       loadingBar.done();
+
       console.trace(error);
-      toast.error("Something went wrong");
+
+      if (axios.isAxiosError(error))
+        toast.error(
+          error?.response?.status === 500 ? "Internal Server Error" : "Something went wrong. Please try again."
+        );
+      else toast.error("Something went wrong. Please try again.");
     }
   };
 

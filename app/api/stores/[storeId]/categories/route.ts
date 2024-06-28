@@ -1,31 +1,39 @@
 import prisma from "@/prisma/client";
+import categorySchema from "@/zod/categorySchema";
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
-export async function POST(
-  req: Request,
-  { params }: { params: { storeId: string; billboardId: string } }
-) {
+export async function GET(req: Request, { params }: { params: { storeId: string } }) {
   try {
-    const { userId } = auth();
-    const body = await req.json();
-    const { name, billboardId } = body;
-
-    if (!userId) {
-      return new NextResponse("Unauthorized", { status: 404 });
-    }
-
-    if (!name) {
-      return new NextResponse("Name is required", { status: 400 });
-    }
-    if (!billboardId) {
-      return new NextResponse("billboard id is required", { status: 400 });
-    }
     if (!params.storeId) {
       return new NextResponse("Store id is required", { status: 400 });
     }
-    const storeByUserId = await prisma.store.findFirst({
-      where: { id: params.storeId, userId },
+
+    const categories = await prisma.category.findMany({
+      where: { storeId: params.storeId },
+    });
+    return NextResponse.json(categories);
+  } catch (error) {
+    console.trace("[Category_GET]", error);
+    return new NextResponse("Internal error", { status: 500 });
+  }
+}
+
+export async function POST(req: Request, { params }: { params: { storeId: string; billboardId: string } }) {
+  try {
+    const { userId } = auth();
+    const body = await req.json();
+
+    try {
+      categorySchema.parse(body);
+    } catch (error) {
+      return NextResponse.json({ message: "Invalid category data" }, { status: 400 });
+    }
+
+    const { name, billboardId } = body;
+
+    const storeByUserId = await prisma.store.findUnique({
+      where: { id: params.storeId, userId: userId! },
     });
 
     if (!storeByUserId) {
@@ -41,25 +49,6 @@ export async function POST(
     return NextResponse.json(category);
   } catch (error) {
     console.trace("[Category_POST]", error);
-    return new NextResponse("Internal error", { status: 500 });
-  }
-}
-
-export async function GET(
-  req: Request,
-  { params }: { params: { storeId: string } }
-) {
-  try {
-    if (!params.storeId) {
-      return new NextResponse("Store id is required", { status: 400 });
-    }
-
-    const categories = await prisma.category.findMany({
-      where: { storeId: params.storeId },
-    });
-    return NextResponse.json(categories);
-  } catch (error) {
-    console.trace("[Category_GET]", error);
     return new NextResponse("Internal error", { status: 500 });
   }
 }

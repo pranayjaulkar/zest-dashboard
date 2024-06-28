@@ -3,11 +3,7 @@ import prisma from "@/prisma/client";
 import Client from "@/components/Client";
 import columns from "./(components)/columns";
 
-export default async function BillboardsPage({
-  params,
-}: {
-  params: { storeId: string };
-}) {
+export default async function BillboardsPage({ params }: { params: { storeId: string } }) {
   const billboards: Billboard[] = await prisma.billboard.findMany({
     where: { storeId: params.storeId },
     orderBy: { createdAt: "desc" },

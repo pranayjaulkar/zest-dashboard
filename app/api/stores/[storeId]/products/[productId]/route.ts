@@ -1,13 +1,13 @@
 import prisma from "@/prisma/client";
+import cloudinary from "@/cloudinary.config";
+import productSchema from "@/zod/productSchema";
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
-import { Product, Image, ProductVariation } from "@prisma/client";
-import cloudinary from "@/cloudinary.config";
-import { getDeletedProductVariations, getNewProductVariations } from "@/lib/utils";
-import { ProductSchema } from "@/types";
+import { Image, ProductVariation } from "@prisma/client";
+import { getDeletedProductVariations, getExistingProductVariations, getNewProductVariations } from "@/lib/utils";
 
-const deleteCloudinaryImages = (images: Image[], deletedImages: Image[]) => {
-  if (images.length) {
+const deleteCloudinaryImages = (images: Image[] | undefined, deletedImages: Image[] = []) => {
+  if (images?.length) {
     const imagesPublicIdArray: string[] = [
       ...images.map((image) => image.cloudinaryPublicId),
       ...deletedImages.map((image: Image) => image.cloudinaryPublicId),
@@ -25,6 +25,7 @@ export async function GET(req: Request, { params }: { params: { productId: strin
     if (!params.productId) {
       return new NextResponse("Product id is required", { status: 400 });
     }
+
     const product = await prisma.product.findUnique({
       where: { id: params.productId },
       include: {
@@ -33,6 +34,7 @@ export async function GET(req: Request, { params }: { params: { productId: strin
         productVariations: { include: { color: true, size: true } },
       },
     });
+
     return NextResponse.json(product);
   } catch (error) {
     console.trace("[PRODUCT_GET]", error);
@@ -45,18 +47,15 @@ export async function PATCH(req: Request, { params }: { params: { storeId: strin
     const { userId } = auth();
     const body = await req.json();
     const { productData, deletedImages } = body;
+
     try {
-      ProductSchema.parse(productData);
+      productSchema.parse(productData);
     } catch (error) {
-      return NextResponse.json({ message: "Invalid Product data", error });
+      return NextResponse.json({ message: "Invalid Product data" }, { status: 400 });
     }
 
-    if (!userId) {
-      return new NextResponse("Unauthorized", { status: 404 });
-    }
-
-    const storeByUserId = await prisma.store.findFirst({
-      where: { id: params.storeId, userId },
+    const storeByUserId = await prisma.store.findUnique({
+      where: { id: params.storeId, userId: userId! },
     });
 
     if (!storeByUserId) {
@@ -73,6 +72,12 @@ export async function PATCH(req: Request, { params }: { params: { storeId: strin
 
       // get newly create variations
       const newProductVariations = getNewProductVariations(product.productVariations, productData.productVariations);
+
+      // get existing variations
+      const existingProductVariations = getExistingProductVariations(
+        product.productVariations,
+        productData.productVariations
+      );
 
       // get deleted variations
       let deletedProductVariations = getDeletedProductVariations(
@@ -91,9 +96,12 @@ export async function PATCH(req: Request, { params }: { params: { storeId: strin
 
         // if there are orderItems then return error
         if (orderItems?.length && orderItems.find((item) => !item.order.delivered)) {
-          return new NextResponse("Product Variation cannot be deleted because it is used in an order", {
-            status: 400,
-          });
+          return NextResponse.json(
+            { code: "P2014", message: "Product Variation cannot be deleted because it is used in an order" },
+            {
+              status: 400,
+            }
+          );
         }
 
         // if not then separate variations that are used by orderItems
@@ -107,9 +115,13 @@ export async function PATCH(req: Request, { params }: { params: { storeId: strin
         );
       }
 
-      let updatedProduct = null;
+      const updates = existingProductVariations.map((v) =>
+        prisma.productVariation.update({ where: { id: v.id }, data: v })
+      );
 
-      updatedProduct = await prisma.product.update({
+      Promise.all(updates).catch((error) => console.trace("[PRODUCT_PATCH]", error));
+
+      const updatedProduct = await prisma.product.update({
         where: { id: params.productId },
         data: {
           ...productData,
@@ -142,65 +154,32 @@ export async function PATCH(req: Request, { params }: { params: { storeId: strin
 export async function DELETE(req: Request, { params }: { params: { storeId: string; productId: string } }) {
   try {
     const { userId } = auth();
-    if (!userId) {
-      return new NextResponse("Unauthorized", { status: 404 });
-    }
-    if (!params.productId) {
-      return new NextResponse("Product id is required", { status: 400 });
-    }
-    if (!params.storeId) {
-      return new NextResponse("Store id is required", { status: 400 });
-    }
-    const storeByUserId = await prisma.store.findFirst({
-      where: { id: params.storeId, userId },
+
+    const storeByUserId = await prisma.store.findUnique({
+      where: { id: params.storeId, userId: userId! },
     });
-    const product: (Product & { images: Image[] }) | null = await prisma.product.findUnique({
+
+    if (!storeByUserId) {
+      return new NextResponse("Unauthorized", { status: 403 });
+    }
+
+    const product = await prisma.product.findUnique({
       where: { id: params.productId },
       include: {
         images: true,
       },
     });
 
-    if (!storeByUserId) {
-      return new NextResponse("Unauthorized", { status: 403 });
-    }
-    const imagesPublicIdArray: string[] | undefined = product?.images.map((image) => image.cloudinaryPublicId);
-    let imageDeleteResponse;
     // Delete all images from cloudinary database
-    if (product?.images.length) {
-      imageDeleteResponse = await cloudinary.api.delete_resources(imagesPublicIdArray || []);
-      if (imageDeleteResponse?.deleted) {
-        // Delete all corresponding image records from database
-        await prisma.image.deleteMany({
-          where: { productId: params.productId },
-        });
+    deleteCloudinaryImages(product?.images);
 
-        // Delete all corresponding product variations
-        await prisma.productVariation.deleteMany({
-          where: { productId: params.productId },
-        });
-        const deletedProduct = await prisma.product.delete({
-          where: { id: params.productId },
-        });
-        return NextResponse.json(deletedProduct);
-      } else {
-        console.trace("[PRODUCT_DELETE]", "imageDeleteResponse: ", imageDeleteResponse);
-        return new NextResponse("Something went wrong", { status: 500 });
-      }
-    } else {
-      await prisma.productVariation.deleteMany({
-        where: { productId: params.productId },
-      });
-      const deletedProduct = await prisma.product.delete({
-        where: { id: params.productId },
-      });
-      return NextResponse.json(deletedProduct);
-    }
+    const deletedProduct = await prisma.product.delete({
+      where: { id: params.productId },
+    });
+
+    return NextResponse.json(deletedProduct);
   } catch (error: any) {
     console.trace("[PRODUCT_DELETE]", error);
-    if (error?.code === "P2014") {
-      return new NextResponse(error.code, { status: 400 });
-    }
     return new NextResponse("Internal error", { status: 500 });
   }
 }

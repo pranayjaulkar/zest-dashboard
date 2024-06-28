@@ -3,11 +3,7 @@ import { formatter } from "@/lib/utils";
 import Client from "@/components/Client";
 import columns from "./(components)/columns";
 
-export default async function ProductsPage({
-  params,
-}: {
-  params: { storeId: string };
-}) {
+export default async function ProductsPage({ params }: { params: { storeId: string } }) {
   let products = await prisma.product.findMany({
     where: { storeId: params.storeId },
     include: {
@@ -16,6 +12,7 @@ export default async function ProductsPage({
     },
     orderBy: { createdAt: "desc" },
   });
+
   const formattedProducts = products.map((item) => ({
     ...item,
     price: formatter.format(item.price.toNumber()),

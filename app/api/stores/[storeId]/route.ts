@@ -68,9 +68,6 @@ export async function DELETE(
     return NextResponse.json(store);
   } catch (error: any) {
     console.trace("[STORE_DELETE]", error);
-    if (error?.code === "P2014") {
-      return new NextResponse(error.code, { status: 400 });
-    }
     return new NextResponse("Internal error", { status: 500 });
   }
 }

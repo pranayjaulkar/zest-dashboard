@@ -1,38 +1,42 @@
 "use client";
-import { Button } from "@/components/ui/button";
-import Heading from "@/components/ui/heading";
-import { Separator } from "@/components/ui/separator";
-import { Trash as TrashIcon } from "lucide-react";
+import toast from "react-hot-toast";
+import axios from "axios";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Billboard, Category } from "@prisma/client";
 import { useForm } from "react-hook-form";
 import { useState } from "react";
-import { Input } from "@/components/ui/input";
-import axios from "axios";
 import { useParams, useRouter } from "next/navigation";
-import toast from "react-hot-toast";
+import { useLoadingBarStore } from "@/hooks/useLoadingBarStore";
+
+import Heading from "@/components/ui/heading";
+import { Button } from "@/components/ui/button";
+import { Trash as TrashIcon } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
+import { Input } from "@/components/ui/input";
 import { AlertModal } from "@/components/modals/AlertModal";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useLoadingBarStore } from "@/hooks/useLoadingBarStore";
 
 interface CategoryFormProps {
   initialData: Category | null;
   billboards: Billboard[];
 }
+
 const formSchema = z.object({
   name: z.string().min(1),
   billboardId: z.string().min(1),
 });
-export type CategoryFormValue = z.infer<typeof formSchema>;
 
-const CategoryForm: React.FC<CategoryFormProps> = ({ initialData, billboards }) => {
+type CategoryFormValue = z.infer<typeof formSchema>;
+
+const CategoryForm = ({ initialData, billboards }: CategoryFormProps) => {
   const params = useParams();
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const loadingBar = useLoadingBarStore();
   const [loading, setLoading] = useState(false);
+
   const form = useForm<CategoryFormValue>({
     resolver: zodResolver(formSchema),
     defaultValues: initialData || {
@@ -45,22 +49,32 @@ const CategoryForm: React.FC<CategoryFormProps> = ({ initialData, billboards }) 
   const description = initialData ? "Edit a category" : "Add a new Category";
   const toastMessage = initialData ? "Category updated" : "Category created";
   const action = initialData ? "Save changes" : "Create category";
+
   const onSubmit = async (data: CategoryFormValue, event: any) => {
     try {
       setLoading(true);
       loadingBar.start(event);
+
       if (initialData) {
         await axios.patch(`/api/stores/${params.storeId}/categories/${params.categoryId}`, data);
       } else {
         await axios.post(`/api/stores/${params.storeId}/categories`, data);
       }
+
+      toast.success(toastMessage);
+
       router.push(`/${params.storeId}/categories`);
       router.refresh();
-      toast.success(toastMessage);
     } catch (error) {
-      console.trace("error", error);
       loadingBar.done();
-      toast.error("Something Went Wrong");
+
+      console.trace("error", error);
+
+      if (axios.isAxiosError(error))
+        toast.error(
+          error?.response?.status === 500 ? "Internal Server Error" : "Something went wrong. Please try again."
+        );
+      else toast.error("Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -70,14 +84,23 @@ const CategoryForm: React.FC<CategoryFormProps> = ({ initialData, billboards }) 
     try {
       setLoading(true);
       loadingBar.start(event);
+
       await axios.delete(`/api/stores/${params.storeId}/categories/${params.categoryId}`);
+
       router.push(`/${params.storeId}/categories/`);
       router.refresh();
+
       toast.success("Category deleted");
     } catch (error) {
       console.trace("error: ", error);
+
       loadingBar.done();
-      toast.error("Something went wrong");
+
+      if (axios.isAxiosError(error))
+        toast.error(
+          error?.response?.status === 500 ? "Internal Server Error" : "Something went wrong. Please try again."
+        );
+      else toast.error("Something went wrong. Please try again.");
     } finally {
       setLoading(false);
       setOpen(false);

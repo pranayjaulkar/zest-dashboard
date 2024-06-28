@@ -1,64 +1,79 @@
 "use client";
-import { Button } from "@/components/ui/button";
-import Heading from "@/components/ui/heading";
-import { Separator } from "@/components/ui/separator";
-import { Trash as TrashIcon } from "lucide-react";
+
+import axios from "axios";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useState } from "react";
-import { Input } from "@/components/ui/input";
-import axios from "axios";
 import { useParams, useRouter } from "next/navigation";
 import toast from "react-hot-toast";
+import { useLoadingBarStore } from "@/hooks/useLoadingBarStore";
+import { Color } from "@prisma/client";
+
+import Heading from "@/components/ui/heading";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { Trash as TrashIcon } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { AlertModal } from "@/components/modals/AlertModal";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
-import { useLoadingBarStore } from "@/hooks/useLoadingBarStore";
 
 interface ColorFormProps {
-  initialData: {
-    id: string | undefined;
-    value: string | undefined;
-    name: string | undefined;
-  };
+  initialData: Color | null;
 }
+
 const formSchema = z.object({
   name: z.string().min(1),
   value: z.string().min(4).regex(/^#/, { message: "String must be a valid hex code. e.g #55bef2" }),
 });
-export type ColorFormValue = z.infer<typeof formSchema>;
 
-const ColorForm: React.FC<ColorFormProps> = ({ initialData }) => {
+type ColorFormValue = z.infer<typeof formSchema>;
+
+const ColorForm = ({ initialData }: ColorFormProps) => {
   const params = useParams();
   const loadingBar = useLoadingBarStore();
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+
   const form = useForm<ColorFormValue>({
     resolver: zodResolver(formSchema),
-    defaultValues: initialData,
+    defaultValues: initialData || {
+      value: "color?.value",
+      name: "color?.name",
+    },
   });
 
-  const title = initialData?.id ? "Edit color" : "Create color";
-  const description = initialData?.id ? "Edit a color" : "Add a new Color";
-  const toastMessage = initialData?.id ? "Color updated" : "Color created";
-  const action = initialData?.id ? "Save changes" : "Create color";
+  const title = initialData ? "Edit color" : "Create color";
+  const description = initialData ? "Edit a color" : "Add a new Color";
+  const toastMessage = initialData ? "Color updated" : "Color created";
+  const action = initialData ? "Save changes" : "Create color";
+
   const onSubmit = async (data: ColorFormValue, event: any) => {
     try {
       setLoading(true);
       loadingBar.start(event);
-      if (initialData?.id) {
+
+      if (initialData) {
         await axios.patch(`/api/stores/${params.storeId}/colors/${params.colorId}`, data);
       } else {
         await axios.post(`/api/stores/${params.storeId}/colors`, data);
       }
+
+      toast.success(toastMessage);
+
       router.push(`/${params.storeId}/colors`);
       router.refresh();
-      toast.success(toastMessage);
     } catch (error) {
-      console.trace("error", error);
       loadingBar.done();
-      toast.error("Something Went Wrong");
+
+      console.trace("error", error);
+
+      if (axios.isAxiosError(error))
+        toast.error(
+          error?.response?.status === 500 ? "Internal Server Error" : "Something went wrong. Please try again."
+        );
+      else toast.error("Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -68,14 +83,23 @@ const ColorForm: React.FC<ColorFormProps> = ({ initialData }) => {
     try {
       setLoading(true);
       loadingBar.start(event);
+
       await axios.delete(`/api/stores/${params.storeId}/colors/${params.colorId}`);
+
+      toast.success("Color deleted");
+
       router.push(`/${params.storeId}/colors/`);
       router.refresh();
-      toast.success("Color deleted");
     } catch (error) {
-      console.trace("error: ", error);
       loadingBar.done();
-      toast.error("Something went wrong");
+
+      console.trace("error: ", error);
+
+      if (axios.isAxiosError(error))
+        toast.error(
+          error?.response?.status === 500 ? "Internal Server Error" : "Something went wrong. Please try again."
+        );
+      else toast.error("Something went wrong. Please try again.");
     } finally {
       setLoading(false);
       setOpen(false);
@@ -88,7 +112,7 @@ const ColorForm: React.FC<ColorFormProps> = ({ initialData }) => {
       <div className="flex items-center justify-between">
         <Heading title={title} description={description} />
 
-        {initialData?.id && (
+        {initialData && (
           <Button variant="destructive" color="icon" onClick={() => setOpen(true)}>
             <TrashIcon className="h-4 w-4" />
           </Button>

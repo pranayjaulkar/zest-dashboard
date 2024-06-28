@@ -1,12 +1,12 @@
-import "./globals.css";
+import CreateModalProvider from "@/providers/CreateModalProvider";
+import LoadingBarProvider from "@/providers/LoadingBarProvider";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
-import CreateModalProvider from "@/providers/CreateModalProvider";
+import { Suspense } from "react";
 import { ToastProvider } from "@/providers/ToastProvider";
 import { ThemeProvider } from "@/providers/ThemeProvider";
-import LoadingBarProvider from "@/providers/LoadingBarProvider";
-import { Suspense } from "react";
+import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
 

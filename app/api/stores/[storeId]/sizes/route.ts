@@ -1,31 +1,40 @@
 import prisma from "@/prisma/client";
+import sizeSchema from "@/zod/sizeSchema";
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
-export async function POST(
-  req: Request,
-  { params }: { params: { storeId: string; billboardId: string } }
-) {
+export async function GET(req: Request, { params }: { params: { storeId: string } }) {
   try {
-    const { userId } = auth();
-    const body = await req.json();
-    const { name, value } = body;
-
-    if (!userId) {
-      return new NextResponse("Unauthorized", { status: 404 });
-    }
-
-    if (!name) {
-      return new NextResponse("Name is required", { status: 400 });
-    }
-    if (!value) {
-      return new NextResponse("Value is required", { status: 400 });
-    }
     if (!params.storeId) {
       return new NextResponse("Store id is required", { status: 400 });
     }
-    const storeByUserId = await prisma.store.findFirst({
-      where: { id: params.storeId, userId },
+
+    const sizes = await prisma.size.findMany({
+      where: { storeId: params.storeId },
+    });
+
+    return NextResponse.json(sizes);
+  } catch (error) {
+    console.trace("[size_GET]", error);
+    return new NextResponse("Internal error", { status: 500 });
+  }
+}
+
+export async function POST(req: Request, { params }: { params: { storeId: string; billboardId: string } }) {
+  try {
+    const { userId } = auth();
+    const body = await req.json();
+
+    try {
+      sizeSchema.parse(body);
+    } catch (error) {
+      return NextResponse.json({ message: "Invalid Size data" }, { status: 400 });
+    }
+
+    const { name, value } = body;
+
+    const storeByUserId = await prisma.store.findUnique({
+      where: { id: params.storeId, userId: userId! },
     });
 
     if (!storeByUserId) {
@@ -38,28 +47,10 @@ export async function POST(
         storeId: params.storeId,
       },
     });
+
     return NextResponse.json(size);
   } catch (error) {
     console.trace("[size_POST]", error);
-    return new NextResponse("Internal error", { status: 500 });
-  }
-}
-
-export async function GET(
-  req: Request,
-  { params }: { params: { storeId: string } }
-) {
-  try {
-    if (!params.storeId) {
-      return new NextResponse("Store id is required", { status: 400 });
-    }
-
-    const categories = await prisma.size.findMany({
-      where: { storeId: params.storeId },
-    });
-    return NextResponse.json(categories);
-  } catch (error) {
-    console.trace("[size_GET]", error);
     return new NextResponse("Internal error", { status: 500 });
   }
 }

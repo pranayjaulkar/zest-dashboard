@@ -7,29 +7,29 @@ import { Color, Size } from "@prisma/client";
 import { DataTable } from "@/components/ui/data-table";
 
 interface VariationsTableProps {
-  productVariations: _ProductVariation[];
-  setProductVariations: React.Dispatch<React.SetStateAction<_ProductVariation[]>>;
-  colors: Color[];
-  sizes: Size[];
-  selectedColors: Color[];
-  selectedSizes: Size[];
-  setSelectedColors: React.Dispatch<React.SetStateAction<Color[]>>;
-  setSelectedSizes: React.Dispatch<React.SetStateAction<Size[]>>;
   initialData: ProductWithPriceTypeConverted | null;
   disabled: boolean;
+  colors: Color[];
+  sizes: Size[];
+  productVariations: _ProductVariation[];
+  setProductVariations: React.Dispatch<React.SetStateAction<_ProductVariation[]>>;
+  selectedColors: Color[];
+  setSelectedColors: React.Dispatch<React.SetStateAction<Color[]>>;
+  selectedSizes: Size[];
+  setSelectedSizes: React.Dispatch<React.SetStateAction<Size[]>>;
 }
 
 export default function VariationsSection({
+  initialData,
+  disabled,
+  colors,
+  sizes,
   productVariations,
   setProductVariations,
-  disabled,
   selectedColors,
   setSelectedColors,
   selectedSizes,
   setSelectedSizes,
-  initialData,
-  colors,
-  sizes,
 }: VariationsTableProps) {
   const [allChecked, SetAllChecked] = useState(false);
 
@@ -113,16 +113,20 @@ export default function VariationsSection({
   ];
 
   const onQuantityChange = (e: any, v: _ProductVariation) => {
-    setProductVariations(
-      productVariations.map((variation) => {
-        if (variation.name === v.name)
-          return {
-            ...variation,
-            quantity: Number(e.target.value),
-          };
-        return variation;
-      })
-    );
+    const newValue = Number(e.target.value);
+    if (Number.isInteger(newValue))
+      setProductVariations((prevArray) =>
+        prevArray.map((variation) => {
+          if (variation.colorId === v.colorId && variation.sizeId === v.sizeId) {
+            return {
+              ...variation,
+              quantity: e.target.value ? newValue : e.target.value,
+            };
+          } else {
+            return variation;
+          }
+        })
+      );
   };
 
   const onCheckedChange = (value: boolean, v: _ProductVariation) => {
@@ -147,6 +151,7 @@ export default function VariationsSection({
       }))
     );
   };
+
   return (
     <div className="w-full space-y-8">
       <div className="flex flex-col">
@@ -203,7 +208,6 @@ export default function VariationsSection({
               </TableCell>
               <TableCell className="text-right">
                 <input
-                  type="number"
                   className="border-2 p-2 rounded-md w-32"
                   value={v.quantity}
                   onChange={(e) => onQuantityChange(e, v)}

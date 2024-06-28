@@ -1,21 +1,22 @@
 "use client";
-import { Button } from "@/components/ui/button";
-import Heading from "@/components/ui/heading";
-import { Separator } from "@/components/ui/separator";
-import { Plus as PlusIcon } from "lucide-react";
 import { useParams, usePathname, useRouter } from "next/navigation";
-import { DataTable } from "@/components/ui/data-table";
 import { ColumnDef } from "@tanstack/react-table";
 import { useState } from "react";
 import { format } from "date-fns";
-import ApiList from "@/components/ui/api-list";
 import { useLoadingBarStore } from "@/hooks/useLoadingBarStore";
-import Link from "next/link";
-import CellActions from "./CellActions";
-import { AlertModal } from "./modals/AlertModal";
 import axios from "axios";
 import toast from "react-hot-toast";
-import { Order, OrderItem, Product, ProductVariation } from "@prisma/client";
+import { Order, OrderItem } from "@prisma/client";
+
+import CellActions from "@/components/CellActions";
+import ApiList from "@/components/ui/api-list";
+import Heading from "@/components/ui/heading";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { Plus as PlusIcon } from "lucide-react";
+import { DataTable } from "@/components/ui/data-table";
+import { AlertModal } from "@/components/modals/AlertModal";
 
 interface ClientProps<TData> {
   data: TData[];
@@ -52,22 +53,61 @@ export default function Client<TData extends { id: string; label?: string; name?
       setRowId(id);
     } catch (error) {
       console.trace("error: ", error);
-      toast.error("Something Went Wrong");
+
+      if (axios.isAxiosError(error))
+        toast.error(
+          error?.response?.status === 500 ? "Internal Server Error" : "Something went wrong. Please try again."
+        );
+      else toast.error("Something went wrong. Please try again.");
     }
   };
 
   const handleMarkDelivered = async (order: FormattedOrder) => {
     try {
       setLoading(true);
+
       const { totalPrice, orderItems, ...newOrder } = order;
+
       await axios.patch(`/api/stores/${params.storeId}/orders/${order?.id}`, { ...newOrder, delivered: true });
+
+      setRows((prev) => prev.map((row) => (row.id === order.id ? { ...row, delivered: true } : row)));
+
       toast.success("Order marked as delivered");
     } catch (error) {
       console.trace("error: ", error);
-      toast.error("Something Went Wrong");
+
+      if (axios.isAxiosError(error))
+        toast.error(
+          error?.response?.status === 500 ? "Internal Server Error" : "Something went wrong. Please try again."
+        );
+      else toast.error("Something went wrong. Please try again.");
     } finally {
       router.refresh();
       setLoading(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    try {
+      setLoading(true);
+
+      await axios.delete(`/api/stores/${params.storeId}/${entityNamePlural}/${rowId}`);
+
+      setRows((previousData) => previousData.filter((element) => element.id !== rowId));
+
+      toast.success(`${entityName} deleted`);
+    } catch (error) {
+      console.trace("error: ", error);
+
+      if (axios.isAxiosError(error))
+        toast.error(
+          error?.response?.status === 500 ? "Internal Server Error" : "Something went wrong. Please try again."
+        );
+      else toast.error("Something went wrong. Please try again.");
+    } finally {
+      router.refresh();
+      setLoading(false);
+      setOpen(false);
     }
   };
 
@@ -94,22 +134,6 @@ export default function Client<TData extends { id: string; label?: string; name?
       ),
     },
   ];
-
-  const handleDelete = async () => {
-    try {
-      setLoading(true);
-      await axios.delete(`/api/stores/${params.storeId}/${entityNamePlural}/${rowId}`);
-      setRows((previousData) => previousData.filter((element) => element.id !== rowId));
-      toast.success(`${entityName} deleted`);
-    } catch (error) {
-      console.trace("error: ", error);
-      toast.error("Something Went Wrong");
-    } finally {
-      router.refresh();
-      setLoading(false);
-      setOpen(false);
-    }
-  };
 
   return (
     <>

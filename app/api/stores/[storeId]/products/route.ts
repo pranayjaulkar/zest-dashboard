@@ -1,9 +1,20 @@
 import cloudinary from "@/cloudinary.config";
 import prisma from "@/prisma/client";
-import { ProductSchema } from "@/types";
+import productSchema from "@/zod/productSchema";
 import { auth } from "@clerk/nextjs/server";
-import { Product, Image } from "@prisma/client";
+import { Image } from "@prisma/client";
 import { NextResponse } from "next/server";
+
+const deleteCloudinaryImages = (deletedImages: Image[] = []) => {
+  if (deletedImages?.length) {
+    const imagesPublicIdArray: string[] = [...deletedImages.map((image: Image) => image.cloudinaryPublicId)];
+    cloudinary.api.delete_resources(imagesPublicIdArray, (err, res) => {
+      if (err || !res?.deleted) {
+        console.trace("[PRODUCT_PATCH]: Unsuccesfull Image Deletion", err || "");
+      }
+    });
+  }
+};
 
 export async function GET(req: Request, { params }: { params: { storeId: string } }) {
   try {
@@ -43,6 +54,7 @@ export async function GET(req: Request, { params }: { params: { storeId: string 
       },
       orderBy: { createdAt: "desc" },
     });
+
     return NextResponse.json(products);
   } catch (error) {
     console.trace("[PRODUCT_GET]", error);
@@ -54,37 +66,25 @@ export async function POST(req: Request, { params }: { params: { storeId: string
   try {
     const { userId } = auth();
     const body = await req.json();
-    const { product: productData, deletedImages } = body;
+    const { productData, deletedImages } = body;
+
     try {
-      ProductSchema.parse(productData);
+      productSchema.parse(productData);
     } catch (error) {
-      return NextResponse.json({ message: "Invalid Product data", error });
+      return NextResponse.json({ message: "Invalid Product data" }, { status: 400 });
     }
 
-    if (!userId) {
-      return new NextResponse("Unauthorized", { status: 404 });
-    }
-
-    const storeByUserId = await prisma.store.findFirst({
-      where: { id: params.storeId, userId },
+    const storeByUserId = await prisma.store.findUnique({
+      where: { id: params.storeId, userId: userId! },
     });
 
     if (!storeByUserId) {
       return new NextResponse("Unauthorized", { status: 403 });
     }
 
-    const imagesPublicIdArray: string[] = [
-      ...productData?.images.map((image: Image) => image.cloudinaryPublicId),
-      ...deletedImages?.map((image: Image) => image.cloudinaryPublicId),
-    ];
+    deleteCloudinaryImages(deletedImages);
 
-    cloudinary.api.delete_resources(imagesPublicIdArray, (err, res) => {
-      if (err || !res?.deleted) {
-        console.trace("[PRODUCT_PATCH]: Unsuccesfull Image Deletion", err || "");
-      }
-    });
-
-    const product: Product = await prisma.product.create({
+    const product = await prisma.product.create({
       data: {
         ...productData,
         storeId: params.storeId,
@@ -98,6 +98,7 @@ export async function POST(req: Request, { params }: { params: { storeId: string
         },
       },
     });
+
     return NextResponse.json(product);
   } catch (error) {
     console.trace("[PRODUCT_POST]", error);

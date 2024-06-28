@@ -1,14 +1,15 @@
 "use client";
 import * as z from "zod";
-import { Modal } from "@/components/ui/modal";
-import { useCreateModalStore } from "@/hooks/useCreateModalStore";
 import axios from "axios";
-import { Input } from "@/components/ui/input";
-import { Button } from "../ui/button";
+import { useCreateModalStore } from "@/hooks/useCreateModalStore";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { useLoadingBarStore } from "@/hooks/useLoadingBarStore";
+
+import Modal from "@/components/ui/modal";
+import { Input } from "@/components/ui/input";
+import { Button } from "../ui/button";
 
 const formSchema = z.string().min(1);
 
@@ -38,7 +39,11 @@ export default function CreateModal() {
       }
     } catch (err) {
       console.trace(err);
-      toast.error("Something went wrong");
+      if (axios.isAxiosError(error))
+        toast.error(
+          error?.response?.status === 500 ? "Internal Server Error" : "Something went wrong. Please try again."
+        );
+      else toast.error("Something went wrong. Please try again.");
     }
   };
 

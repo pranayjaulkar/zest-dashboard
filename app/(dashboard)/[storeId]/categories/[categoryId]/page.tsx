@@ -1,21 +1,15 @@
 import prisma from "@/prisma/client";
 import CategoryForm from "./(components)/CategoryForm";
-interface CategoryPageProps {
-  params: { categoryId: string; storeId: string };
-}
 
-const CategoryPage: React.FC<CategoryPageProps> = async ({ params }) => {
+const CategoryPage = async ({ params }: { params: { categoryId: string; storeId: string } }) => {
   const category = await prisma.category.findUnique({
-    where: {
-      id: params.categoryId,
-    },
+    where: { id: params.categoryId },
   });
 
   const billboards = await prisma.billboard.findMany({
-    where: {
-      storeId: params.storeId,
-    },
+    where: { storeId: params.storeId },
   });
+
   return (
     <div className="flex-col max-w-screen-xl mx-auto">
       <div className="flex-1 space-y-4 p-8 pt-6">

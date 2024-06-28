@@ -1,6 +1,6 @@
 "use client";
 import { ImagePlus as ImagePlusIcon, Trash as TrashIcon } from "lucide-react";
-import { Suspense, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "./button";
 import Image from "next/image";
 import { CldUploadWidget } from "next-cloudinary";
@@ -13,7 +13,7 @@ interface ImageUploadProps {
   images: ImageType[];
 }
 
-const ImageUpload: React.FC<ImageUploadProps> = ({ multiple = false, onUpload, onRemove, images }) => {
+const ImageUpload = ({ multiple = false, onUpload, onRemove, images }: ImageUploadProps) => {
   const [isMounted, setIsMounted] = useState(false);
 
   const handleImageUpload = (result: any) => {
@@ -29,7 +29,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ multiple = false, onUpload, o
   }, []);
 
   if (!isMounted) {
-    return null
+    return null;
   }
 
   return (

@@ -24,13 +24,13 @@ model Store {
 model Billboard {
   id                 String     @id @default(uuid())
   storeId            String
+  store              Store      @relation("StoreToBillboard", fields: [storeId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   label              String
   imageUrl           String
   cloudinaryPublicId String
+  active             Boolean?
   createdAt          DateTime   @default(now())
   updatedAt          DateTime   @updatedAt
-  active             Boolean?
-  store              Store      @relation("StoreToBillboard", fields: [storeId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   categories         Category[] @relation("BillboardToCategory")
 
   @@index([storeId])
@@ -39,12 +39,12 @@ model Billboard {
 model Category {
   id          String    @id @default(uuid())
   storeId     String
+  store       Store     @relation("StoreToCategory", fields: [storeId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   billboardId String
+  billboard   Billboard @relation("BillboardToCategory", fields: [billboardId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   name        String
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
-  billboard   Billboard @relation("BillboardToCategory", fields: [billboardId], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  store       Store     @relation("StoreToCategory", fields: [storeId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   products    Product[] @relation("CategoryToProduct")
 
   @@index([billboardId])
@@ -54,12 +54,12 @@ model Category {
 model Size {
   id                String             @id @default(uuid())
   storeId           String
+  store             Store              @relation("StoreToSize", fields: [storeId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   name              String
   value             String
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
   productVariations ProductVariation[] @relation("ProductVariationToSize")
-  store             Store              @relation("StoreToSize", fields: [storeId], references: [id], onUpdate: Cascade, onDelete: Cascade)
 
   @@index([storeId])
 }
@@ -67,11 +67,11 @@ model Size {
 model Color {
   id                String             @id @default(uuid())
   storeId           String
+  store             Store              @relation("StoreToColor", fields: [storeId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   name              String
   value             String
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
-  store             Store              @relation("StoreToColor", fields: [storeId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   productVariations ProductVariation[] @relation("ProductVariationToColor")
 
   @@index([storeId])
@@ -80,7 +80,9 @@ model Color {
 model Product {
   id                String             @id @default(uuid())
   storeId           String
+  store             Store              @relation("StoreToProduct", fields: [storeId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   categoryId        String
+  category          Category           @relation("CategoryToProduct", fields: [categoryId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   name              String
   price             Decimal
   isFeatured        Boolean            @default(false)
@@ -89,8 +91,6 @@ model Product {
   updatedAt         DateTime           @updatedAt
   images            Image[]            @relation("ProductToImage")
   orderItems        OrderItem[]        @relation("ProductToOrderItem")
-  category          Category           @relation("CategoryToProduct", fields: [categoryId], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  store             Store              @relation("StoreToProduct", fields: [storeId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   productVariations ProductVariation[] @relation("ProductVariationToProduct")
 
   @@index([storeId])
@@ -100,11 +100,11 @@ model Product {
 model Image {
   id                 String   @id @default(uuid())
   productId          String
+  product            Product  @relation("ProductToImage", fields: [productId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   url                String
   cloudinaryPublicId String
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
-  product            Product  @relation("ProductToImage", fields: [productId], references: [id], onUpdate: Cascade, onDelete: Cascade)
 
   @@index([productId])
 }
@@ -127,13 +127,13 @@ model Order {
 model OrderItem {
   id                 String           @id @default(uuid())
   orderId            String
+  order              Order            @relation("OrderToOrderItem", fields: [orderId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   productId          String
+  product            Product          @relation("ProductToOrderItem", fields: [productId], references: [id], onUpdate: Cascade, onDelete: Restrict)
+  productVariationId String
+  productVariation   ProductVariation @relation("ProductVariationToOrderItem", fields: [productVariationId], references: [id], onDelete: Cascade)
   createdAt          DateTime         @default(now())
   updatedAt          DateTime         @updatedAt
-  productVariationId String
-  order              Order            @relation("OrderToOrderItem", fields: [orderId], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  product            Product          @relation("ProductToOrderItem", fields: [productId], references: [id], onUpdate: Cascade, onDelete: Restrict)
-  productVariation   ProductVariation @relation("ProductVariationToOrderItem", fields: [productVariationId], references: [id], onDelete: Restrict)
 
   @@index([productId])
   @@index([orderId])
@@ -143,15 +143,15 @@ model ProductVariation {
   id         String      @id @default(uuid())
   name       String
   quantity   Int
-  updatedAt  DateTime    @updatedAt
-  createdAt  DateTime    @default(now())
-  orderItems OrderItem[] @relation("ProductVariationToOrderItem")
   colorId    String
   color      Color       @relation("ProductVariationToColor", fields: [colorId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   productId  String?
   product    Product?    @relation("ProductVariationToProduct", fields: [productId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   sizeId     String
   size       Size        @relation("ProductVariationToSize", fields: [sizeId], references: [id], onDelete: Cascade)
+  orderItems OrderItem[] @relation("ProductVariationToOrderItem")
+  updatedAt  DateTime    @updatedAt
+  createdAt  DateTime    @default(now())
 
   @@index([productId])
   @@index([colorId])

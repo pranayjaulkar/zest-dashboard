@@ -41,7 +41,7 @@ export const getProductVariations = (
           sizeId: size.id,
           colorId: color.id,
           productId: relatedProductVariation?.productId || undefined,
-          quantity: existingProductVariations?.find((pv) => pv.name === color.name + "_" + size.name)?.quantity || 0,
+          quantity: relatedProductVariation?.quantity || "",
           size,
           color,
           selected: !!relatedProductVariation,
@@ -101,4 +101,19 @@ export const getDeletedProductVariations = (
   });
 
   return deletedVariations;
+};
+export const getExistingProductVariations = (
+  oldProductVariations: ProductVariation[],
+  newProductVariations: ProductVariation[]
+) => {
+  let exisitingVariations: ProductVariation[] = [];
+
+  oldProductVariations.forEach((v1) => {
+    let pv = newProductVariations.find((v2) => v2.colorId === v1.colorId && v2.sizeId === v1.sizeId);
+    if (pv) {
+      exisitingVariations = [...exisitingVariations, { ...pv, id: v1.id }];
+    }
+  });
+
+  return exisitingVariations;
 };

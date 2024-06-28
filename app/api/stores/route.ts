@@ -34,7 +34,7 @@ export async function GET(req: Request) {
     if (!storeId) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
-    const store = await prisma.store.findFirst({
+    const store = await prisma.store.findUnique({
       where: { id: storeId },
     });
     return NextResponse.json(store);
