@@ -30,13 +30,7 @@ export async function POST(req: Request) {
 }
 export async function GET(req: Request) {
   try {
-    const { storeId }: { storeId: string } = await req.json();
-    if (!storeId) {
-      return new NextResponse("Unauthorized", { status: 401 });
-    }
-    const store = await prisma.store.findUnique({
-      where: { id: storeId },
-    });
+    const store = await prisma.store.findMany({ include: { products: { include: { images: true } } } });
     return NextResponse.json(store);
   } catch (error) {
     console.trace("api/stores/route.ts", error);

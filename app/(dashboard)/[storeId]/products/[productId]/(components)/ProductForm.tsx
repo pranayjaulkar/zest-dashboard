@@ -118,7 +118,7 @@ const ProductForm = ({ initialData, categories, colors, sizes }: ProductFormProp
       loadingBar.done();
       setLoading(false);
 
-      console.trace("error", error);
+      // console.trace("error", error);
 
       if (axios.isAxiosError(error))
         if (error?.response?.data?.code === "P2014") toast.error(error.response.data.message);
@@ -144,7 +144,7 @@ const ProductForm = ({ initialData, categories, colors, sizes }: ProductFormProp
     } catch (error: any) {
       loadingBar.done();
 
-      console.trace("error: ", error);
+      // console.trace("error: ", error);
 
       if (axios.isAxiosError(error))
         if (error?.response?.data?.code === "P2014") toast.error(error.response.data.message);

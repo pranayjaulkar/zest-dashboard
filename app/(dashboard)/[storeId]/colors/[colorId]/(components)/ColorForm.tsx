@@ -39,8 +39,8 @@ const ColorForm = ({ initialData }: ColorFormProps) => {
   const form = useForm<ColorFormValue>({
     resolver: zodResolver(formSchema),
     defaultValues: initialData || {
-      value: "color?.value",
-      name: "color?.name",
+      value: "",
+      name: "",
     },
   });
 
@@ -67,7 +67,7 @@ const ColorForm = ({ initialData }: ColorFormProps) => {
     } catch (error) {
       loadingBar.done();
 
-      console.trace("error", error);
+      // console.trace("error", error);
 
       if (axios.isAxiosError(error))
         toast.error(
@@ -93,7 +93,7 @@ const ColorForm = ({ initialData }: ColorFormProps) => {
     } catch (error) {
       loadingBar.done();
 
-      console.trace("error: ", error);
+      // console.trace("error: ", error);
 
       if (axios.isAxiosError(error))
         toast.error(

@@ -55,7 +55,7 @@ export default function CellActions<TData extends { id: string; label?: string; 
     } catch (error) {
       loadingBar.done();
 
-      console.trace(error);
+      // console.trace(error);
 
       if (axios.isAxiosError(error))
         toast.error(

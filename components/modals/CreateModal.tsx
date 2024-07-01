@@ -28,17 +28,23 @@ export default function CreateModal() {
         setError("");
         setLoading(true);
         loadingBar.start(event);
+
         const res = await axios.post("/api/stores", { name });
+
         toast.success("Created store successfully");
+
         createModal.close();
+
         router.push(`/${res.data.id}`);
         router.refresh();
+        
         setLoading(false);
       } else {
         setError("Name is required.");
       }
     } catch (err) {
-      console.trace(err);
+      // console.trace(err);
+
       if (axios.isAxiosError(error))
         toast.error(
           error?.response?.status === 500 ? "Internal Server Error" : "Something went wrong. Please try again."

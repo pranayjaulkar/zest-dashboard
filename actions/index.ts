@@ -51,10 +51,18 @@ export async function getSalesCount(storeId: string) {
 }
 
 export async function getStockCount(storeId: string) {
-  const stockCount = await prisma.product.count({
-    where: { storeId, isArchived: true },
+  const stockCounts = await prisma.productVariation.groupBy({
+    by: ["productId"],
+    where: { product: { storeId } },
+    _sum: { quantity: true },
   });
-  return stockCount;
+  return stockCounts.reduce((acc, stockCount) => {
+    let sum = 0;
+    if (stockCount) {
+      sum = stockCount._sum.quantity || 0;
+    }
+    return acc + sum;
+  }, 0);
 }
 
 export async function getTotalRevenue(storeId: string) {

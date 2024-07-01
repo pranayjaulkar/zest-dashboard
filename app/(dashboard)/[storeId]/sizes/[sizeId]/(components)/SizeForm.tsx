@@ -66,7 +66,7 @@ const SizeForm = ({ initialData }: SizeFormProps) => {
     } catch (error) {
       loadingBar.done();
 
-      console.trace("error", error);
+      // console.trace("error", error);
 
       if (axios.isAxiosError(error))
         toast.error(
@@ -92,7 +92,7 @@ const SizeForm = ({ initialData }: SizeFormProps) => {
     } catch (error) {
       loadingBar.done();
 
-      console.trace("error: ", error);
+      // console.trace("error: ", error);
 
       if (axios.isAxiosError(error))
         toast.error(

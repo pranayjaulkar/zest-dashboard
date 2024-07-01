@@ -68,7 +68,7 @@ const CategoryForm = ({ initialData, billboards }: CategoryFormProps) => {
     } catch (error) {
       loadingBar.done();
 
-      console.trace("error", error);
+      // console.trace("error", error);
 
       if (axios.isAxiosError(error))
         toast.error(
@@ -92,7 +92,7 @@ const CategoryForm = ({ initialData, billboards }: CategoryFormProps) => {
 
       toast.success("Category deleted");
     } catch (error) {
-      console.trace("error: ", error);
+      // console.trace("error: ", error);
 
       loadingBar.done();
 

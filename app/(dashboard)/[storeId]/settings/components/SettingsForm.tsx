@@ -57,7 +57,7 @@ const SettingsForm = ({ initialData }: SettingsFormProps) => {
     } catch (error) {
       loadingBar.done();
 
-      console.trace("error: ", error);
+      // console.trace("error: ", error);
 
       if (axios.isAxiosError(error))
         toast.error(
@@ -85,7 +85,7 @@ const SettingsForm = ({ initialData }: SettingsFormProps) => {
     } catch (error) {
       loadingBar.done();
 
-      console.trace("error: ", error);
+      // console.trace("error: ", error);
 
       if (axios.isAxiosError(error))
         toast.error(

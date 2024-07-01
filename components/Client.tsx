@@ -52,7 +52,7 @@ export default function Client<TData extends { id: string; label?: string; name?
       setOpen(true);
       setRowId(id);
     } catch (error) {
-      console.trace("error: ", error);
+      // console.trace("error: ", error);
 
       if (axios.isAxiosError(error))
         toast.error(
@@ -74,7 +74,7 @@ export default function Client<TData extends { id: string; label?: string; name?
 
       toast.success("Order marked as delivered");
     } catch (error) {
-      console.trace("error: ", error);
+      // console.trace("error: ", error);
 
       if (axios.isAxiosError(error))
         toast.error(
@@ -97,7 +97,7 @@ export default function Client<TData extends { id: string; label?: string; name?
 
       toast.success(`${entityName} deleted`);
     } catch (error) {
-      console.trace("error: ", error);
+      // console.trace("error: ", error);
 
       if (axios.isAxiosError(error))
         toast.error(

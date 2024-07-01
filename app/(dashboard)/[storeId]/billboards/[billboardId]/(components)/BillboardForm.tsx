@@ -98,7 +98,7 @@ const BillboardForm = ({ initialData }: BillboardFormProps) => {
     } catch (err) {
       loadingBar.done();
 
-      console.trace("error: ", err);
+      // console.trace("error: ", err);
 
       if (axios.isAxiosError(error))
         toast.error(
