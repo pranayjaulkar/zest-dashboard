@@ -1,5 +1,6 @@
 import CreateModalProvider from "@/providers/CreateModalProvider";
 import LoadingBarProvider from "@/providers/LoadingBarProvider";
+import { Analytics } from "@vercel/analytics/react";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
@@ -28,6 +29,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <CreateModalProvider />
             {children}
           </ThemeProvider>
+          <Analytics />
         </body>
       </html>
     </ClerkProvider>
