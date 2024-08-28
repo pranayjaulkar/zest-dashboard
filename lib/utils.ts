@@ -2,8 +2,6 @@ import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { _ProductVariation } from "@/types";
 import { Color, ProductVariation, Size } from "@prisma/client";
-import cloudinary from "@/cloudinary.config";
-import { Image } from "@prisma/client";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));

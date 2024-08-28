@@ -12,6 +12,8 @@ const deleteCloudinaryImages = (deletedImages: { cloudinaryPublicId: string }[] 
     cloudinary.api.delete_resources(imagesPublicIdArray, (err, res) => {
       if (err || !res?.deleted) {
         console.trace("[PRODUCT_PATCH]: Unsuccesfull Image Deletion", err || "");
+      } else {
+        console.trace("[PRODUCT_PATCH]: Succesfull Image Deletion", res || "");
       }
     });
   }
