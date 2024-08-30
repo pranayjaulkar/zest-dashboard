@@ -18,7 +18,7 @@ export const useLoadingBarStore = create<LoadingBarStore>((set, get) => ({
   setProgress: (num) => set({ progress: num }),
   // start() method starts the loading bar
   // use when manually redirecting to a page.
-  // when manually redirecting dont call done() method.
+  // when manually redirecting don't call done() method.
   // it will be called automatically when the route changes.
   start: (event) => {
     // if loading bar is already started then clear the previous

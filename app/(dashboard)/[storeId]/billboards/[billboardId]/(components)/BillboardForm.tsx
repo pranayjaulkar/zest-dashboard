@@ -47,8 +47,6 @@ const BillboardForm = ({ initialData }: BillboardFormProps) => {
   const handleSubmit = async (event: any) => {
     try {
       event.preventDefault();
-
-      console.log("deletedImages: ", deletedImages);
       const data = {
         billboardData: { active, imageUrl: images[0].url, cloudinaryPublicId: images[0].cloudinaryPublicId, label },
         deletedImages,
