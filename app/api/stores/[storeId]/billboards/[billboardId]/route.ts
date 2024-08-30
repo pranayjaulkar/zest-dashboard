@@ -5,15 +5,14 @@ import { Billboard } from "@prisma/client";
 import cloudinary from "@/cloudinary.config";
 import billboardSchema from "@/zod/billboardSchema";
 
-const deleteCloudinaryImages = (deletedImages: { cloudinaryPublicId: string }[] = []) => {
-  if (deletedImages?.length) {
-    const imagesPublicIdArray: string[] = [...deletedImages.map((image) => image.cloudinaryPublicId)];
-
+const deleteCloudinaryImages = (images: { cloudinaryPublicId: string }[] = []) => {
+  if (images?.length) {
+    const imagesPublicIdArray: string[] = [...images.map((image) => image.cloudinaryPublicId)];
     cloudinary.api.delete_resources(imagesPublicIdArray, (err, res) => {
       if (err || !res?.deleted) {
         console.trace("[PRODUCT_PATCH]: Unsuccesfull Image Deletion", err || "");
       } else {
-        console.trace("[PRODUCT_PATCH]: Succesfull Image Deletion", res || "");
+        console.trace("[PRODUCT_PATCH]: Succesfull Image Deletion", res?.deleted || "");
       }
     });
   }

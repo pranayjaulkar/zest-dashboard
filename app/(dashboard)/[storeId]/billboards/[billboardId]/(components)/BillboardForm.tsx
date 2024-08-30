@@ -48,9 +48,10 @@ const BillboardForm = ({ initialData }: BillboardFormProps) => {
     try {
       event.preventDefault();
 
+      console.log("deletedImages: ", deletedImages);
       const data = {
         billboardData: { active, imageUrl: images[0].url, cloudinaryPublicId: images[0].cloudinaryPublicId, label },
-        deleteImageUrl: deletedImages,
+        deletedImages,
       };
 
       if (billboardSchema.safeParse(data.billboardData).success) {
