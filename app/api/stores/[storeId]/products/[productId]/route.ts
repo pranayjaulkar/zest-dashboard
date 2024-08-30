@@ -11,7 +11,9 @@ const deleteCloudinaryImages = (images: Image[] = []) => {
     const imagesPublicIdArray: string[] = images.map((image) => image.cloudinaryPublicId);
     cloudinary.api.delete_resources(imagesPublicIdArray, (err, res) => {
       if (err || !res?.deleted) {
-        console.trace("[PRODUCT_PATCH]: Unsuccesfull Image Deletion", err || "");
+        console.log("[PRODUCT_PATCH]: Unsuccesfull Image Deletion", err || "");
+      } else {
+        console.log("[PRODUCT_PATCH]: Succesfull Image Deletion", res?.deleted || "");
       }
     });
   }
@@ -63,9 +65,9 @@ export async function PATCH(req: Request, { params }: { params: { storeId: strin
       where: { id: params.productId },
       include: { images: true, productVariations: true },
     });
+
     if (product) {
-      //delete all deleted images in cloudinary database
-      deleteCloudinaryImages([...product.images, ...deletedImages]);
+      deleteCloudinaryImages(deletedImages);
 
       let { newVars, deletedVars, existingVars } = getProductVariationsDiff(
         product.productVariations,
