@@ -18,6 +18,26 @@ export function getRandomNumber(min: number, max: number) {
   return Math.floor(Math.random() * (maxFloored - minCeiled) + minCeiled);
 }
 
+export const getColorsFromVariations = (variations: (ProductVariation & { size: Size } & { color: Color })[]) => {
+  let colorsArray: Color[] = [];
+  variations.forEach((v) => {
+    if (!colorsArray.find((c) => c.id === v.color.id)) {
+      colorsArray = [...colorsArray, v.color];
+    }
+  });
+  return colorsArray;
+};
+
+export const getSizesFromVariations = (variations: (ProductVariation & { size: Size } & { color: Color })[]) => {
+  let sizesArray: Size[] = [];
+  variations.forEach((v) => {
+    if (!sizesArray.find((s) => s.id === v.size.id)) {
+      sizesArray = [...sizesArray, v.size];
+    }
+  });
+  return sizesArray;
+};
+
 export const getProductVariations = (
   colors: Color[],
   sizes: Size[],
@@ -43,7 +63,8 @@ export const getProductVariations = (
           size,
           color,
           selected: !!relatedProductVariation,
-          name: color.name + "_" + size.name,
+          name: color.name.split(" ").join("_") + "_" + size.name,
+          id: relatedProductVariation?.id,
         },
       ];
     })
@@ -51,67 +72,35 @@ export const getProductVariations = (
   return variations;
 };
 
-export const getColorsFromVariations = (variations: (ProductVariation & { size: Size } & { color: Color })[]) => {
-  let colorsArray: Color[] = [];
-  variations.forEach((v) => {
-    if (!colorsArray.find((c) => c.id === v.color.id)) {
-      colorsArray = [...colorsArray, v.color];
-    }
-  });
-  return colorsArray;
-};
-
-export const getSizesFromVariations = (variations: (ProductVariation & { size: Size } & { color: Color })[]) => {
-  let sizesArray: Size[] = [];
-  variations.forEach((v) => {
-    if (!sizesArray.find((s) => s.id === v.size.id)) {
-      sizesArray = [...sizesArray, v.size];
-    }
-  });
-  return sizesArray;
-};
-
-export const getNewProductVariations = (
+export const getProductVariationsDiff = (
   oldProductVariations: ProductVariation[],
-  newProductVariations: ProductVariation[]
+  updatedProductVariations: ProductVariation[]
 ) => {
-  let variations: ProductVariation[] = [];
-  newProductVariations.forEach((v1) => {
-    const v = oldProductVariations.find((v2) => v2.colorId === v1.colorId && v2.sizeId === v1.sizeId);
+  let newVars: ProductVariation[] = [];
+  let existingVars: ProductVariation[] = [];
+  let deletedVars: ProductVariation[] = oldProductVariations;
+
+  // for each productVariation in updatedProductVariations loop through oldProductVariations
+  // if any old productVariation is found equal to the new that means this updated variation
+  // is not new and it already existed in the old variations. hence we add it to the
+  // existing vars list and filter it from the deletedvars list.
+  // if all old productVariation is not found equal to the updated productVariation that means
+  // the updated product variation is a new one we add it to the list.
+  updatedProductVariations.forEach((uptdPv) => {
+    const v = oldProductVariations.find((oldPv) => oldPv.colorId === uptdPv.colorId && oldPv.sizeId === uptdPv.sizeId);
+
+    // if uptdPv is new variation than v will be undefined
     if (!v) {
-      variations = [...variations, v1];
+      newVars = [...newVars, uptdPv];
     }
-  });
-  return variations;
-};
 
-export const getDeletedProductVariations = (
-  oldProductVariations: ProductVariation[],
-  newProductVariations: ProductVariation[]
-) => {
-  let deletedVariations: ProductVariation[] = oldProductVariations;
-
-  newProductVariations.forEach((v1) => {
-    let pv = oldProductVariations.find((v2) => v2.colorId === v1.colorId && v2.sizeId === v1.sizeId);
-    if (pv) {
-      deletedVariations = deletedVariations.filter((v) => !(v.colorId === pv.colorId && v.sizeId === pv.sizeId));
+    if (v) {
+      existingVars = [...existingVars, { ...uptdPv, id: uptdPv.id }];
+      deletedVars = deletedVars.filter(
+        (variation) => !(variation.colorId === v.colorId && variation.sizeId === v.sizeId)
+      );
     }
   });
 
-  return deletedVariations;
-};
-export const getExistingProductVariations = (
-  oldProductVariations: ProductVariation[],
-  newProductVariations: ProductVariation[]
-) => {
-  let exisitingVariations: ProductVariation[] = [];
-
-  oldProductVariations.forEach((v1) => {
-    let pv = newProductVariations.find((v2) => v2.colorId === v1.colorId && v2.sizeId === v1.sizeId);
-    if (pv) {
-      exisitingVariations = [...exisitingVariations, { ...pv, id: v1.id }];
-    }
-  });
-
-  return exisitingVariations;
+  return { newVars, deletedVars, existingVars };
 };

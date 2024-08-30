@@ -29,6 +29,7 @@ export type _ProductVariation = {
   color: Color;
   name: string;
   selected?: boolean;
+  id?: string;
 };
 
 export type ProductWithVarsAndImages = Product & { images: Image[] } & {

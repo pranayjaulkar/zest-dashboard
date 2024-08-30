@@ -4,14 +4,11 @@ import productSchema from "@/zod/productSchema";
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { Image, ProductVariation } from "@prisma/client";
-import { getDeletedProductVariations, getExistingProductVariations, getNewProductVariations } from "@/lib/utils";
+import { getProductVariationsDiff } from "@/lib/utils";
 
-const deleteCloudinaryImages = (images: Image[] | undefined, deletedImages: Image[] = []) => {
+const deleteCloudinaryImages = (images: Image[] = []) => {
   if (images?.length) {
-    const imagesPublicIdArray: string[] = [
-      ...images.map((image) => image.cloudinaryPublicId),
-      ...deletedImages.map((image: Image) => image.cloudinaryPublicId),
-    ];
+    const imagesPublicIdArray: string[] = images.map((image) => image.cloudinaryPublicId);
     cloudinary.api.delete_resources(imagesPublicIdArray, (err, res) => {
       if (err || !res?.deleted) {
         console.trace("[PRODUCT_PATCH]: Unsuccesfull Image Deletion", err || "");
@@ -68,56 +65,41 @@ export async function PATCH(req: Request, { params }: { params: { storeId: strin
     });
     if (product) {
       //delete all deleted images in cloudinary database
-      deleteCloudinaryImages(product.images, deletedImages);
+      deleteCloudinaryImages([...product.images, ...deletedImages]);
 
-      // get newly create variations
-      const newProductVariations = getNewProductVariations(product.productVariations, productData.productVariations);
-
-      // get existing variations
-      const existingProductVariations = getExistingProductVariations(
-        product.productVariations,
-        productData.productVariations
-      );
-
-      // get deleted variations
-      let deletedProductVariations = getDeletedProductVariations(
+      let { newVars, deletedVars, existingVars } = getProductVariationsDiff(
         product.productVariations,
         productData.productVariations
       );
 
       let disconnectVariations: ProductVariation[] = [];
 
-      if (deletedProductVariations.length) {
+      if (deletedVars.length) {
         // get orderItems which are using product variations that are to be deleted
         const orderItems = await prisma.orderItem.findMany({
-          where: { productVariationId: { in: deletedProductVariations.map((pv) => pv.id) } },
+          where: { productVariationId: { in: deletedVars.map((pv) => pv.id) } },
           include: { order: true },
         });
 
-        // if there are orderItems then return error
+        // if there are orderItems of this product variation then return error
+        // because user can't delete variations with existing orders
+        // it can be deleted only if the order is delivered or canceled
         if (orderItems?.length && orderItems.find((item) => !item.order.delivered)) {
           return NextResponse.json(
             { code: "P2014", message: "Product Variation cannot be deleted because it is used in an order" },
-            {
-              status: 400,
-            }
+            { status: 400 }
           );
         }
 
-        // if not then separate variations that are used by orderItems
+        // if there are no orderItems of this product variation
+        // then separate variations that are used by orderItems
         // from the ones that are to be deleted
-        disconnectVariations = deletedProductVariations.filter((v) =>
-          orderItems.find((item) => item.productVariationId === v.id)
-        );
+        disconnectVariations = deletedVars.filter((v) => orderItems.find((item) => item.productVariationId === v.id));
 
-        deletedProductVariations = deletedProductVariations.filter(
-          (v) => !orderItems.find((item) => item.productVariationId === v.id)
-        );
+        deletedVars = deletedVars.filter((v) => !orderItems.find((item) => item.productVariationId === v.id));
       }
 
-      const updates = existingProductVariations.map((v) =>
-        prisma.productVariation.update({ where: { id: v.id }, data: v })
-      );
+      const updates = existingVars.map((v) => prisma.productVariation.update({ where: { id: v.id }, data: v }));
 
       Promise.all(updates).catch((error) => console.trace("[PRODUCT_PATCH]", error));
 
@@ -135,8 +117,8 @@ export async function PATCH(req: Request, { params }: { params: { storeId: strin
           },
           productVariations: {
             disconnect: disconnectVariations.map((v) => ({ id: v.id })),
-            deleteMany: { id: { in: deletedProductVariations.map((pv) => pv.id) } },
-            createMany: { data: newProductVariations },
+            deleteMany: { id: { in: deletedVars.map((pv) => pv.id) } },
+            createMany: { data: newVars },
           },
         },
       });

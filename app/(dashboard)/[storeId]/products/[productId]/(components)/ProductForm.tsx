@@ -99,6 +99,7 @@ const ProductForm = ({ initialData, categories, colors, sizes }: ProductFormProp
             productId: v.productId,
             quantity: v.quantity,
             name: v.name,
+            id: v?.id,
           }));
 
         const newData = { productData: { ...data, images, productVariations: variations }, deletedImages };
