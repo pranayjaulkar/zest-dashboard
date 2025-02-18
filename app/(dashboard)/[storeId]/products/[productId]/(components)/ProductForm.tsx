@@ -8,10 +8,25 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useLoadingBarStore } from "@/hooks/useLoadingBarStore";
 import { Category, Size, Color } from "@prisma/client";
-import { _ProductVariation, ImageType, ProductWithPriceTypeConverted } from "@/types";
+import {
+  _ProductVariation,
+  ImageType,
+  ProductWithPriceTypeConverted,
+} from "@/types";
 import { Trash as TrashIcon } from "lucide-react";
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel } from "@/components/ui/form";
-import { getProductVariations, getColorsFromVariations, getSizesFromVariations } from "@/lib/utils";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+} from "@/components/ui/form";
+import {
+  getProductVariations,
+  getColorsFromVariations,
+  getSizesFromVariations,
+} from "@/lib/utils";
 
 import VariationsSection from "./VariationsSection";
 import Heading from "@/components/ui/heading";
@@ -21,13 +36,19 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface ProductFormProps {
   initialData: ProductWithPriceTypeConverted | null;
   categories: Category[];
-  sizes: Size[];
-  colors: Color[];
+  allSizes: Size[];
+  allColors: Color[];
 }
 
 const formSchema = z.object({
@@ -40,7 +61,14 @@ const formSchema = z.object({
 
 type ProductFormValue = z.infer<typeof formSchema>;
 
-const ProductForm = ({ initialData, categories, colors, sizes }: ProductFormProps) => {
+const ProductForm = ({
+  initialData,
+  categories,
+  allColors,
+  allSizes,
+}: ProductFormProps) => {
+  const [colors, setColors] = useState(allColors);
+  const [sizes , setSizes ] = useState(allSizes)
   const params = useParams();
   const router = useRouter();
   const loadingBar = useLoadingBarStore();
@@ -49,7 +77,9 @@ const ProductForm = ({ initialData, categories, colors, sizes }: ProductFormProp
   const [loading, setLoading] = useState(false);
   const [deletedImages, setDeletedImages] = useState<ImageType[]>([]);
   const [images, setImages] = useState<ImageType[]>([]);
-  const [productVariations, setProductVariations] = useState<_ProductVariation[]>([]);
+  const [productVariations, setProductVariations] = useState<
+    _ProductVariation[]
+  >([]);
   const [selectedColors, setSelectedColors] = useState<Color[]>(
     initialData ? getColorsFromVariations(initialData.productVariations) : []
   );
@@ -102,10 +132,16 @@ const ProductForm = ({ initialData, categories, colors, sizes }: ProductFormProp
             id: v?.id,
           }));
 
-        const newData = { productData: { ...data, images, productVariations: variations }, deletedImages };
+        const newData = {
+          productData: { ...data, images, productVariations: variations },
+          deletedImages,
+        };
 
         if (initialData) {
-          await axios.patch(`/api/stores/${params.storeId}/products/${params.productId}`, newData);
+          await axios.patch(
+            `/api/stores/${params.storeId}/products/${params.productId}`,
+            newData
+          );
         } else {
           await axios.post(`/api/stores/${params.storeId}/products`, newData);
         }
@@ -122,10 +158,13 @@ const ProductForm = ({ initialData, categories, colors, sizes }: ProductFormProp
       // console.trace("error", error);
 
       if (axios.isAxiosError(error))
-        if (error?.response?.data?.code === "P2014") toast.error(error.response.data.message);
+        if (error?.response?.data?.code === "P2014")
+          toast.error(error.response.data.message);
         else
           toast.error(
-            error?.response?.status === 500 ? "Internal Server Error" : "Something went wrong. Please try again."
+            error?.response?.status === 500
+              ? "Internal Server Error"
+              : "Something went wrong. Please try again."
           );
       else toast.error("Something went wrong. Please try again.");
     }
@@ -136,7 +175,9 @@ const ProductForm = ({ initialData, categories, colors, sizes }: ProductFormProp
       setLoading(true);
       loadingBar.start(event);
 
-      await axios.delete(`/api/stores/${params.storeId}/products/${params.productId}`);
+      await axios.delete(
+        `/api/stores/${params.storeId}/products/${params.productId}`
+      );
 
       router.push(`/${params.storeId}/products/`);
       router.refresh();
@@ -148,10 +189,13 @@ const ProductForm = ({ initialData, categories, colors, sizes }: ProductFormProp
       // console.trace("error: ", error);
 
       if (axios.isAxiosError(error))
-        if (error?.response?.data?.code === "P2014") toast.error(error.response.data.message);
+        if (error?.response?.data?.code === "P2014")
+          toast.error(error.response.data.message);
         else
           toast.error(
-            error?.response?.status === 500 ? "Internal Server Error" : "Something went wrong. Please try again."
+            error?.response?.status === 500
+              ? "Internal Server Error"
+              : "Something went wrong. Please try again."
           );
       else toast.error("Something went wrong. Please try again.");
     } finally {
@@ -161,7 +205,13 @@ const ProductForm = ({ initialData, categories, colors, sizes }: ProductFormProp
   };
 
   useEffect(() => {
-    setProductVariations(getProductVariations(selectedColors, selectedSizes, initialData?.productVariations));
+    setProductVariations(
+      getProductVariations(
+        selectedColors,
+        selectedSizes,
+        initialData?.productVariations
+      )
+    );
   }, [selectedColors, selectedSizes, initialData]);
 
   useEffect(() => {
@@ -172,24 +222,41 @@ const ProductForm = ({ initialData, categories, colors, sizes }: ProductFormProp
 
   useEffect(() => {
     if (initialData?.images)
-      setImages(initialData.images.map((img) => ({ url: img.url, cloudinaryPublicId: img.cloudinaryPublicId })));
+      setImages(
+        initialData.images.map((img) => ({
+          url: img.url,
+          cloudinaryPublicId: img.cloudinaryPublicId,
+        }))
+      );
   }, []);
 
   return (
     <>
-      <AlertModal isOpen={open} setOpen={setOpen} onConfirm={onDelete} loading={loading} />
+      <AlertModal
+        isOpen={open}
+        setOpen={setOpen}
+        onConfirm={onDelete}
+        loading={loading}
+      />
       <div className="flex items-center justify-between">
         <Heading title={title} description={description} />
 
         {initialData && (
-          <Button variant="destructive" size="icon" onClick={() => setOpen(true)}>
+          <Button
+            variant="destructive"
+            size="icon"
+            onClick={() => setOpen(true)}
+          >
             <TrashIcon className="h-4 w-4" />
           </Button>
         )}
       </div>
       <Separator />
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 w-full">
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="space-y-8 w-full"
+        >
           {/* Image */}
 
           <ImageUpload
@@ -197,7 +264,10 @@ const ProductForm = ({ initialData, categories, colors, sizes }: ProductFormProp
             images={images}
             onUpload={(image) => setImages((prev) => [...prev, image])}
             onRemove={(url) => {
-              setDeletedImages((prev) => [...prev, images.filter((img) => img.url === url)[0]]);
+              setDeletedImages((prev) => [
+                ...prev,
+                images.filter((img) => img.url === url)[0],
+              ]);
               setImages(images.filter((img) => img.url !== url));
             }}
           />
@@ -260,7 +330,10 @@ const ProductForm = ({ initialData, categories, colors, sizes }: ProductFormProp
                   >
                     <FormControl>
                       <SelectTrigger className="w-[180px]">
-                        <SelectValue placeholder="Select a category" {...field} />
+                        <SelectValue
+                          placeholder="Select a category"
+                          {...field}
+                        />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -284,10 +357,15 @@ const ProductForm = ({ initialData, categories, colors, sizes }: ProductFormProp
               name="isFeatured"
               render={({ field }) => (
                 <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                  <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                  <Checkbox
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
                   <div className="space-y-2 leading-none">
                     <FormLabel>Featured</FormLabel>
-                    <FormDescription>This product will appear on the homepage.</FormDescription>
+                    <FormDescription>
+                      This product will appear on the homepage.
+                    </FormDescription>
                   </div>
                 </FormItem>
               )}
@@ -300,10 +378,15 @@ const ProductForm = ({ initialData, categories, colors, sizes }: ProductFormProp
               name="isArchived"
               render={({ field }) => (
                 <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                  <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                  <Checkbox
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
                   <div className="space-y-2 leading-none">
                     <FormLabel>Archived</FormLabel>
-                    <FormDescription>This product will not appear anywhere in the store.</FormDescription>
+                    <FormDescription>
+                      This product will not appear anywhere in the store.
+                    </FormDescription>
                   </div>
                 </FormItem>
               )}
@@ -315,6 +398,8 @@ const ProductForm = ({ initialData, categories, colors, sizes }: ProductFormProp
 
           <VariationsSection
             colors={colors}
+            setColors={setColors}
+            setSizes={setSizes}
             sizes={sizes}
             productVariations={productVariations}
             setProductVariations={setProductVariations}

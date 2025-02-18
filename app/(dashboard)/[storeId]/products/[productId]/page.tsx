@@ -2,7 +2,11 @@ import prisma from "@/prisma/client";
 import ProductForm from "./(components)/ProductForm";
 import { ProductWithPriceTypeConverted } from "@/types";
 
-export default async function ProductPage({ params }: { params: { productId: string; storeId: string } }) {
+export default async function ProductPage({
+  params,
+}: {
+  params: { productId: string; storeId: string };
+}) {
   const product = await prisma.product.findUnique({
     where: {
       id: params.productId,
@@ -39,7 +43,12 @@ export default async function ProductPage({ params }: { params: { productId: str
   return (
     <div className="flex-col max-w-screen-xl mx-auto">
       <div className="flex-1 space-y-4 p-8 pt-6">
-        <ProductForm initialData={productPriceTypeConverted} categories={categories} colors={colors} sizes={sizes} />
+        <ProductForm
+          initialData={productPriceTypeConverted}
+          categories={categories}
+          allColors={colors}
+          allSizes={sizes}
+        />
       </div>
     </div>
   );

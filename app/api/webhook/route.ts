@@ -28,7 +28,9 @@ export async function POST(req: Request) {
     address?.postal_code,
     address?.country,
   ];
+
   const addressString = addressComponents.filter((c) => c !== null).join(", ");
+  
   if (event.type === "checkout.session.completed") {
     const order = await prisma.order.update({
       where: { id: session?.metadata?.orderId },

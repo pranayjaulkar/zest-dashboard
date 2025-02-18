@@ -25,7 +25,9 @@ export async function GET(req: Request, { params }: { params: { colorId: string 
 export async function PATCH(req: Request, { params }: { params: { storeId: string; colorId: string } }) {
   try {
     const { userId } = auth();
+    console.log('userId: ', userId);
     const body = await req.json();
+    console.log('body: ', body);
 
     try {
       colorSchema.parse(body);
